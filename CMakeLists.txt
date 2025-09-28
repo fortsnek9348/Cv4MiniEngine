@@ -47,9 +47,12 @@ if (MSVC)
 	target_compile_options(CommonStuff PUBLIC /arch:AVX2)
 	target_compile_options(CommonStuff PUBLIC /W4)
 	target_compile_options(CommonStuff PUBLIC /MP)
+	target_compile_options(CommonStuff PUBLIC /Zc:preprocessor)
 	
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_compile_options(CommonStuff PUBLIC /showFilenames)
+	else()
+		target_compile_options(CommonStuff PUBLIC /wd4251) # ... needs to have dll-interface to be used by clients of ...
 	endif()
 else()
 	target_compile_options(CommonStuff PUBLIC -march=x86-64-v3)
@@ -128,8 +131,9 @@ if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_compile_options(CvGameCoreDLL PUBLIC -Wno-register) # error : ISO C++17 does not allow 'register' storage class specifier [-Wregister]
 	else()
-		target_compile_options(CvGameCoreDLL PUBLIC /w5033) # warning C5033: 'register' is no longer a supported storage class
+		target_compile_options(CvGameCoreDLL PUBLIC /wd5033) # warning C5033: 'register' is no longer a supported storage class
 	endif()
+	target_compile_options(CvGameCoreDLL PRIVATE /bigobj)
 else()
 	target_compile_definitions(CvGameCoreDLL PUBLIC register=)
 endif()
