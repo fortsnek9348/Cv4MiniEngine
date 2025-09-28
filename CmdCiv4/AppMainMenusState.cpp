@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "DLLInterface/MyCvDLLUtility.h"
 #include "VersionInfo.h"
+#include "CvVFS.h"
 
 #include <CvGlobals.h>
 #include <CvDLLPythonIFaceBase.h>
@@ -60,7 +61,7 @@ namespace
 	class BackgroundWindow : public tui::Window
 	{
 	public:
-		BackgroundWindow() : Window{ L"", tui::WindowConfig{
+		BackgroundWindow(const CvApp& app) : Window{ L"", tui::WindowConfig{
 			.isDefaultFocus = false,
 			.isFullscreen = true,
 			.isModal = false,
@@ -86,7 +87,15 @@ namespace
 				buildString += L' ';
 				buildString += CvWString(CvString(s));
 			}
-			client->addChild(std::make_shared<tui::Label>(buildString));
+			if (const std::string s = app.getVFS().getModName(false); !s.empty())
+			{
+				buildString += L'\n';
+				buildString += L"Mod: " + CvWString(s);
+			}
+			auto lblBuildString = std::make_shared<tui::Label>(buildString);
+			lblBuildString->enableWrapping = true;
+			lblBuildString->setLabelAlignment(tui::EAlign::Center);
+			client->addChild(lblBuildString);
 
 			auto menuBorderPanel = std::make_shared<tui::BoxPanel>(tui::EBorderStyle::None);
 			auto menuPanel = std::make_shared<tui::Element>();
@@ -133,7 +142,7 @@ namespace
 
 void AppMainMenusState::onEnter(CvApp& app)
 {
-	app.getUI().pushWindow(std::make_shared<BackgroundWindow>());
+	app.getUI().pushWindow(std::make_shared<BackgroundWindow>(app));
 }
 void AppMainMenusState::onUpdate(CvApp&)
 {

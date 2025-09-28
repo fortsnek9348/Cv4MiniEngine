@@ -84,6 +84,7 @@ CvApp::CvApp()
 	const std::filesystem::path dataDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L"");
 	std::cout << "Building VFS file catalog with CV4MiniEngine data directory " << dataDir << std::endl;
 	mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"");
+	//mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"Next War\\");
 	gVFS = mVFS.get();
 
 	saveCivilizationIniIfChanged();
@@ -102,6 +103,13 @@ void CvApp::redirectLoggingOutput()
 {
 	initDebugOutput();
 }
+
+
+const CvVFS& CvApp::getVFS() const
+{
+	return *mVFS;
+}
+
 
 ICvAppUI& CvApp::getUI() noexcept
 {
@@ -229,7 +237,7 @@ void CvApp::deserialise(FFile<StdRawBinaryStream>& file)
 	CvString str;
 	file.ReadString(str);
 	if (str != gVFS->getModRelPathString())
-		std::abort();
+		throw std::runtime_error("Could not load save. Save uses mod '" + str + "' while engine is loaded with mod '" +  gVFS->getModRelPathString() + "'.");
 	file.ReadString(str); // modMd5Hash
 	file.Read(&u32); // unk
 	if (u32 != 0)

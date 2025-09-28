@@ -87,7 +87,13 @@ namespace
 	VfsDirEntriesMap enumeratePhysical(const fs::path& mountRoot, const fs::path& mountRelPath, size_t fileMountPointI)
 	{
 		VfsDirEntriesMap map;
-		for (const fs::directory_entry& dirEntry : fs::directory_iterator(mountRoot / mountRelPath, fs::directory_options::skip_permission_denied))
+
+		std::error_code ec{};
+		auto it = fs::directory_iterator(mountRoot / mountRelPath, fs::directory_options::skip_permission_denied, ec);
+		if (ec == std::errc::no_such_file_or_directory)
+			return map;
+
+		for (const fs::directory_entry& dirEntry : it)
 		{
 			const fs::path& path = dirEntry.path();
 			fs::path dirEntryMountRelPath = mountRelPath / path.filename();
@@ -177,7 +183,7 @@ namespace
 
 struct CvVFS::Internals
 {
-	explicit Internals(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::wstring& optRelModName)
+	explicit Internals(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, std::wstring optRelModName)
 	{
 		const fs::path btsRoot = vanillaCiv4RootDir / "Beyond the Sword";
 
@@ -217,12 +223,17 @@ struct CvVFS::Internals
 		mPythonModuleLookup.reserve(200);
 		buildPythonModuleLookup(mVfsRoot);
 
+		if (!optRelModName.empty() && (optRelModName.back() == L'\\' || optRelModName.back() == L'/'))
+			optRelModName.pop_back();
+
 		mModName = CvString(optRelModName);
 		if (!optRelModName.empty())
 		{
 			mModFullPath = (btsRoot / "Mods" / optRelModName).string();
-			mModRelPath = (fs::path("Mods") / optRelModName).string() + '\\';
-			std::ranges::replace(mModRelPath, '/', '\\'); // Used for save files, we need a specific format.
+			mModRelPath = (fs::path("Mods") / optRelModName).string();
+			// Used for save files, we need a specific format.
+			std::ranges::replace(mModRelPath, '/', '\\');
+			mModRelPath += '\\';
 		}
 	}
 

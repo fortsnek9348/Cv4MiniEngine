@@ -134,6 +134,8 @@ public:
 
 	void redirectLoggingOutput();
 
+	const CvVFS& getVFS() const;
+
 	void startUI();
 	ICvAppUI& getUI() noexcept;
 
