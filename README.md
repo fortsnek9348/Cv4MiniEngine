@@ -172,3 +172,10 @@ See your INI file, after it's been updated.
 * Cv4MiniEngine save games are NOT compatible with Vanilla BTS, due to missing checksum.
 * Saved replays are compatible in both directions.
 
+#### Licence
+
+See LICENSE.txt.
+
+Code in "CvGameCoreDLL" contains original Firaxis CvGameCoreDLL code. Licence applies to additions and modifications only.
+
+Scripts in "Data" contain code derived from [BUG Mod](https://civ4bug.sourceforge.net/BUGMod.html) and original Firaxis scripts.
