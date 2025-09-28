@@ -1,0 +1,3 @@
+[submodule "FAStar"]
+	path = FAStar
+	url = https://github.com/fortsnek9348/Cv4MiniEngineFAStar.git
