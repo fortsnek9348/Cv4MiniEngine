@@ -12,7 +12,7 @@ Cv4MiniEngine depends on:
 * Header-only: stb (for DXT compression)
 * Header-only: https://github.com/pybind/pybind11/releases/tag/v2.9.2 (version must support Python 2.7)
 
-Cv4MiniEngine also depends on the FAStar respository. Clone that at project root.
+Cv4MiniEngine also depends on the FAStar repository, as a submodule.
 
 On Linux, you will likely need to build SFML 3, Python 2.7, and NFD. Remember to build AND install (install to anywhere).
 
@@ -20,26 +20,22 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 
 #### Windows VS
 
-Use the provided VS solution.
-
-Configuration is done through the `ExternalDependencies.props` file. Change the "user macros" to point to the required directories. This can be done within the IDE. Further tweaks may be required if your lib installs have a different layout.
-
-Note that the S3TC and tinyxml2 source files are referenced directly using paths from `ExternalDependencies.props`.
-
-If you get an ambiguous function error in pybind11 pointing to `foward_like`, just patch the headers to rename the function.
+* Clone this repository, with submodules.
+* Use the provided VS solution.
+* Configuration is done through the `ExternalDependencies.props` file. Change the "user macros" to point to the required directories. This can be done within the IDE. Further tweaks may be required if your lib installs have a different layout.
+	* Note that the S3TC and tinyxml2 source files are referenced directly using paths from `ExternalDependencies.props`.
+* If you get an ambiguous function error in pybind11 pointing to `foward_like`, just patch the headers to rename the function.
 
 #### Windows CMake
 
-* Clone this respoitory.
-* Clone the FAStar repository to within it.
+* Clone this repository, with submodules.
 * Grab the dependencies. Build them if necessary.
 * Use `cmake-gui`. Fill in the variables as requested, including `CMAKE_INSTALL_PREFIX`. But you can ignore `SFML_DOC_DIR`.
 * You can run from the build tree, but you'll need to set `CV4MINIENGINE_DATADIR`.
 
 #### Linux CMake
 
-* Clone this respoitory.
-* Clone the FAStar repository to within it.
+* Clone this repository, with submodules.
 * Ensure you have a very up-to-date gcc or clang, and std lib. I used `clang++-20` and `libstdc++-15`.
 * Preferably, use a fast linker like `mold` or `lld`.
 * `sudo apt install clang-20 mold libstdc++-15`
