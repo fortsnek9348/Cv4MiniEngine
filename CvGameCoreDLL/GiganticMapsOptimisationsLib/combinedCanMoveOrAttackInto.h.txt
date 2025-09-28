@@ -1,0 +1,158 @@
+#pragma once
+
+#include "../CvUnit.h"
+#include "../CvPlot.h"
+#include "../CvPlayerAI.h"
+#include "../CvTeamAI.h"
+#include "../CvInfos.h"
+#include "../CvGlobals.h"
+
+// To simplify logic, let's combine (canMoveInto(pPlot, false, false, false) || canMoveInto(pPlot, true, false, false)) into one function.
+// Restrictions here: Land and Sea only. AI only (!isHuman)
+static bool combinedCanMoveOrAttackInto(const CvUnit& unit, const CvPlot* pPlot)
+{
+	// bAttack = true and false
+	constexpr bool bIgnoreLoad = false;
+	constexpr bool bDeclareWar = false;
+
+	if (unit.atPlot(pPlot))
+		return false;
+
+	if (pPlot->isImpassable() && !unit.canMoveImpassable())
+		return false;
+
+	// Cannot move around in unrevealed land freely
+	const CvUnitInfo& unitInfo = unit.getUnitInfo();
+	if (unitInfo.isNoRevealMap() && unit.willRevealByMove(pPlot))
+		return false;
+
+	if (GC.getUSE_SPIES_NO_ENTER_BORDERS())
+		if (unit.isSpy() && NO_PLAYER != pPlot->getOwnerINLINE())
+			if (!GET_PLAYER(unit.getOwnerINLINE()).canSpiesEnterBorders(pPlot->getOwnerINLINE()))
+				return false;
+
+	const CvArea* const pPlotArea = pPlot->area();
+	const TeamTypes ePlotTeam = pPlot->getTeam();
+	bool bCanEnterArea = unit.canEnterArea(ePlotTeam, pPlotArea);
+	if (bCanEnterArea)
+	{
+		if (pPlot->getFeatureType() != NO_FEATURE)
+		{
+			if (unitInfo.getFeatureImpassable(pPlot->getFeatureType()))
+			{
+				TechTypes eTech = (TechTypes)unitInfo.getFeaturePassableTech(pPlot->getFeatureType());
+				if (NO_TECH == eTech || !GET_TEAM(unit.getTeam()).isHasTech(eTech))
+					if (DOMAIN_SEA != unit.getDomainType() || pPlot->getTeam() != unit.getTeam())  // sea units can enter impassable in own cultural borders
+						return false;
+			}
+		}
+		else
+		{
+			if (unitInfo.getTerrainImpassable(pPlot->getTerrainType()))
+			{
+				TechTypes eTech = (TechTypes)unitInfo.getTerrainPassableTech(pPlot->getTerrainType());
+				if (NO_TECH == eTech || !GET_TEAM(unit.getTeam()).isHasTech(eTech))
+					if (DOMAIN_SEA != unit.getDomainType() || pPlot->getTeam() != getTeam())  // sea units can enter impassable in own cultural borders
+						if (bIgnoreLoad || !unit.canLoad(pPlot))
+							return false;
+			}
+		}
+	}
+
+	switch (unit.getDomainType())
+	{
+	case DOMAIN_SEA:
+		if (!pPlot->isWater() && !unit.canMoveAllTerrain())
+			if (!pPlot->isFriendlyCity(unit, true) || !pPlot->isCoastalLand())
+				return false;
+		break;
+
+	case DOMAIN_LAND:
+		if (pPlot->isWater() && !unit.canMoveAllTerrain())
+			if (!pPlot->isCity() || 0 == GC.getDefineINT("LAND_UNITS_CAN_ATTACK_WATER_CITIES"))
+				if (bIgnoreLoad || !unit.isHuman() || unit.plot()->isWater() || !unit.canLoad(pPlot))
+					return false;
+		break;
+
+	case DOMAIN_AIR:
+	case DOMAIN_IMMOBILE:
+	default:
+		return false;
+	}
+
+	if (unit.isAnimal())
+		if (pPlot->isOwned())
+			return false;
+
+	if (!bCanEnterArea)
+	{
+		FAssert(ePlotTeam != NO_TEAM);
+
+		if (!GET_TEAM(unit.getTeam()).canDeclareWar(ePlotTeam))
+			return false;
+		else if (GET_TEAM(unit.getTeam()).AI_isSneakAttackReady(ePlotTeam))
+		{
+			if (!(unit.getGroup()->AI_isDeclareWar(pPlot)))
+				return false;
+		}
+		else
+			return false;
+	}
+
+	const bool unitHasMadeAttack = unit.isMadeAttack() && !unit.isBlitz();
+
+	const bool canWithAttack = !unitHasMadeAttack;
+
+	bool canWithoutAttack = true;
+	
+	if (unit.isNoCapture())
+		if (pPlot->isEnemyCity(unit))
+			canWithoutAttack = false;
+
+	if (unit.isAnimal())
+		if (pPlot->getBonusType() != NO_BONUS || pPlot->getImprovementType() != NO_IMPROVEMENT || pPlot->getNumUnits() > 0)
+			canWithoutAttack = false;
+
+	const auto commonAttackMove = [&] {
+		if (pPlot->isVisibleEnemyUnit(&unit))
+			return canWithAttack;
+		else
+			return canWithoutAttack;
+		};
+
+	if (!unit.canCoexistWithEnemyUnit(NO_TEAM))
+	{
+		if (unit.canAttack())
+		{
+			if (const CvUnit* const pDefender = pPlot->getBestDefender(NO_PLAYER, unit.getOwnerINLINE(), &unit, true))
+				if (!unit.canAttack(*pDefender))
+					//return canWithoutAttack && !pPlot->isVisibleEnemyUnit(&unit);
+					// Assume pPlot->isVisibleEnemyUnit(&unit) == true, because we have a defender.
+					return false;
+
+			return commonAttackMove();
+		}
+		else
+		{
+			if (pPlot->isEnemyCity(unit) || pPlot->isVisibleEnemyUnit(&unit))
+				return false;
+
+			return true;
+		}
+	}
+	else
+	{
+		if (unit.canAttack())
+		{
+			if (const CvUnit* const pDefender = pPlot->getBestDefender(NO_PLAYER, unit.getOwnerINLINE(), &unit, true))
+				if (!unit.canAttack(*pDefender))
+					return canWithoutAttack;
+
+			return commonAttackMove();
+		}
+		else
+		{
+			return canWithoutAttack;
+		}
+	}
+}

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Show Log
+Exec=bash -c "touch log.txt; tail -f log.txt"
+Terminal=true
+Type=Application
+StartupNotify=false
+Categories=Game

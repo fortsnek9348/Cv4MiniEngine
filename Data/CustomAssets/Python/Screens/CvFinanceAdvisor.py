@@ -1,0 +1,3 @@
+import BugFinanceAdvisor
+
+CvFinanceAdvisor = BugFinanceAdvisor.BugFinanceAdvisor

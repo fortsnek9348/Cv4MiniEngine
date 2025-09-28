@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6526489d-9f61-4b3e-b32c-2170fd147d5e}</ProjectGuid>
+    <RootNamespace>CmdCiv4</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Cv4MiniEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\PropertySheet.props" />
+    <Import Project="..\ExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\PropertySheet.props" />
+    <Import Project="..\ExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <CopyLocalProjectReference>true</CopyLocalProjectReference>
+    <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <CopyLocalProjectReference>true</CopyLocalProjectReference>
+    <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;SFML_STATIC;ZLIB_CONST;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(TINYXML2_DIR);$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <MapExports>false</MapExports>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;SFML_STATIC;ZLIB_CONST;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(TINYXML2_DIR);$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s.lib;sfml-audio-s.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <MapExports>false</MapExports>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <OptimizeReferences>false</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(S3TC_DXT_DIR)\s3tc.cpp">
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
+    </ClCompile>
+    <ClCompile Include="$(TINYXML2_DIR)\tinyxml2.cpp" />
+    <ClCompile Include="AppGameSetupConfigPanel.cpp" />
+    <ClCompile Include="AppGameSetupMapScript.cpp" />
+    <ClCompile Include="AppGameSetupPlayerListPanel.cpp" />
+    <ClCompile Include="AppGameSetupWindow.cpp" />
+    <ClCompile Include="AppMainMenusState.cpp" />
+    <ClCompile Include="AppUIUtil.cpp" />
+    <ClCompile Include="AudioSystem.cpp" />
+    <ClCompile Include="CivIni.cpp" />
+    <ClCompile Include="CvButtonPopup.cpp" />
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="CvApp.cpp" />
+    <ClCompile Include="CvAppUI.cpp" />
+    <ClCompile Include="CvDiplomacyScreen.cpp" />
+    <ClCompile Include="CvDiplomacyScreenUI.cpp" />
+    <ClCompile Include="CvEngine.cpp" />
+    <ClCompile Include="CvEngineEnums.cpp" />
+    <ClCompile Include="CvGInterfaceScreen.cpp" />
+    <ClCompile Include="CvGTurnLogWindow.cpp" />
+    <ClCompile Include="CvInterface.cpp" />
+    <ClCompile Include="CvPopup.cpp" />
+    <ClCompile Include="CvUserProfile.cpp" />
+    <ClCompile Include="CvVFS.cpp" />
+    <ClCompile Include="DLLMessageQueue.cpp" />
+    <ClCompile Include="DXT.cpp" />
+    <ClCompile Include="IniReader.cpp" />
+    <ClCompile Include="LineGraph.cpp" />
+    <ClCompile Include="MainInterfaceControls.cpp" />
+    <ClCompile Include="MainInterfaceControls_PlotListUnitButton.cpp" />
+    <ClCompile Include="MainInterfaceControls_RichLabel.cpp" />
+    <ClCompile Include="MainInterfaceEventHandling.cpp" />
+    <ClCompile Include="MainInterfaceWorldView.cpp" />
+    <ClCompile Include="Minimap.cpp" />
+    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
+    <ClCompile Include="CvTranslator.cpp" />
+    <ClCompile Include="CvTuiDialog.cpp" />
+    <ClCompile Include="PythonAPI\CyCamera.cpp" />
+    <ClCompile Include="PythonAPI\CyDiplomacy.cpp" />
+    <ClCompile Include="PythonAPI\CyEngine.cpp" />
+    <ClCompile Include="PythonAPI\CyFractal.cpp" />
+    <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
+    <ClCompile Include="PythonAPI\CyGlobeLayerManager.cpp" />
+    <ClCompile Include="PythonAPI\CyInterface.cpp" />
+    <ClCompile Include="PythonAPI\CyPopup.cpp" />
+    <ClCompile Include="PythonAPI\CyPopupInfo.cpp" />
+    <ClCompile Include="PythonAPI\CyPopupReturn.cpp" />
+    <ClCompile Include="PythonAPI\CyPythonMgr.cpp" />
+    <ClCompile Include="PythonAPI\CyStatistics.cpp" />
+    <ClCompile Include="PythonAPI\CyTranslator.cpp" />
+    <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
+    <ClCompile Include="PythonAPI\CyUserProfile.cpp" />
+    <ClCompile Include="DLLInterface\FMPIManager.cpp" />
+    <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLEngineIFace.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLEntityIFace.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLFAStar.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLFeature.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLFlagEntity.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLInterfaceIFace.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLPython.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLUtility.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLXml.cpp" />
+    <ClCompile Include="PythonPopup.cpp" />
+    <ClCompile Include="PythonScreen.cpp" />
+    <ClCompile Include="RawBinaryStream.cpp" />
+    <ClCompile Include="RichGuage.cpp" />
+    <ClCompile Include="RichTextTable.cpp" />
+    <ClCompile Include="TuiFileBrowser.cpp" />
+    <ClCompile Include="TuiTextCode.cpp" />
+    <ClCompile Include="UITheme.cpp" />
+    <ClCompile Include="VersionInfo.cpp" />
+    <ClCompile Include="WorldView.cpp" />
+    <ClCompile Include="WorldViewUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonStuff\CommonStuff.vcxproj">
+      <Project>{1fb2b809-6581-444e-a356-19cf91b975d2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\CvGameCoreDLL\CvGameCoreDLL.vcxproj">
+      <Project>{de380e50-8b7d-4a03-a80e-dd1d1756169e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FAStar\FAStar.vcxproj">
+      <Project>{c1731c9e-fbb0-4cef-a379-9199627acb53}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\HeckConsoleUI\HeckConsoleUI.vcxproj">
+      <Project>{5b038b55-7b29-4474-9bdd-f386450096a2}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AppGameSetupConfigPanel.h" />
+    <ClInclude Include="AppGameSetupMapScript.h" />
+    <ClInclude Include="AppGameSetupPlayerListPanel.h" />
+    <ClInclude Include="AppGameSetupWindow.h" />
+    <ClInclude Include="AppMainMenusState.h" />
+    <ClInclude Include="AppUIUtil.h" />
+    <ClInclude Include="AudioSystem.h" />
+    <ClInclude Include="CivIni.h" />
+    <ClInclude Include="CLinkListIterator.h" />
+    <ClInclude Include="CvButtonPopup.h" />
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="CvApp.h" />
+    <ClInclude Include="CvDiplomacyScreen.h" />
+    <ClInclude Include="CvDiplomacyScreenUI.h" />
+    <ClInclude Include="CvEngine.h" />
+    <ClInclude Include="CvEngineEnums.h" />
+    <ClInclude Include="CvGInterfaceScreen.h" />
+    <ClInclude Include="CvGTurnLogWindow.h" />
+    <ClInclude Include="CvInterface.h" />
+    <ClInclude Include="CvPopup.h" />
+    <ClInclude Include="CvTranslator.h" />
+    <ClInclude Include="CvUserProfile.h" />
+    <ClInclude Include="CvVFS.h" />
+    <ClInclude Include="DLLMessageQueue.h" />
+    <ClInclude Include="DXT.h" />
+    <ClInclude Include="IniReader.h" />
+    <ClInclude Include="LineGraph.h" />
+    <ClInclude Include="MainInterface.h" />
+    <ClInclude Include="MainInterfaceControls.h" />
+    <ClInclude Include="Minimap.h" />
+    <ClInclude Include="CvTuiDialog.h" />
+    <ClInclude Include="PythonAPI\CyCamera.h" />
+    <ClInclude Include="PythonAPI\CyDiplomacy.h" />
+    <ClInclude Include="PythonAPI\CyEngine.h" />
+    <ClInclude Include="PythonAPI\CyFractal.h" />
+    <ClInclude Include="PythonAPI\CyGInterfaceScreen.h" />
+    <ClInclude Include="PythonAPI\CyGlobeLayerManager.h" />
+    <ClInclude Include="PythonAPI\CyInterface.h" />
+    <ClInclude Include="PythonAPI\CvPythonExtensions.h" />
+    <ClInclude Include="PythonAPI\CyPopup.h" />
+    <ClInclude Include="PythonAPI\CyPopupInfo.h" />
+    <ClInclude Include="PythonAPI\CyPopupReturn.h" />
+    <ClInclude Include="PythonAPI\CyPythonMgr.h" />
+    <ClInclude Include="PythonAPI\CyStatistics.h" />
+    <ClInclude Include="PythonAPI\CyTranslator.h" />
+    <ClInclude Include="PythonAPI\CyTuiDialog.h" />
+    <ClInclude Include="PythonAPI\CyUserProfile.h" />
+    <ClInclude Include="DLLInterface\FMPIManager.h" />
+    <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Logger.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLEngineIFace.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLEntityIFace.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLFAStar.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLFeature.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLFlagEntity.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLInterfaceIFace.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLPython.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLUtility.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLXml.h" />
+    <ClInclude Include="MyFFile.h" />
+    <ClInclude Include="PythonPopup.h" />
+    <ClInclude Include="PythonScreen.h" />
+    <ClInclude Include="RawBinaryStream.h" />
+    <ClInclude Include="RichGuage.h" />
+    <ClInclude Include="RichTextTable.h" />
+    <ClInclude Include="TuiFileBrowser.h" />
+    <ClInclude Include="TuiTextCode.h" />
+    <ClInclude Include="UITheme.h" />
+    <ClInclude Include="VersionInfo.h" />
+    <ClInclude Include="WorldView.h" />
+    <ClInclude Include="WorldViewUtils.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

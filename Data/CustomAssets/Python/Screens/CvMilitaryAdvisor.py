@@ -1,0 +1,3 @@
+import CvBUGMilitaryAdvisor
+
+CvMilitaryAdvisor = CvBUGMilitaryAdvisor.CvMilitaryAdvisor

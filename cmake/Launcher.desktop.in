@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Cv4MiniEngine (${CvGameCoreDLL_NameSuffix})
+Exec=bash --noprofile -c "env LD_LIBRARY_PATH\=\$LD_LIBRARY_PATH:\"CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}\" ./Cv4MiniEngine"
+Terminal=true
+Type=Application
+StartupNotify=false
+Categories=Game

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<!-- Should have done this a long time ago... -->
+	<Type Name="heck::simd::Vector&lt;*, *, *&gt;">
+		<DisplayString>{($T1(*)[$T2])&amp;regs,na}</DisplayString>
+		<Expand>
+			<!--<Item Name="[size]"  ExcludeView="simple">$T2</Item>-->
+			<ArrayItems>
+				<Size>$T2</Size>
+				<ValuePointer>($T1*)&amp;regs</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="heck::simd::AvxBitMask&lt;*&gt;">
+		<DisplayString>[{$T1}] {{ ... }}</DisplayString>
+		<Expand>
+			<CustomListItems ExcludeView="detailed">
+				<Variable Name="i" InitialValue="0"/>
+				<Variable Name="bBitValue" InitialValue="0"/>
+				<Size>$T1</Size>
+				<Loop>
+					<Exec>bBitValue = ((bits >> i) % 2) != 0 ? true : false</Exec>
+					<Item>bBitValue</Item>
+					<Exec>++i</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+</AutoVisualizer>

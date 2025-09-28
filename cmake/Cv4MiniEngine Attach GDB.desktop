@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Cv4MiniEngine Attach GDB
+Exec=bash --noprofile -c "gdb -p `pgrep Cv4MiniEngine`"
+Terminal=true
+Type=Application
+StartupNotify=false
+Categories=Game
+Icon=
+Comment=
+Path=

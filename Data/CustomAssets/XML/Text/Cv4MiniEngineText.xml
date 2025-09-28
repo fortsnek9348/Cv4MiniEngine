@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Civ4GameText xmlns="http://www.firaxis.com">
+	<TEXT>
+		<Tag>TXT_KEY_GAMESPEED_REALTIME</Tag>
+		<English>Real Time</English>
+		<French>En temps réel</French> <!-- Machine-translated -->
+		<German>Echtzeit</German> <!-- Machine-translated -->
+		<Italian>Tempo reale</Italian> <!-- Machine-translated -->
+		<Spanish>Tiempo real</Spanish> <!-- Machine-translated -->
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_GAMESPEED_ETERNITY</Tag>
+		<English>Eternity</English>
+		<French>Éternité</French> <!-- Machine-translated -->
+		<German>Ewigkeit</German> <!-- Machine-translated -->
+		<Italian>Eternità</Italian> <!-- Machine-translated -->
+		<Spanish>Eternidad</Spanish> <!-- Machine-translated -->
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_GAMESPEED_TECTONIC</Tag>
+		<English>Tectonic</English>
+		<French>Tectonique</French> <!-- Machine-translated -->
+		<German>Tektonisch</German> <!-- Machine-translated -->
+		<Italian>Tettonica</Italian> <!-- Machine-translated -->
+		<Spanish>Tectónica</Spanish> <!-- Machine-translated -->
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_GAMESPEED_GLACIAL</Tag>
+		<English>Glacial</English>
+		<French>Glaciaire</French> <!-- Machine-translated -->
+		<German>Gletscher</German> <!-- Machine-translated -->
+		<Italian>Glaciale</Italian> <!-- Machine-translated -->
+		<Spanish>Glacial</Spanish> <!-- Machine-translated -->
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_GAMESPEED_SLOTH</Tag>
+		<English>Sloth</English>
+		<French>Paresse</French> <!-- Machine-translated -->
+		<German>Faultier</German> <!-- Machine-translated -->
+		<Italian>Bradipo</Italian> <!-- Machine-translated -->
+		<Spanish>Pereza</Spanish> <!-- Machine-translated -->
+	</TEXT>
+</Civ4GameText>

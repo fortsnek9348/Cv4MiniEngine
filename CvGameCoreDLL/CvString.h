@@ -1,0 +1,555 @@
+#pragma once
+
+#include "CommonShared.h"
+
+#include <CommonStuff/StringConversion.h>
+
+#include <string>
+#include <vector>
+#include <string.h>
+#include <stdarg.h>
+
+#ifndef _WIN32
+#include <strings.h> // strcasecmp
+#endif
+
+#ifdef _MSC_VER
+#pragma warning( disable: 4251 )		// needs to have dll-interface to be used by clients of class
+#endif
+
+#ifdef _MSC_VER
+// char %s with wide-char formatting does not produce nice results. Let's have the compiler warn us...
+#define FORTSNEK_FORMAT_STRING(p) _Printf_format_string_ p
+#else
+#define FORTSNEK_FORMAT_STRING(p) p
+#endif
+
+//
+// simple string classes, based on stl, but with a few helpers
+//
+// DON'T add any data members or virtual functions to these classes, so they stay the same size as their stl counterparts
+//
+// Mustafa Thamer
+// Firaxis Games, copyright 2005
+//
+
+// wide string
+class CvWString : public std::wstring
+{
+public:
+	CvWString() {}
+	CvWString(const std::string& s) { Copy(s.c_str()); 	}
+	CvWString(const CvWString& s) { *this = s; 	}
+	CvWString(const char* s) { Copy(s); 	}
+	CvWString(const wchar_t* s) { if (s) *this = s; }
+//	CvWString(const __wchar_t* s) { if (s) *this = s; }
+	CvWString(const std::wstring& s) { assign(s.c_str()); }
+	CvWString(std::wstring_view s) : std::wstring(s) {}
+	~CvWString() {}
+
+	void Copy(const char* s)
+	{ 
+		if (s && s[0] != L'\0')
+		{
+			// fortsnek: char strings are ISO-8859-1, which is byte Unicode.
+			const std::string_view view(s);
+			resize_and_overwrite(view.size(), [view](wchar_t* buf, size_t n) {
+				for (size_t i = 0; i < n; ++i)
+					buf[i] = static_cast<uint8_t>(view[i]);
+				return n;
+				});
+		}
+		/*if (s)
+		{
+			size_t iLen = strlen(s);
+			if (iLen)
+			{
+				wchar_t *w = new wchar_t[iLen+1];
+#ifdef _WIN32
+				swprintf_s(w, iLen+1, L"%hs", s);	// convert
+#else
+				swprintf(w, iLen+1, L"%hs", s);	// convert
+#endif
+				assign(w);
+				delete [] w;
+			}
+		}*/
+	}
+
+	// FString compatibility
+	const wchar_t* GetCString() const 	{ return c_str(); }	
+
+	// implicit conversion
+	// fortsnek: Removing! This is far too dangerous to be implicit! See: return (m_paszEarlyArtDefineTags) ? m_paszEarlyArtDefineTags[i] : nullptr;
+	//operator const wchar_t*() const 	{ return c_str(); }							
+
+	// operators
+	wchar_t& operator[](int i) { return std::wstring::operator[](i);	}
+	wchar_t& operator[](std::wstring::size_type i) { return std::wstring::operator[](i);	}
+	wchar_t operator[](int i) const { return std::wstring::operator[](i);	}
+	const CvWString& operator=( const wchar_t* s) { if (s) assign(s); else clear();	return *this; }	
+	const CvWString& operator=( const std::wstring& s) { assign(s.c_str());	return *this; }	
+	const CvWString& operator=( const std::string& w) { Copy(w.c_str());	return *this; }	
+	const CvWString& operator=( const CvWString& w) { assign(w.c_str());	return *this; }	
+
+	const CvWString& operator=( const char* w) { Copy(w);	return *this; }	
+
+	void Format(FORTSNEK_FORMAT_STRING(const wchar_t* lpszFormat), ... );
+
+	// static helpers
+	static bool formatv(std::wstring& out, const wchar_t * fmt, va_list args);
+	static bool format(std::wstring & out, FORTSNEK_FORMAT_STRING(const wchar_t * fmt), ...);
+	static CvWString format(FORTSNEK_FORMAT_STRING(const wchar_t * fmt), ...);
+	static std::wstring formatv(const wchar_t * fmt, va_list args);
+};
+
+
+//#define WIDEPTR(s) (s ? CvWString(s).c_str() : nullptr)
+
+inline CvWString operator+( const CvWString& s, const CvWString& t) { return (std::wstring&)s + (std::wstring&)t; }
+inline CvWString operator+( const CvWString& s, const wchar_t* t) { return (std::wstring&)s + std::wstring(t); }
+inline CvWString operator+( const wchar_t* s, const CvWString& t) { return std::wstring(s) + std::wstring(t); }
+//CvString operator+( const CvString& s, const CvString& t) { return (std::string&)s + (std::string&)t; }
+
+class CvWStringBuffer
+{
+public:
+	CvWStringBuffer()
+	{
+		m_pBuffer = nullptr;
+		m_iLength = 0;
+		m_iCapacity = 0;
+	}
+
+	~CvWStringBuffer()
+	{
+		SAFE_DELETE_ARRAY(m_pBuffer);
+	}
+
+	void append(wchar_t character)
+	{
+		int newLength = m_iLength + 1;
+		ensureCapacity(newLength + 1);
+		m_pBuffer[m_iLength] = character;
+		m_pBuffer[m_iLength + 1] = 0; //null character
+		m_iLength = newLength;
+	}
+
+	void append(std::wstring_view szString)
+	{
+		int inputLength = (int)wcsnlen(szString.data(), szString.size());
+		int newLength = m_iLength + inputLength;
+		ensureCapacity(newLength + 1);
+
+		//append data
+		memcpy(m_pBuffer + m_iLength, szString.data(), sizeof(wchar_t) * inputLength); //null character
+		m_pBuffer[newLength] = '\0';
+		m_iLength = newLength;
+	}
+
+	void append(const wchar_t *szCharacters)
+	{
+		append(std::wstring_view(szCharacters));
+	}
+    
+	//void append(const CvWString &szString)
+	//{
+	//	append(szString.GetCString());
+	//}
+
+	void append(const CvWStringBuffer &szStringBuffer)
+	{
+		//append(szStringBuffer.m_pBuffer);
+		append({ szStringBuffer.m_pBuffer, (size_t)szStringBuffer.m_iLength });
+	}
+
+	void assign(const CvWString &szString)
+	{
+		assign(szString.GetCString());
+	}
+
+	void assign(const wchar_t *szCharacters)
+	{
+		clear();
+		append(szCharacters);
+	}
+
+	void clear()
+	{
+		if(m_pBuffer != nullptr)
+		{
+			m_iLength = 0;
+			m_pBuffer[0] = 0; //null character
+		}
+	}
+
+	bool isEmpty() const
+	{
+		if(m_iLength == 0)
+			return true;
+		else
+			return false;
+	}
+
+	const wchar_t *getCString()
+	{
+		ensureCapacity(1);
+		return m_pBuffer;
+	}
+
+private:
+	void ensureCapacity(int newCapacity)
+	{
+		if(newCapacity > m_iCapacity)
+		{
+			m_iCapacity = 2 * newCapacity; //grow by %100
+			wchar_t *newBuffer = new wchar_t [m_iCapacity];
+			
+			//copy data
+			if(m_pBuffer != nullptr)
+			{
+				memcpy(newBuffer, m_pBuffer, sizeof(wchar_t) * (m_iLength + 1)); //null character
+				//erase old memory
+				SAFE_DELETE_ARRAY(m_pBuffer);
+			}
+			else
+			{
+				newBuffer[0] = 0; //null character
+			}
+
+			m_pBuffer = newBuffer;
+		}
+	}
+
+	wchar_t *m_pBuffer;
+	int m_iLength;
+	int m_iCapacity;
+};
+
+//
+class CvString : public std::string
+{
+public:
+	CvString() {}
+	CvString(int iLen) { reserve(iLen); }
+	CvString(const char* s) { operator=(s); }
+	CvString(const std::string& s) { assign(s.c_str()); }
+	//CvString(const std::string::base& s) { assign(s.c_str()); }
+	explicit CvString(const std::wstring& s) { Copy(s.c_str()); }		// don't want accidental conversions down to narrow strings
+	CvString(std::string_view s) : std::string(s) {}
+	~CvString() {}
+
+
+	void Convert(const std::wstring& w) { Copy(w.c_str());	}
+
+	void Copy(const wchar_t* w)
+	{
+		if (w && w[0] != L'\0')
+		{
+			// fortsnek: char strings are ISO-8859-1, which is byte Unicode.
+			const std::wstring_view view(w);
+			resize_and_overwrite(view.size(), [view](char* buf, size_t n) {
+				for (size_t i = 0; i < n; ++i)
+				{
+					if (0 <= view[i] && view[i] <= UINT8_MAX)
+						buf[i] = static_cast<char>(static_cast<uint8_t>(view[i]));
+					else
+						buf[i] = '?';
+				}
+				return n;
+				});
+		}
+		/*
+		if (w)
+		{
+			int iLen = (int)wcslen(w);
+			if (iLen)
+			{
+				char *s = new char[iLen+1];
+#ifdef _WIN32
+				if (sprintf_s(s, iLen+1, "%ls", w) < 0)	// convert
+#else
+				if (snprintf(s, iLen+1, "%ls", w) < 0)	// convert
+#endif
+					std::abort();
+				assign(s);
+				delete [] s;
+			}
+		}*/
+	}
+
+	// implicit conversion
+	// fortsnek: Removing! This is far too dangerous to be implicit! See: return (m_paszEarlyArtDefineTags) ? m_paszEarlyArtDefineTags[i] : nullptr;
+	//operator const char*() const 	{ return c_str(); }							
+	//	operator const CvWString() const 	{ return CvWString(c_str()); }							
+
+	// operators
+	char& operator[](int i) { return std::string::operator[](i);	}
+	char& operator[](std::string::size_type i) { return std::string::operator[](i);	}
+	char operator[](int i) const { return std::string::operator[](i);	}
+	const CvString& operator=( const char* s) { if (s) assign(s); else clear();	return *this; }	
+	const CvString& operator=( const std::string& s) { assign(s.c_str());	return *this; }	
+//	const CvString& operator=( const std::wstring& w) { Copy(w.c_str());	return *this; }		// don't want accidental conversions down to narrow strings
+//	const CvString& operator=( const wchar_t* w) { Copy(w);	return *this; }	
+
+	// FString compatibility
+	bool IsEmpty() const { return empty();	}
+	const char* GetCString() const 	{ return c_str(); }							// convert
+#ifdef _WIN32
+	int CompareNoCase( const char* lpsz ) const { return _stricmp(lpsz, c_str()); }
+	int CompareNoCase( const char* lpsz, int iLength ) const { return _strnicmp(lpsz, c_str(), iLength);  }
+#else
+	int CompareNoCase(const char* lpsz) const { return strcasecmp(lpsz, c_str()); }
+	int CompareNoCase(const char* lpsz, int iLength) const { return strncasecmp(lpsz, c_str(), iLength); }
+#endif
+	void Format(FORTSNEK_FORMAT_STRING(const char* lpszFormat), ... );
+	int GetLength() const { return (int)size(); }
+	int Replace( char chOld, char chNew );
+
+	void getTokens(const CvString& delimiters, std::vector<CvString>& tokensOut) const;
+
+	// static helpers
+	static bool formatv(std::string& out, const char * fmt, va_list args);
+	static bool format(std::string & out, FORTSNEK_FORMAT_STRING(const char * fmt), ...);
+	static CvString format(FORTSNEK_FORMAT_STRING(const char * fmt), ...);
+	static std::string formatv(const char * fmt, va_list args);
+};
+
+#ifdef _USRDLL
+
+//////////////////////////////////////////////////////////////////////////
+// INLINES
+// Don't move these into a cpp file, since I don't want CvString to be part of the DLL, MT
+//////////////////////////////////////////////////////////////////////////
+
+inline int CvString::Replace( char chOld, char chNew )
+{
+	int i, iCnt = 0;
+	for(i=0;i<(int)size();i++)
+	{
+		if ((*this)[i] == chOld)
+		{
+			replace(i, 1, std::string(1, chNew) );
+			iCnt++;
+		}
+	}
+	return iCnt;
+}
+
+inline void CvString::getTokens(const CvString& delimiters, std::vector<CvString>& tokensOut) const
+{
+	//tokenizer code taken from http://www.digitalpeer.com/id/simple
+	
+	// skip delimiters at beginning.
+	size_type lastPos = find_first_not_of(delimiters, 0);
+
+	// find first "non-delimiter".
+	size_type pos = find_first_of(delimiters, lastPos);
+
+	while (CvString::npos != pos || CvString::npos != lastPos)
+	{
+		// found a token, parse it.
+		CvString token = substr(lastPos, pos - lastPos);
+		tokensOut.push_back(token);
+		
+		// skip delimiters.  Note the "not_of"
+		lastPos = find_first_not_of(delimiters, pos);
+
+		// find next "non-delimiter"
+		pos = find_first_of(delimiters, lastPos);
+	}
+}
+
+//
+// static
+//
+inline bool CvString::formatv(std::string & out, const char * fmt, va_list args)
+{
+	char buf[2048];
+	char * pbuf = buf;
+	int len = 0;
+	int attempts = 0;
+	bool success = false;
+	const int kMaxAttempts = 40;
+
+	do
+	{
+		int maxlen = 2047+2048*attempts;
+#ifdef _WIN32
+		len = _vsnprintf(pbuf,maxlen,fmt,args);
+#else
+		len = vsnprintf(pbuf, maxlen, fmt, args);
+#endif
+		attempts++;
+		success = (len>=0 && len<=maxlen);
+		if (!success)
+		{
+			if (pbuf!=buf)
+				delete [] pbuf;
+			pbuf = new char[2048+2048*attempts];
+		}
+	}
+	while (!success && attempts<kMaxAttempts);
+
+	if ( attempts==kMaxAttempts )
+	{
+		// dxPrintNL( "CvString::formatv - Max reallocs occurred while formatting string. Result is likely truncated!", 0 );
+	}
+
+	if (success)
+		out = pbuf;
+	else
+		out = "";
+
+	if (pbuf!=buf)
+		delete [] pbuf;
+
+	return success;
+}
+
+//
+// static
+//
+inline bool CvWString::formatv(std::wstring & out, const wchar_t * fmt, va_list args)
+{
+	wchar_t buf[2048];
+	wchar_t * pbuf = buf;
+	int len = 0;
+	int attempts = 0;
+	bool success = false;
+	const int kMaxAttempts = 40;
+
+	do
+	{
+		int maxlen = 2047+2048*attempts;
+#ifdef _WIN32
+		len = _vsnwprintf(pbuf,maxlen,fmt,args);
+#else
+		len = vswprintf(pbuf, maxlen, fmt, args);
+#endif
+		attempts++;
+		success = (len>=0 && len<=maxlen);
+		if (!success)
+		{
+			if (pbuf!=buf)
+				delete [] pbuf;
+			pbuf = new wchar_t[2048+2048*attempts];
+		}
+	}
+	while (!success && attempts<kMaxAttempts);
+
+	if ( attempts==kMaxAttempts )
+	{
+		// dxPrintNL( "CvString::formatv - Max reallocs occurred while formatting string. Result is likely truncated!", 0 );
+	}
+
+	if (success)
+		out = pbuf;
+	else
+		out = L"";
+
+	if (pbuf!=buf)
+		delete [] pbuf;
+
+	return success;
+}
+
+
+//
+// static
+//
+inline std::wstring CvWString::formatv(const wchar_t * fmt, va_list args)
+{
+	std::wstring result;
+	formatv( result, fmt, args );
+	return result;
+}
+
+//
+// static
+//
+inline CvWString CvWString::format(FORTSNEK_FORMAT_STRING(const wchar_t * fmt), ...)
+{
+	std::wstring result;
+	va_list args;
+	va_start(args,fmt);
+	formatv(result,fmt,args);
+	va_end(args);
+	return CvWString(result);
+}
+
+//
+// static
+//
+inline bool CvWString::format(std::wstring & out, FORTSNEK_FORMAT_STRING(const wchar_t * fmt), ...)
+{
+	va_list args;
+	va_start(args,fmt);
+	bool r = formatv(out,fmt,args);
+	va_end(args);
+	return r;
+}
+
+//
+//
+//
+inline void CvWString::Format(FORTSNEK_FORMAT_STRING(const wchar_t* lpszFormat), ... )
+{
+	std::wstring result;
+	va_list args;
+	va_start(args,lpszFormat);
+	formatv(result,lpszFormat,args);
+	va_end(args);
+	*this = result;
+}
+
+//
+// static
+//
+inline std::string CvString::formatv(const char * fmt, va_list args)
+{
+	std::string result;
+	formatv( result, fmt, args );
+	return result;
+}
+//
+// static
+//
+inline CvString CvString::format(FORTSNEK_FORMAT_STRING(const char * fmt), ...)
+{
+	std::string result;
+	va_list args;
+	va_start(args,fmt);
+	formatv(result,fmt,args);
+	va_end(args);
+	return CvString(result);
+}
+
+//
+// static
+//
+inline bool CvString::format(std::string & out, FORTSNEK_FORMAT_STRING(const char * fmt), ...)
+{
+	va_list args;
+	va_start(args,fmt);
+	bool r = formatv(out,fmt,args);
+	va_end(args);
+	return r;
+}
+
+
+//
+//
+//
+inline void CvString::Format(FORTSNEK_FORMAT_STRING(const char* lpszFormat), ... )
+{
+	std::string result;
+	va_list args;
+	va_start(args,lpszFormat);
+	formatv(result,lpszFormat,args);
+	va_end(args);
+	*this = result;
+}
+
+#endif
+

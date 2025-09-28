@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\CommonStuff\aabb.h" />
+    <ClInclude Include="inc\CommonStuff\adj.h" />
+    <ClInclude Include="inc\CommonStuff\Array2D.h" />
+    <ClInclude Include="inc\CommonStuff\Bitmap2D.h" />
+    <ClInclude Include="inc\CommonStuff\CompilerMacros.h" />
+    <ClInclude Include="inc\CommonStuff\DAryHeap.h" />
+    <ClInclude Include="inc\CommonStuff\div.h" />
+    <ClInclude Include="inc\CommonStuff\FunctionOutputIterator.h" />
+    <ClInclude Include="inc\CommonStuff\Hashing.h" />
+    <ClInclude Include="inc\CommonStuff\IntegerDivisonByConstant.h" />
+    <ClInclude Include="inc\CommonStuff\IntegerTypeUtil.h" />
+    <ClInclude Include="inc\CommonStuff\MapGeometry.h" />
+    <ClInclude Include="inc\CommonStuff\NoCopy.h" />
+    <ClInclude Include="inc\CommonStuff\StatisticsRegistry.h" />
+    <ClInclude Include="inc\CommonStuff\StringConversion.h" />
+    <ClInclude Include="inc\CommonStuff\System.h" />
+    <ClInclude Include="inc\CommonStuff\TradeNetworkCore.h" />
+    <ClInclude Include="inc\CommonStuff\TradeNetworkSystem.h" />
+    <ClInclude Include="inc\CommonStuff\PPM.h" />
+    <ClInclude Include="inc\CommonStuff\PQCoordSimdAStar.h" />
+    <ClInclude Include="inc\CommonStuff\ProfilerMarkers.h" />
+    <ClInclude Include="inc\CommonStuff\QuadTree.h" />
+    <ClInclude Include="inc\CommonStuff\range.h" />
+    <ClInclude Include="inc\CommonStuff\Simd.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAStar.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAStarGraph.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAStarPriorityQueue.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAvx2Polyfills.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAvxRegMask.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAvxRegs.h" />
+    <ClInclude Include="inc\CommonStuff\SimdCommon.h" />
+    <ClInclude Include="inc\CommonStuff\SimdConversion.h" />
+    <ClInclude Include="inc\CommonStuff\SimdConversionsAvx.h" />
+    <ClInclude Include="inc\CommonStuff\SimdCoordWrapping.h" />
+    <ClInclude Include="inc\CommonStuff\SimdHeap.h" />
+    <ClInclude Include="inc\CommonStuff\SimdHybridHeap.h" />
+    <ClInclude Include="inc\CommonStuff\SimdAvxBitMask.h" />
+    <ClInclude Include="inc\CommonStuff\SimdMask.h" />
+    <ClInclude Include="inc\CommonStuff\SimdMultiHeap.h" />
+    <ClInclude Include="inc\CommonStuff\SimdMultiHeapAStarPriorityQueue.h" />
+    <ClInclude Include="inc\CommonStuff\SimdRegOpsAvx128.h" />
+    <ClInclude Include="inc\CommonStuff\SimdRegOpsAvx256.h" />
+    <ClInclude Include="inc\CommonStuff\SimdRegOpsAvx512.h" />
+    <ClInclude Include="inc\CommonStuff\SimdSortUtil.h" />
+    <ClInclude Include="inc\CommonStuff\SimdVector.h" />
+    <ClInclude Include="inc\CommonStuff\ParallelExt.h" />
+    <ClInclude Include="inc\CommonStuff\UnionFind.h" />
+    <ClInclude Include="inc\CommonStuff\vec.h" />
+    <ClInclude Include="inc\CommonStuff\WorkStealingParallelFor.h" />
+    <ClInclude Include="UserMarks.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="System.cpp" />
+    <ClCompile Include="StringConversion.cpp" />
+    <ClCompile Include="StatisticsRegistry.cpp" />
+    <ClCompile Include="TradeNetworkCore.cpp" />
+    <ClCompile Include="TradeNetworkSystem.cpp" />
+    <ClCompile Include="PQCoordSimdAStar.cpp" />
+    <ClCompile Include="ProfilerMarkers.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
+    <ClCompile Include="WorkStealingParallelFor.cpp" />
+    <ClCompile Include="PPM.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{1fb2b809-6581-444e-a356-19cf91b975d2}</ProjectGuid>
+    <RootNamespace>CommonStuff</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\HeckModule\PropertySheet.props" />
+    <Import Project="..\ExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\HeckModule\PropertySheet.props" />
+    <Import Project="..\ExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <PublicModuleDirectories>inc</PublicModuleDirectories>
+    <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <PublicModuleDirectories>inc</PublicModuleDirectories>
+    <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,30 @@
+12,13c12,13
+< #include "pybind11.h"
+< #include "detail/common.h"
+---
+> #include <pybind11/pybind11.h>
+> #include <pybind11/detail/common.h>
+48c48
+< forwarded_type<T, U> forward_like(U &&u) {
+---
+> forwarded_type<T, U> forward_like_special_pybind_edition(U &&u) {
+81c81
+<                 key_conv::cast(forward_like<T>(value), policy, parent));
+---
+>                 key_conv::cast(forward_like_special_pybind_edition<T>(value), policy, parent));
+125c125
+<                 key_conv::cast(forward_like<T>(kv.first), policy_key, parent));
+---
+>                 key_conv::cast(forward_like_special_pybind_edition<T>(kv.first), policy_key, parent));
+127c127
+<                 value_conv::cast(forward_like<T>(kv.second), policy_value, parent));
+---
+>                 value_conv::cast(forward_like_special_pybind_edition<T>(kv.second), policy_value, parent));
+181c181
+<                 value_conv::cast(forward_like<T>(value), policy, parent));
+---
+>                 value_conv::cast(forward_like_special_pybind_edition<T>(value), policy, parent));
+245c245
+<                 value_conv::cast(forward_like<T>(value), policy, parent));
+---
+>                 value_conv::cast(forward_like_special_pybind_edition<T>(value), policy, parent));

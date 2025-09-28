@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)_$(Platform)</TargetName>
+    <CodeAnalysisRuleSet>..\AnalyzerNativeRules.ruleset</CodeAnalysisRuleSet>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <ConformanceMode>true</ConformanceMode>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <StringPooling>true</StringPooling>
+      <!--<BasicRuntimeChecks Condition="$(Configuration) == 'Debug'">UninitializedLocalUsageCheck</BasicRuntimeChecks>-->
+      <BasicRuntimeChecks Condition="$(Configuration.StartsWith('Debug'))">Default</BasicRuntimeChecks>
+      <BufferSecurityCheck Condition="$(Configuration.StartsWith('Release'))">false</BufferSecurityCheck>
+      <Optimization Condition="$(Configuration.StartsWith('Debug'))">Disabled</Optimization>
+      <Optimization Condition="$(Configuration.StartsWith('Release'))">MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FunctionLevelLinking Condition="$(Configuration.StartsWith('Debug'))">false</FunctionLevelLinking>
+      <FunctionLevelLinking Condition="$(Configuration.StartsWith('Release'))">true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4251;4324;4371;4435;4505;4514;4623;4625;4626;4668;4686;4774;4820;5026;5027;5045;5244;5033</DisableSpecificWarnings>
+      <!--<PreprocessorDefinitions Condition="$(Configuration) == 'Debug'">_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+	  <AdditionalOptions Condition="$(UseClangCl) == 'True'">/utf-8 /clang:-Wno-extra-qualification /clang:-Wno-undefined-inline /showFilenames %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="$(UseClangCl) != 'True'">/Zc:externConstexpr /Zc:throwingNew /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <UseStructuredOutput>false</UseStructuredOutput>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
