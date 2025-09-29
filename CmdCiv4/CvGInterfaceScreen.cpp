@@ -101,6 +101,9 @@ void CvGInterfaceScreen::updatePlotHelp(CvPlot* plot)
 
 			CvGameTextMgr::GetInstance().getPlotHelp(plot, CvInterface::getInstance().getCurrentCityBillboardHoverCity(), nullptr, false, buf);
 		}
+		//static_cast<RichLabel&>(*at(mPlotHelpTargetName)).debug = std::wstring_view(buf.getCString()).starts_with(L"Defense");
+		//if (std::wstring_view(buf.getCString()).starts_with(L"Defense"))
+		//	_CrtDbgBreak();
 		static_cast<RichLabel&>(*at(mPlotHelpTargetName)).setLabel(buf.getCString());
 	}
 }

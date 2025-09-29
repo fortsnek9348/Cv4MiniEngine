@@ -316,6 +316,11 @@ void UIScene::update()
 
 	checkControlReferences();
 
+	// Re-inject in case of scene changes.
+	// NOTE: Do it before layout to fix quirky plot help text, where when you move the world view using the arrow keys, the plot help text changes, and needs relayout after.
+	//       *But*, we may need updated element rects to handle this event... But that's not a problem yet.
+	injectEvent(mLastMouseMoveEvent);
+
 	for (const auto& wnd : mWindows)
 		wnd->layoutWindow(mSceneDim);
 
@@ -361,9 +366,6 @@ void UIScene::update()
 			}
 		}
 	}
-
-	// Re-inject in case of scene changes.
-	injectEvent(mLastMouseMoveEvent);
 }
 
 ModifierKeyState UIScene::exchangeLastModifierKeysState(ModifierKeyState state)

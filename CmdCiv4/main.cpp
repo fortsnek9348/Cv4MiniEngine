@@ -878,7 +878,7 @@ int main()
 
 	//CvApp::getInstance().deferLoadGame(R"(Giant Pangea begin T209.CivBeyondSwordSave)");
 
-	//CvApp::getInstance().deferLoadGame(getUserDataDir() / R"(Cv4MiniEngine Testing\My Game turn 242 AD-1660.CivBeyondSwordSave)");
+	//CvApp::getInstance().deferLoadGame(getUserDataDir() / R"(Cv4MiniEngine Testing\Quirky plot help - Axolotl8 turn 0 BC-4000.CivBeyondSwordSave)");
 
 	return CvApp::getInstance().run();
 }

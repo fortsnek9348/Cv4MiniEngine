@@ -94,4 +94,7 @@ void RichLabel::drawThis(hecktui::ivec2 offset, hecktui::Framebuffer& fb)
 			src = src.subspan(n + (n < src.size()));
 		}
 	}
+
+	
+	//fb.drawBox(rect, hecktui::EBorderStyle::Thin, { .text = EColour::Red });
 }
