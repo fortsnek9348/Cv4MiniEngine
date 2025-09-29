@@ -22,6 +22,7 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 
 * Clone this repository, with submodules.
 * Use the provided VS solution.
+* AVX2/AVX512 setting is in the common property sheet.
 * Configuration is done through the `ExternalDependencies.props` file. Change the "user macros" to point to the required directories. This can be done within the IDE. Further tweaks may be required if your lib installs have a different layout.
 	* Note that the S3TC and tinyxml2 source files are referenced directly using paths from `ExternalDependencies.props`.
 * If you get an ambiguous function error in pybind11 pointing to `foward_like`, just patch the headers to rename the function.
