@@ -103,8 +103,9 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	mLstMapScript->setListItems(mapScripts
 		| std::views::transform([](const AppGameSetupMapScriptInfo& info) { return std::wstring(CvWString(info.moduleName)); })
 		| std::ranges::to<std::vector>());
-	// TODO: This should be case-insensitive to match VFS filename lookup.
-	mLstMapScript->setSelectionIndex(std::ranges::find(mapScripts, CvString(initCore.getMapScriptName()), &AppGameSetupMapScriptInfo::moduleName) - mapScripts.begin());
+	mLstMapScript->setSelectionIndex(std::ranges::find_if(mapScripts, [selected = heck::toAsciiLower(heck::toAsciiString(initCore.getMapScriptName()))](const AppGameSetupMapScriptInfo& script) {
+		return selected == heck::toAsciiLower(script.moduleName);
+		}) - mapScripts.begin());
 	if (mLstMapScript->getSelectionIndex() >= mapScripts.size())
 		mLstMapScript->setSelectionIndex(0);
 	settingsPanel->addChild(mLstMapScript);

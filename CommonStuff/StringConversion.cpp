@@ -9,6 +9,31 @@
 #include <Windows.h>
 #endif
 
+std::string heck::toAsciiString(std::wstring_view s)
+{
+	std::string out;
+	const std::wstring_view view(s);
+	out.resize_and_overwrite(view.size(), [view](char* buf, size_t n) {
+		for (size_t i = 0; i < n; ++i)
+		{
+			const unsigned char c = static_cast<unsigned char>(view[i]);
+			if (c < 0x80)
+				buf[i] = c;
+			else
+				throw std::runtime_error("Could not convert wstring to ASCII.");
+		}
+		return n;
+		});
+	return out;
+}
+
+std::string heck::toAsciiLower(std::string s)
+{
+	for (char& c : s)
+		c = toAsciiLower(c);
+	return s;
+}
+
 std::string heck::toUtf8(std::wstring_view w)
 {
 	std::string out;

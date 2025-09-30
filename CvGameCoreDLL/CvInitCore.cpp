@@ -759,7 +759,7 @@ void CvInitCore::setMapScriptName(const CvWString & szMapScriptName)
 
 bool CvInitCore::getWBMapScript() const
 {
-	return (gDLL->isDescFileName( CvString(m_szMapScriptName).GetCString() ));
+	return (gDLL->isDescFileName(convertToAscii(m_szMapScriptName).c_str()));
 }
 
 bool CvInitCore::getWBMapNoPlayers() const
@@ -996,15 +996,15 @@ void CvInitCore::refreshCustomMapOptions()
 
 	if ( !getWBMapScript() )
 	{
-		if ( gDLL->pythonMapExists(CvString(getMapScriptName()).GetCString()) )
+		if ( gDLL->pythonMapExists(convertToAscii(getMapScriptName()).GetCString()) )
 		{
 			bool bOK;
 			long iNumOptions = 0;
 
-			gDLL->getPythonIFace()->callFunction(CvString(getMapScriptName()).GetCString(), "getNumHiddenCustomMapOptions", nullptr, &iNumOptions);
+			gDLL->getPythonIFace()->callFunction(convertToAscii(getMapScriptName()).GetCString(), "getNumHiddenCustomMapOptions", nullptr, &iNumOptions);
 			m_iNumHiddenCustomMapOptions = iNumOptions;
 
-			bOK = gDLL->getPythonIFace()->callFunction(CvString(getMapScriptName()).GetCString(), "getNumCustomMapOptions", nullptr, &iNumOptions);
+			bOK = gDLL->getPythonIFace()->callFunction(convertToAscii(getMapScriptName()).GetCString(), "getNumCustomMapOptions", nullptr, &iNumOptions);
 			if (bOK)
 			{
 				// Got number of custom map options - now get the option defaults
@@ -1015,7 +1015,7 @@ void CvInitCore::refreshCustomMapOptions()
 					CyArgsList argsList;
 					argsList.add(i);
 
-					bOK = gDLL->getPythonIFace()->callFunction(CvString(getMapScriptName()).GetCString(), "getCustomMapOptionDefault", argsList.makeFunctionArgs(), &iOptionDefault);
+					bOK = gDLL->getPythonIFace()->callFunction(convertToAscii(getMapScriptName()).GetCString(), "getCustomMapOptionDefault", argsList.makeFunctionArgs(), &iOptionDefault);
 					FAssertMsg(bOK, "Call to python fn \"getCustomMapOptionDefault\" failed in CvInitCore::refreshCustomMapOptions");
 					if (bOK)
 					{
@@ -1311,7 +1311,7 @@ const CvWString & CvInitCore::getLeaderName(PlayerTypes eID, unsigned int uiForm
 	FASSERT_BOUNDS(0, MAX_PLAYERS, std::to_underlying(eID), "CvInitCore::getLeaderName");
 	if ( checkBounds(eID, 0, MAX_PLAYERS) )
 	{
-		m_szTemp = gDLL->getObjectText(CvString(m_aszLeaderName[eID]).GetCString(), uiForm, true);
+		m_szTemp = gDLL->getObjectText(convertToAscii(m_aszLeaderName[eID]).GetCString(), uiForm, true);
 	}
 	else
 	{
@@ -1353,7 +1353,7 @@ const CvWString & CvInitCore::getCivDescription(PlayerTypes eID, unsigned int ui
 
 	if ( checkBounds(eID, 0, MAX_PLAYERS) )
 	{
-		m_szTemp = gDLL->getObjectText(CvString(m_aszCivDescription[eID]).GetCString(), uiForm, true);
+		m_szTemp = gDLL->getObjectText(convertToAscii(m_aszCivDescription[eID]).GetCString(), uiForm, true);
 	}
 	else
 	{
@@ -1395,7 +1395,7 @@ const CvWString & CvInitCore::getCivShortDesc(PlayerTypes eID, unsigned int uiFo
 	if ( checkBounds(eID, 0, MAX_PLAYERS) )
 	{
 		// Assume we have stored the key
-		m_szTemp = gDLL->getObjectText(CvString(m_aszCivShortDesc[eID]).GetCString(), uiForm, true);
+		m_szTemp = gDLL->getObjectText(convertToAscii(m_aszCivShortDesc[eID]).GetCString(), uiForm, true);
 	}
 	else
 	{
@@ -1437,7 +1437,7 @@ const CvWString & CvInitCore::getCivAdjective(PlayerTypes eID, unsigned int uiFo
 	if ( checkBounds(eID, 0, MAX_PLAYERS) )
 	{
 		// Assume we have stored the key
-		m_szTemp = gDLL->getObjectText(CvString(m_aszCivAdjective[eID]).GetCString(), uiForm, true);
+		m_szTemp = gDLL->getObjectText(convertToAscii(m_aszCivAdjective[eID]).GetCString(), uiForm, true);
 	}
 	else
 	{
@@ -1498,7 +1498,7 @@ void CvInitCore::setCivPassword(PlayerTypes eID, const CvWString & szCivPassword
 		}
 		else
 		{
-			m_aszCivPassword[eID] = CvWString(gDLL->md5String((char*)CvString(szCivPassword).GetCString()));
+			m_aszCivPassword[eID] = CvWString(gDLL->md5String(convertToAscii(szCivPassword).GetCString()));
 		}
 	}
 }
@@ -1950,7 +1950,7 @@ void CvInitCore::setAdminPassword(const CvWString & szAdminPassword, bool bEncry
 	}
 	else
 	{
-		m_szAdminPassword = CvWString(gDLL->md5String((char*)CvString(szAdminPassword).GetCString()));
+		m_szAdminPassword = CvWString(gDLL->md5String(convertToAscii(szAdminPassword).GetCString()));
 	}
 }
 

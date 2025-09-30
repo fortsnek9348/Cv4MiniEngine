@@ -2455,7 +2455,7 @@ const wchar_t* CvPlayer::getStateReligionKey() const
 
 const CvWString CvPlayer::getBestAttackUnitName(unsigned int uiForm) const
 {
-	return gDLL->getObjectText((CvString)getBestAttackUnitKey(), uiForm, true);
+	return gDLL->getObjectText(convertToAscii(getBestAttackUnitKey()), uiForm, true);
 }
 
 

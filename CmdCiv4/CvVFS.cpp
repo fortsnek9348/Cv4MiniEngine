@@ -280,20 +280,21 @@ struct CvVFS::Internals
 		if (!optRelModName.empty() && (optRelModName.back() == L'\\' || optRelModName.back() == L'/'))
 			optRelModName.pop_back();
 
-		mModName = CvString(optRelModName);
+		mModName = optRelModName;
 		if (!optRelModName.empty())
 		{
-			mModFullPath = (btsRoot / "Mods" / optRelModName).string();
-			mModRelPath = (fs::path("Mods") / optRelModName).string();
+			mModFullPath = (btsRoot / "Mods" / optRelModName).wstring();
+			mModRelPath = (fs::path("Mods") / optRelModName).wstring();
 			// Used for save files, we need a specific format.
-			std::ranges::replace(mModRelPath, '/', '\\');
-			mModRelPath += '\\';
+			std::ranges::replace(mModRelPath, L'/', L'\\');
+			mModRelPath += L'\\';
 		}
 	}
 
-	std::string mModName;
-	std::string mModFullPath;
-	std::string mModRelPath;
+	// We'll now store these as wstrings. If anybody needs ASCII/codepage strings, they'll have to convert where used.
+	std::wstring mModName;
+	std::wstring mModFullPath;
+	std::wstring mModRelPath;
 
 	std::vector<fs::path> mMountings;
 
@@ -654,12 +655,12 @@ std::optional<std::string> CvVFS::loadPythonCodeIfExists(const std::string& file
 		return std::nullopt;
 }
 
-const char* CvVFS::getModName(bool fullPath) const
+const std::wstring& CvVFS::getModName(bool fullPath) const
 {
-	return (fullPath ? mInternals->mModFullPath : mInternals->mModName).c_str();
+	return fullPath ? mInternals->mModFullPath : mInternals->mModName;
 }
 
-std::string CvVFS::getModRelPathString() const
+const std::wstring& CvVFS::getModRelPathString() const
 {
 	return mInternals->mModRelPath;
 }

@@ -87,10 +87,10 @@ namespace
 				buildString += L' ';
 				buildString += CvWString(CvString(s));
 			}
-			if (const std::string s = app.getVFS().getModName(false); !s.empty())
+			if (const std::wstring s = app.getVFS().getModName(false); !s.empty())
 			{
 				buildString += L'\n';
-				buildString += L"Mod: " + CvWString(s);
+				buildString += L"Mod: " + s;
 			}
 			auto lblBuildString = std::make_shared<tui::Label>(buildString);
 			lblBuildString->enableWrapping = true;

@@ -242,8 +242,8 @@ void CvApp::deserialise(FFile<StdRawBinaryStream>& file)
 		std::abort();
 	CvString str;
 	file.ReadString(str);
-	if (str != gVFS->getModRelPathString())
-		throw std::runtime_error("Could not load save. Save uses mod '" + str + "' while engine is loaded with mod '" +  gVFS->getModRelPathString() + "'.");
+	if (str != heck::toAsciiString(gVFS->getModRelPathString()))
+		throw std::runtime_error("Could not load save. Save uses mod '" + str + "' while engine is loaded with mod '" + heck::toAsciiString(gVFS->getModRelPathString()) + "'.");
 	file.ReadString(str); // modMd5Hash
 	file.Read(&u32); // unk
 	if (u32 != 0)

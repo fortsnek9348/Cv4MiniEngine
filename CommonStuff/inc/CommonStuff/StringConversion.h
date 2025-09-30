@@ -6,6 +6,19 @@
 
 namespace heck
 {
+	// Returns successfully or will throw on non-ascii.
+	std::string toAsciiString(std::wstring_view s);
+
+	std::string toAsciiLower(std::string s);
+
+	constexpr char toAsciiLower(char c)
+	{
+		if ('A' <= c && c <= 'Z')
+			return static_cast<char>(c - 'A' + 'a');
+		else
+			return c;
+	}
+
 	std::string toUtf8(std::wstring_view s);
 	std::wstring toWide(std::string_view s);
 #ifndef _WIN32

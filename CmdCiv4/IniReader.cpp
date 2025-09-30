@@ -1,10 +1,14 @@
 #include "IniReader.h"
 
+#include <CommonStuff/StringConversion.h>
+
 #include <CvString.h>
 #include <CvGlobals.h>
 
 #include <algorithm>
 #include <fstream>
+
+// TODO: Store INI as UTF-8.
 
 //static void toAsciiLowerInplace(std::string& s)
 //{
@@ -13,17 +17,11 @@
 //			c = c - 'A' + 'a';
 //}
 
-static char toAsciiLower(char c)
-{
-	if ('A' <= c && c <= 'Z')
-		c = c - 'A' + 'a';
-	return c;
-}
-
+static constexpr char (*toAsciiCharLower)(char) = heck::toAsciiLower;
 
 size_t IniData::CICmp::operator()(std::string_view a, std::string_view b) noexcept
 {
-	return std::ranges::lexicographical_compare(a, b, std::less<>(), toAsciiLower, toAsciiLower);
+	return std::ranges::lexicographical_compare(a, b, std::less<>(), toAsciiCharLower, toAsciiCharLower);
 }
 
 static bool isSpace(char c)
@@ -79,7 +77,7 @@ void IniData::set(const IniDocKey& section, const IniDocKey& key, std::string va
 
 void IniData::set(const IniDocKey& section, const IniDocKey& key, std::wstring value)
 {
-	set(section, key, CvString(CvWString(std::move(value))));
+	set(section, key, heck::toAsciiString(value));
 }
 
 void IniData::setDefault(const IniDocKey& sectionInfo, const IniDocKey& key, std::string value)
@@ -98,7 +96,7 @@ void IniData::setDefault(const IniDocKey& sectionInfo, const IniDocKey& key, std
 	Section& section = grabSection(sectionInfo);
 	if (!section.propLookup.contains(key.name))
 	{
-		const auto it = section.props.insert(section.props.end(), Section::Prop{ { std::string(key.doc) }, std::string(key.name), CvString(value) });
+		const auto it = section.props.insert(section.props.end(), Section::Prop{ { std::string(key.doc) }, std::string(key.name), heck::toAsciiString(value) });
 		section.propLookup.emplace(it->name, it);
 		mChanged = true;
 	}

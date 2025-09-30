@@ -464,14 +464,14 @@ void CvDLLButtonPopup::OnOkClicked([[maybe_unused]] CvPopup* pPopup, PopupReturn
 			{
 				if (pPopupReturn->getEditBoxString(5) && *(pPopupReturn->getEditBoxString(5)))
 				{
-					szEmail = CvString(pPopupReturn->getEditBoxString(5));
+					szEmail = convertToAscii(pPopupReturn->getEditBoxString(5));
 				}
 			}
 			if (GC.getGameINLINE().isPbem())
 			{
 				if (pPopupReturn->getEditBoxString(6) && *(pPopupReturn->getEditBoxString(6)))
 				{
-					szSmtpHost = CvString(pPopupReturn->getEditBoxString(6));
+					szSmtpHost = convertToAscii(pPopupReturn->getEditBoxString(6));
 				}
 			}
 
@@ -508,7 +508,8 @@ void CvDLLButtonPopup::OnOkClicked([[maybe_unused]] CvPopup* pPopup, PopupReturn
 			{
 				if (*(pPopupReturn->getEditBoxString(1)))
 				{
-					szAdminPassword = CvWString(gDLL->md5String((char*)CvString(pPopupReturn->getEditBoxString(1)).GetCString()));
+					// fortsnek: So, we're taking the unicode input, converting it to CvString, hashing it, then converting to unicode? Interesting.
+					szAdminPassword = CvWString(gDLL->md5String(convertToAscii(pPopupReturn->getEditBoxString(1)).c_str()));
 				}
 				else
 				{
@@ -539,7 +540,7 @@ void CvDLLButtonPopup::OnOkClicked([[maybe_unused]] CvPopup* pPopup, PopupReturn
 			{
 				szAdminPassword = pPopupReturn->getEditBoxString(0);
 			}
-			if (CvWString(gDLL->md5String((char*)CvString(szAdminPassword).GetCString())) == GC.getInitCore().getAdminPassword())
+			if (CvWString(gDLL->md5String(convertToAscii(szAdminPassword).c_str())) == GC.getInitCore().getAdminPassword())
 			{
 				switch ((ControlTypes)info.getData1())
 				{
@@ -606,11 +607,11 @@ void CvDLLButtonPopup::OnOkClicked([[maybe_unused]] CvPopup* pPopup, PopupReturn
 	case BUTTONPOPUP_ADDBUDDY:
 		if (pPopupReturn->getButtonClicked() == 0)
 		{
-			gDLL->AcceptBuddy(CvString(info.getText()).GetCString(), info.getData1());
+			gDLL->AcceptBuddy(convertToAscii(info.getText()).c_str(), info.getData1());
 		}
 		else
 		{
-			gDLL->RejectBuddy(CvString(info.getText()).GetCString(), info.getData1());
+			gDLL->RejectBuddy(convertToAscii(info.getText()).c_str(), info.getData1());
 		}
 		break;
 
@@ -2110,7 +2111,7 @@ bool CvDLLButtonPopup::launchPythonScreen([[maybe_unused]] CvPopup* pPopup, CvPo
 	argsList.add(info.getData3());
 	argsList.add(info.getOption1());
 	argsList.add(info.getOption2());
-	gDLL->getPythonIFace()->callFunction(PYScreensModule, CvString(info.getText()).GetCString(), argsList.makeFunctionArgs());
+	gDLL->getPythonIFace()->callFunction(PYScreensModule, convertToAscii(info.getText()).c_str(), argsList.makeFunctionArgs());
 
 	return (false); // return false, so the Popup object is deleted, since it's just a dummy
 }

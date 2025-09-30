@@ -184,7 +184,7 @@ void CvReplayInfo::createInfo(PlayerTypes ePlayer)
 	if (ptexture)
 		memcpy((void*)m_pcMinimapPixels, ptexture, m_nMinimapSize);
 
-	m_szModName = gDLL->getModName();
+	m_szModName = convertToAscii(gDLL->getModName());
 }
 
 int CvReplayInfo::getNumPlayers() const

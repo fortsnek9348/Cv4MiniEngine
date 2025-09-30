@@ -830,6 +830,9 @@
     <ClCompile Include="GiganticMapsOptimisationsLib\WholeMapSimpleDijkstra.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CvString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="FVariableSystem.inl">

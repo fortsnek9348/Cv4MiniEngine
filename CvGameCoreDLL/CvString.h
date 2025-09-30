@@ -226,6 +226,12 @@ private:
 	int m_iCapacity;
 };
 
+class CvString;
+
+// fortsnek: New function. Will convert successfully or throw.
+//           Used in a few places where UI inputs are converted to CvString.
+CvString convertToAscii(const CvWString& s);
+
 //
 class CvString : public std::string
 {
@@ -235,11 +241,11 @@ public:
 	CvString(const char* s) { operator=(s); }
 	CvString(const std::string& s) { assign(s.c_str()); }
 	//CvString(const std::string::base& s) { assign(s.c_str()); }
-	explicit CvString(const std::wstring& s) { Copy(s.c_str()); }		// don't want accidental conversions down to narrow strings
+	//explicit CvString(const std::wstring& s) { Copy(s.c_str()); }		// don't want accidental conversions down to narrow strings
 	CvString(std::string_view s) : std::string(s) {}
 	~CvString() {}
 
-
+#if 0
 	void Convert(const std::wstring& w) { Copy(w.c_str());	}
 
 	void Copy(const wchar_t* w)
@@ -277,6 +283,7 @@ public:
 			}
 		}*/
 	}
+#endif
 
 	// implicit conversion
 	// fortsnek: Removing! This is far too dangerous to be implicit! See: return (m_paszEarlyArtDefineTags) ? m_paszEarlyArtDefineTags[i] : nullptr;

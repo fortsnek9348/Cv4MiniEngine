@@ -260,9 +260,10 @@ public:
 
 	virtual bool ChangeINIKeyValue(const char* szGroupKey, const char* szKeyValue, const char* szOut) = 0;
 
-	virtual char* md5String(char* szString) = 0;
+	virtual char* md5String(const char* szString) = 0;
 
-	virtual const char* getModName(bool bFullPath = true) const = 0;
+	// fortsnek: Using wstring now. Move conversion closer to where it's needed.
+	virtual const std::wstring& getModName(bool bFullPath = true) const = 0;
 	virtual bool hasSkippedSaveChecksum() const = 0;
 	virtual void reportStatistics() = 0;
 };

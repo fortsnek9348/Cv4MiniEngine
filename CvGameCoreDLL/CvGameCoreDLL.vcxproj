@@ -200,6 +200,7 @@
     <ClCompile Include="CvSelectionGroup.cpp" />
     <ClCompile Include="CvSelectionGroupAI.cpp" />
     <ClCompile Include="CvStatistics.cpp" />
+    <ClCompile Include="CvString.cpp" />
     <ClCompile Include="CvStructs.cpp" />
     <ClCompile Include="CvTalkingHeadMessage.cpp" />
     <ClCompile Include="CvTeam.cpp" />

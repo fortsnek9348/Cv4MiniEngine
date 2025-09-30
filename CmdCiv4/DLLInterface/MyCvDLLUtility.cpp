@@ -816,7 +816,9 @@ public:
 		FFile<StdRawBinaryStream> file{ StdRawBinaryStream(cacheDataPath, std::ios::in | std::ios::binary) };
 		try
 		{
-			if (file.ReadString() != gVFS->getModRelPathString())
+			std::string modString;
+			file.ReadString(modString);
+			if (modString != heck::toAsciiString(gVFS->getModRelPathString()))
 			{
 				std::wclog << L"Cache " << cacheDataPath << L" rejected: Mod mismatch." << std::endl;
 				return false;
@@ -1311,7 +1313,7 @@ int MyCvDLLUtility::loadReplays(std::vector<CvReplayInfo*>& listReplays)
 			FFile<StdRawBinaryStream> file(dirEntry.path(), std::ios::in);
 			auto info = std::make_unique<CvReplayInfo>();
 			info->read(file);
-			if (info->getModName() == gVFS->getModRelPathString())
+			if (info->getModName() == heck::toAsciiString(gVFS->getModRelPathString()))
 				listReplays.push_back(info.release()); // Caller deallocates.
 		}
 	}
@@ -1393,12 +1395,12 @@ bool MyCvDLLUtility::ChangeINIKeyValue([[maybe_unused]] const char* szGroupKey, 
 	std::abort();
 }
 
-char* MyCvDLLUtility::md5String([[maybe_unused]] char* szString)
+char* MyCvDLLUtility::md5String([[maybe_unused]] const char* szString)
 {
 	std::abort();
 }
 
-const char* MyCvDLLUtility::getModName(bool bFullPath) const
+const std::wstring& MyCvDLLUtility::getModName(bool bFullPath) const
 {
 	return gVFS->getModName(bFullPath);
 }

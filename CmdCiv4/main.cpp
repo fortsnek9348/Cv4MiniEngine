@@ -396,7 +396,7 @@ static void startNewGame(LoadingScreen& loadingScreen)
 		if (mainInitCore.getCustomMapOption(i) == NO_CUSTOM_MAPOPTION) // If NO_CUSTOM_MAPOPTION, then let's assume random option is allowed.
 		{
 			long result = 0;
-			(void)MyCvDLLPython().callPythonFunction(CvString(mainInitCore.getMapScriptName()).c_str(), "getNumCustomMapOptionValues", int(i), &result);
+			(void)MyCvDLLPython().callPythonFunction(heck::toAsciiString(mainInitCore.getMapScriptName()).c_str(), "getNumCustomMapOptionValues", int(i), &result);
 			mainInitCore.setCustomMapOption(i, (CustomMapOptionTypes)rng.get((unsigned short)std::clamp<long>(result, 1, UINT16_MAX)));
 		}
 	}

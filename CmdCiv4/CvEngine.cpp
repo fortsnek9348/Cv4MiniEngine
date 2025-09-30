@@ -78,7 +78,7 @@ void CvEngine::AutoSave(bool bInitial)
 		CvWString str;
 		GAMETEXT.setTimeStr(str, GC.getGame().getGameTurn(), true);
 
-		const std::filesystem::path path = autosavesDirPath / std::format("Autosave turn {} {}{}.CivBeyondSwordSave", GC.getGame().getGameTurn(), bInitial ? "Initial " : "", std::string(CvString(str)));
+		const std::filesystem::path path = autosavesDirPath / std::format(L"Autosave turn {} {}{}.CivBeyondSwordSave", GC.getGame().getGameTurn(), bInitial ? L"Initial " : L"", std::wstring(str));
 
 		std::clog << "Autosaving to " << path << "..." << std::endl;
 

@@ -81,7 +81,7 @@ static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameS
 	initCore.setType(GameType::GAME_SP_NEW);
 
 	initCore.setMapScriptName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Map, "Fractal"));
-	if (!gDLL->pythonMapExists(CvString(initCore.getMapScriptName()).GetCString()))
+	if (!gDLL->pythonMapExists(heck::toAsciiString(initCore.getMapScriptName()).c_str()))
 	{
 		// If the map script doesn't exist, just pick anything.
 		initCore.setMapScriptName(mapScripts.front().moduleName);

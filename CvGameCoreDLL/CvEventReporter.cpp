@@ -50,7 +50,7 @@ void CvEventReporter::newGame()
 	// Called at the launch of a game (new or loaded)
 
 	// Report initial stats for the game
-	m_kStatistics.setMapName( CvString(GC.getInitCore().getMapScriptName()).GetCString() );
+	m_kStatistics.setMapName(convertToAscii(GC.getInitCore().getMapScriptName()).c_str());
 	m_kStatistics.setEra(GC.getInitCore().getEra());
 }
 

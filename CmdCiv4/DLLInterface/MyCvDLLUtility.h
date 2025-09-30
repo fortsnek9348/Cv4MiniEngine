@@ -198,8 +198,8 @@ public:
 	virtual PlayerTypes getFirstBadConnection() override;
 	virtual int getConnState(PlayerTypes ePlayer) override;
 	virtual bool ChangeINIKeyValue(const char* szGroupKey, const char* szKeyValue, const char* szOut) override;
-	virtual char* md5String(char* szString) override;
-	virtual const char* getModName(bool bFullPath) const override;
+	virtual char* md5String(const char* szString) override;
+	virtual const std::wstring& getModName(bool bFullPath) const override;
 	virtual bool hasSkippedSaveChecksum() const override;
 	virtual void reportStatistics() override;
 };

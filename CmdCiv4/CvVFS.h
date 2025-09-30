@@ -27,10 +27,10 @@ public:
 
 	std::optional<std::string> loadPythonCodeIfExists(const std::string& filename, std::filesystem::path& vfsPathOut) const;
 
-	const char* getModName(bool fullPath) const;
+	const std::wstring& getModName(bool fullPath) const;
 
 	// "Mods\Next War\". Used for save files.
-	std::string getModRelPathString() const;
+	const std::wstring& getModRelPathString() const;
 
 private:
 	struct Internals;

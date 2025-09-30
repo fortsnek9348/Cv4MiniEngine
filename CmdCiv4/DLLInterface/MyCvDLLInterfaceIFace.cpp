@@ -422,7 +422,7 @@ void MyCvDLLInterfaceIFace::addPopup(CvPopupInfo* pInfo, PlayerTypes ePlayer, bo
 	// We own this pointer now.
 	std::unique_ptr<CvPopupInfo> pInfoOwner(pInfo);
 
-	std::clog << "addPopup for player " << (int)ePlayer << ": " << CvString(pInfo->getText()) << std::endl;
+	std::wclog << L"addPopup for player " << std::to_underlying(ePlayer) << L": " << pInfo->getText() << std::endl;
 
 	if (ePlayer == NO_PLAYER)
 		ePlayer = gGlobals.getGame().getActivePlayer();
