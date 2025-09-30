@@ -25,6 +25,7 @@ public:
 	const std::string& get(const IniDocKey& section, const IniDocKey& key, const std::string& def) const;
 	std::wstring get(const IniDocKey& section, const IniDocKey& key, const std::wstring& def) const;
 	int get(const IniDocKey& section, const IniDocKey& key, int def) const;
+	unsigned int getUnsigned(const IniDocKey& section, const IniDocKey& key, unsigned int def) const;
 	int getEnum(const IniDocKey& section, const IniDocKey& key, int num, const std::string& def) const;
 	int getEnum(const IniDocKey& section, const IniDocKey& key, int num, int def) const;
 

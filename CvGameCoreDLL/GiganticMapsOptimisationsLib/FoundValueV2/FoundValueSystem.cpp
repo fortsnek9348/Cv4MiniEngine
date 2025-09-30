@@ -80,7 +80,11 @@ void System::onPlotBonusChanged(const CvPlot& plot, BonusTypes from, BonusTypes 
 			std::erase(mBonusLocations[from], getPlotCoord(plot));
 		}
 
-		mBonusLocations[to].push_back(getPlotCoord(plot));
+		if (to != NO_BONUS)
+		{
+			// Yes, this can happen. /My/ mod removes bonuses.
+			mBonusLocations[to].push_back(getPlotCoord(plot));
+		}
 	}
 }
 void System::onPlotOwnerChanged(const CvPlot& plot, PlayerTypes from, PlayerTypes to)

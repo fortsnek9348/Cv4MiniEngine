@@ -141,6 +141,27 @@ int IniData::get(const IniDocKey& section, const IniDocKey& key, int def) const
 	}
 }
 
+unsigned int IniData::getUnsigned(const IniDocKey& section, const IniDocKey& key, unsigned int def) const
+{
+	std::string s = get(section, key, std::to_string(def));
+	trim(s);
+	size_t len = 0;
+	try
+	{
+		const unsigned long value = std::stoul(s, &len);
+		if (len != s.size())
+			throw std::logic_error("Junk at end of string.");
+		if constexpr (UINT_MAX < ULONG_MAX)
+			if (value > UINT_MAX)
+				throw std::out_of_range("Out of range.");
+		return value;
+	}
+	catch (const std::logic_error& ex)
+	{
+		throw std::runtime_error("Failed to parse INI value at " + std::string(section.name) + '/' + std::string(key.name) + " as int: " + ex.what());
+	}
+}
+
 int IniData::getEnum(const IniDocKey& section, const IniDocKey& key, int num, const std::string& def) const
 {
 	if (const auto sectionIt = mSectionLookup.find(section.name); sectionIt != mSectionLookup.end())

@@ -70,11 +70,11 @@ static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameS
 	}
 
 	{
-		const int value = gCivilizationIVIni.get(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
+		const unsigned int value = gCivilizationIVIni.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
 		initCore.setSyncRandSeed(value ? value : std::random_device()());
 	}
 	{
-		const int value = gCivilizationIVIni.get(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
+		const unsigned int value = gCivilizationIVIni.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
 		initCore.setMapRandSeed(value ? value : std::random_device()());
 	}
 
