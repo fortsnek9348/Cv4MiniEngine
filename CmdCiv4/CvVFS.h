@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <span>
 
-class CvVFS : public heck::NoCopyNoMove // self-referencing
+class CvVFS
 {
 public:
 	explicit CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::wstring& optModName);
@@ -18,8 +18,11 @@ public:
 	//std::filesystem::path resolveAsset(const std::filesystem::path& path);
 	std::ifstream open(const std::filesystem::path& path, std::ios_base::openmode mode) const;
 
-	std::vector<std::filesystem::path> enumerateExtRecursive(const std::filesystem::path& path, const std::wstring& filenamePrefix, const std::wstring& filenameSuffix) const;
-	std::vector<std::filesystem::path> enumerateExtNonRecursive(const std::filesystem::path& path, const std::wstring& ext) const;
+	// XML enumeration, returns phys paths
+	std::vector<std::filesystem::path> enumeratePhysExtRecursive(const std::filesystem::path& path, const std::wstring& filenamePrefix, const std::wstring& filenameSuffix) const;
+	// Map enumeration, returns phys paths
+	std::vector<std::filesystem::path> enumeratePhysExtNonRecursive(const std::filesystem::path& path, const std::wstring& ext) const;
+	// pyc dirs enumeration
 	std::vector<std::filesystem::path> enumeratePhysicalDirsContainingExt(const std::wstring& ext) const;
 
 	std::optional<std::string> loadPythonCodeIfExists(const std::string& filename, std::filesystem::path& vfsPathOut) const;
@@ -32,8 +35,6 @@ public:
 private:
 	struct Internals;
 	std::unique_ptr<Internals> mInternals;
-
-	
 };
 
 // Set once in main.

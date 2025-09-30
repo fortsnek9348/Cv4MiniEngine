@@ -4,24 +4,36 @@
 #include <CvString.h>
 
 #include <CommonStuff/Hashing.h>
-
-#ifndef _WIN32
 #include <CommonStuff/StringConversion.h>
-#endif
 
 #include <algorithm>
 #include <ranges>
 #include <fstream>
 #include <unordered_set>
+#include <set>
+#include <map>
+#include <cctype>
 #include <cwctype>
 #include <memory>
 
 namespace fs = std::filesystem;
 
+#ifndef _WIN32
+#define IS_CASE_SENSITIVE_PLATFORM 1
+#endif
+
 constinit const CvVFS* ::gVFS = nullptr;
+
+#define BUILD_FILE_CATALOG 0
 
 namespace
 {
+	[[nodiscard]] wchar_t vfsCaseFoldWChar(wchar_t c)
+	{
+		return static_cast<wchar_t>(towupper(c));
+	}
+
+#if BUILD_FILE_CATALOG
 	// VFS file cataloging. I don't like it, it's slow for startup, and it's only needed because Linux.
 	// This could probably be avoided by doing case-insensitive file IO open/enumeration.
 
@@ -73,13 +85,12 @@ namespace
 	static VfsString vfsCaseFold(std::wstring_view s)
 	{
 #ifdef _WIN32
-		return VfsString(std::from_range, s | std::views::transform([](wchar_t c) { return static_cast<wchar_t>(towupper(c)); }));
+		return VfsString(std::from_range, s | std::views::transform(vfsCaseFoldWChar));
 #else
-		// Don't have string range construct yet.
-		// And we need to convert UTF-32 to UTF-16.
 		std::wstring caseFoldedWideStr(s);
 		for (wchar_t& c : caseFoldedWideStr)
-			c = static_cast<wchar_t>(towupper(c));
+			c = vfsCaseFoldWChar(c);
+		// Need to convert UTF-32 to UTF-16.
 		return heck::toUtf16(caseFoldedWideStr);
 #endif
 	}
@@ -121,7 +132,7 @@ namespace
 					vfsMerge(*targetIt->second.folderDirEntries, *srcDirEntry.folderDirEntries, srcPhysPath / srcName);
 				else if (srcDirEntry.folderDirEntries)
 					targetIt->second.folderDirEntries = std::move(srcDirEntry.folderDirEntries);
-				
+
 				if (targetIt->second.fileMountRelPath && srcDirEntry.fileMountRelPath && targetIt->second.fileMountRelPath.fileMountPointI == srcDirEntry.fileMountRelPath.fileMountPointI)
 					throw std::filesystem::filesystem_error("VFS merge error. Two files from the same mount merge to the same VFS entry. Likely to be filenames that differ in only case.", srcPhysPath / srcName, std::error_code());
 				else if (srcDirEntry.fileMountRelPath)
@@ -179,6 +190,40 @@ namespace
 
 		return nullptr;
 	}
+#else
+	std::string toLower(std::string s)
+	{
+		for (char& c : s)
+			c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+		return s;
+	}
+
+	//struct CIPathEq
+	//{
+	//	static bool operator()(const fs::path& a, const fs::path& b) noexcept
+	//	{
+	//		return a == b || std::ranges::equal(a.generic_wstring(), b.generic_wstring(), std::equal_to<>(), vfsCaseFoldWChar, vfsCaseFoldWChar);
+	//	}
+	//};
+
+	struct CIPathCmp
+	{
+		static bool operator()(const fs::path& a, const fs::path& b) noexcept
+		{
+			return std::ranges::lexicographical_compare(a.generic_wstring(), b.generic_wstring(), std::less<>(), vfsCaseFoldWChar, vfsCaseFoldWChar);
+		}
+	};
+
+	//struct CIPathHash
+	//{
+	//	static size_t operator()(const fs::path& a) noexcept
+	//	{
+	//		std::wstring str = a.generic_wstring();
+	//		std::ranges::for_each(str, vfsCaseFoldWChar);
+	//		return std::hash<decltype(str)>()(str);
+	//	}
+	//};
+#endif
 }
 
 struct CvVFS::Internals
@@ -214,14 +259,21 @@ struct CvVFS::Internals
 			cv4EngineRootDir / kPublicMapsDirName         /**/,
 		});
 
+		mPythonModuleLookup.reserve(200);
+
+#if BUILD_FILE_CATALOG
 		for (size_t i = 0; i < mMountings.size(); ++i)
 		{
 			VfsDirEntriesMap mountTree = enumeratePhysical(mMountings[i], fs::path(), i);
 			vfsMerge(mVfsRoot, mountTree, mMountings[i]);
 		}
-
-		mPythonModuleLookup.reserve(200);
-		buildPythonModuleLookup(mVfsRoot);
+		
+		buildPythonModuleLookup(mVfsRoot, false);
+		buildPythonModuleLookup(*mVfsRoot.at(vfsCaseFold(L"Python")).folderDirEntries, true); // Let's hope there are no conflicts with maps.
+#else
+		buildPythonModuleLookup("", false);
+		buildPythonModuleLookup("Python", true); // Let's hope there are no conflicts with maps.
+#endif
 
 		if (!optRelModName.empty() && (optRelModName.back() == L'\\' || optRelModName.back() == L'/'))
 			optRelModName.pop_back();
@@ -237,19 +289,26 @@ struct CvVFS::Internals
 		}
 	}
 
+	std::string mModName;
+	std::string mModFullPath;
+	std::string mModRelPath;
+
 	std::vector<fs::path> mMountings;
+
+	// VFS file tree implementation
+#if BUILD_FILE_CATALOG
 	VfsDirEntriesMap mVfsRoot;
 
 	std::unordered_map<std::string, const MountRelPath*> mPythonModuleLookup;
 
-	void buildPythonModuleLookup(const VfsDirEntriesMap& vfsFolder)
+	void buildPythonModuleLookup(const VfsDirEntriesMap& vfsFolder, bool recursive)
 	{
 		static const VfsString kExt = vfsCaseFold(L".py");
 
 		for (const auto& [filename, dirEntry] : vfsFolder)
 		{
-			if (dirEntry.folderDirEntries)
-				buildPythonModuleLookup(*dirEntry.folderDirEntries);
+			if (recursive && dirEntry.folderDirEntries)
+				buildPythonModuleLookup(*dirEntry.folderDirEntries, recursive);
 			
 			if (dirEntry.fileMountRelPath && filename.ends_with(kExt))
 				mPythonModuleLookup.emplace(dirEntry.fileMountRelPath.relPath.stem().string(), &dirEntry.fileMountRelPath);
@@ -265,24 +324,20 @@ struct CvVFS::Internals
 		//}
 	}
 
-	std::string mModName;
-	std::string mModFullPath;
-	std::string mModRelPath;
+	
 
 	//template<class Iterator>
 	//std::vector<std::filesystem::path> enumerateExt(const std::filesystem::path& path, const std::filesystem::path& ext, bool phys) const;
 
-	static void enumerateExt(std::vector<fs::path>& foundVfsFilePathsOut, const VfsDirEntriesMap& vfsFolder, const fs::path& vfsPath, const VfsString& filenamePrefix, const VfsString& filenameSuffix, bool recursive)
+	static void enumerateExt(std::vector<fs::path>& foundVfsFilePathsOut, const VfsDirEntriesMap& vfsFolder, const fs::path& vfsPath,
+		const VfsString& filenamePrefix, const VfsString& filenameSuffix, bool recursive)
 	{
 		//return enumerateExt<fs::directory_iterator>(path, ext, false);
 
 		for (const auto& [name, dirEntry] : vfsFolder)
 		{
-			if (dirEntry.folderDirEntries)
-			{
-				if (recursive)
-					enumerateExt(foundVfsFilePathsOut, *dirEntry.folderDirEntries, vfsPath, filenamePrefix, filenameSuffix, recursive);
-			}
+			if (recursive && dirEntry.folderDirEntries)
+				enumerateExt(foundVfsFilePathsOut, *dirEntry.folderDirEntries, vfsPath, filenamePrefix, filenameSuffix, recursive);
 			
 			if (dirEntry.fileMountRelPath && name.starts_with(filenamePrefix) && name.ends_with(filenameSuffix))
 				foundVfsFilePathsOut.push_back(vfsPath / dirEntry.fileMountRelPath.relPath.filename()); // USe the filename with the original casing, for original map script names.
@@ -291,13 +346,11 @@ struct CvVFS::Internals
 
 	void enumeratePhysicalDirsContainingExt(std::unordered_set<MountRelPath, MountRelPathHash>& physDirPathsSet, std::vector<fs::path>& physDirPathsList, const VfsDirEntriesMap& vfsFolder, const VfsString& ext) const
 	{
-		//return enumerateExt<fs::directory_iterator>(path, ext, false);
-
 		for (const auto& [name, dirEntry] : vfsFolder)
 		{
 			if (dirEntry.folderDirEntries)
 				enumeratePhysicalDirsContainingExt(physDirPathsSet, physDirPathsList, *dirEntry.folderDirEntries, ext);
-			
+
 			if (dirEntry.fileMountRelPath && name.ends_with(ext))
 			{
 				const fs::path folderMountRelPath = dirEntry.fileMountRelPath.relPath.parent_path();
@@ -307,6 +360,182 @@ struct CvVFS::Internals
 			}
 		}
 	}
+	std::vector<fs::path> enumeratePhysicalDirsContainingExt(const std::wstring& ext) const
+	{
+		//return enumerateExt<fs::directory_iterator>(path, ext, false);
+
+		std::unordered_set<MountRelPath, MountRelPathHash> set;
+		std::vector<fs::path> list;
+		enumeratePhysicalDirsContainingExt(set, list, mVfsRoot, vfsCaseFold(ext));
+		return list;
+	}
+
+	std::optional<fs::path> tryResolve(const fs::path& path) const
+	{
+		const std::vector<VfsString> segments = vfsSegmentPath(path);
+		if (const MountRelPath* const entry = vfsFindFile(mVfsRoot, segments))
+			return mMountings[entry->fileMountPointI] / entry->relPath;
+		else
+			return std::nullopt;
+	}
+
+#else
+	struct EnumeratedFile
+	{
+		fs::path vfsPath;
+		fs::path physPath;
+	};
+
+	// Lower-case
+	std::unordered_map<std::string, EnumeratedFile> mPythonModuleLookup;
+
+	void buildPythonModuleLookup(const fs::path& vfsRoot, bool recursive)
+	{
+		std::vector<fs::path> vfsPaths;
+		std::vector<fs::path> physPaths = enumerateFilesWithExt(vfsRoot, {}, L".py", recursive, &vfsPaths);
+
+		for (auto&& [vfsPath, physPath] : std::views::zip(vfsPaths, physPaths))
+		{
+			std::string name = toLower(vfsPath.stem().string());
+			mPythonModuleLookup.emplace(std::move(name), EnumeratedFile{ std::move(vfsPath), std::move(physPath) });
+		}
+	}
+
+	std::vector<fs::path> enumerateFilesWithExt(const fs::path& vfsPath, const std::wstring& filenamePrefix, const std::wstring& filenameSuffix, bool recursive,
+		std::vector<fs::path>* vfsPathsOut) const
+	{
+		//return enumerateExt<fs::recursive_directory_iterator>(path, ext, false);
+
+		//const auto vfsPathSegments = vfsSegmentPath(vfsPath);
+		//std::vector<fs::path> foundVfsFilePaths;
+		//if (const VfsDirEntriesMap* const folder = vfsFindFolder(&mInternals->mVfsRoot, vfsPathSegments))
+		//	Internals::enumerateExt(foundVfsFilePaths, *folder, vfsPath, vfsCaseFold(filenamePrefix), vfsCaseFold(filenameSuffix), true);
+		//return foundVfsFilePaths;
+
+		const heck::ci_wstring_view filenamePrefixCI(filenamePrefix);
+		const heck::ci_wstring_view filenameSuffixCI(filenameSuffix);
+
+		std::map<fs::path, fs::path, CIPathCmp> files;
+
+		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
+		{
+			fs::recursive_directory_iterator it;
+
+			try
+			{
+				it = fs::recursive_directory_iterator(mountPhysRoot / vfsPath, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied);
+			}
+			catch (const fs::filesystem_error& ex)
+			{
+				if (ex.code() == std::errc::no_such_file_or_directory)
+					continue;
+				throw;
+			}
+
+			for (const fs::directory_entry& dirEntry : it)
+			{
+				const fs::path& physPath = dirEntry.path();
+				const std::wstring filename = physPath.filename().wstring();
+				if (heck::ci_wstring_view(filename).starts_with(filenamePrefixCI) && heck::ci_wstring_view(filename).ends_with(filenameSuffixCI))
+					files.emplace(physPath.lexically_proximate(mountPhysRoot), physPath);
+
+				if (!recursive)
+					it.disable_recursion_pending();
+			}
+		}
+
+		if (vfsPathsOut)
+			vfsPathsOut->assign_range(files | std::views::keys | std::views::as_rvalue);
+
+		return { std::from_range, files | std::views::values | std::views::as_rvalue };
+	}
+
+	std::optional<fs::path> tryResolve(const fs::path& path) const
+	{
+		//const std::vector<VfsString> segments = vfsSegmentPath(path);
+	//
+	//if (const MountRelPath* const result = vfsFindFile(mInternals->mVfsRoot, segments))
+	//	return mInternals->mMountings[result->fileMountPointI] / result->relPath;
+	//else
+	//	throw std::filesystem::filesystem_error("VFS failed to resolve path.", path, std::make_error_code(std::errc::no_such_file_or_directory));
+
+#if IS_CASE_SENSITIVE_PLATFORM
+		const std::wstring genericPath = path.generic_wstring();
+		const std::vector pathSegs = genericPath | std::views::split(L'/') | std::ranges::to<std::vector>();
+		if (pathSegs.empty())
+			throw std::filesystem::filesystem_error("Empty path.", path, std::make_error_code(std::errc::no_such_file_or_directory));
+#endif
+
+		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
+		{
+			if (fs::path trivialPhysPath = mountPhysRoot / path; fs::exists(trivialPhysPath))
+				return trivialPhysPath;
+
+#if IS_CASE_SENSITIVE_PLATFORM
+			// Need to enumerate dirs ourselves to do case-insensitive file lookup.
+			fs::path incrementalPhysPath = mountPhysRoot;
+			bool found = true;
+			for (const std::ranges::subrange segSR : pathSegs)
+			{
+				const std::basic_string_view seg(segSR);
+				// Try the obvious first.
+				if (fs::exists(incrementalPhysPath / seg))
+					incrementalPhysPath /= seg;
+				else
+				{
+					fs::path::string_type chosenName;
+					for (const fs::directory_entry& dirEntry : fs::directory_iterator(incrementalPhysPath, fs::directory_options::skip_permission_denied))
+					{
+						const fs::path name = dirEntry.path().filename();
+						if (heck::ci_wstring_view(name.wstring()) == heck::ci_wstring_view(seg))
+						{
+							if (!chosenName.empty())
+								throw std::filesystem::filesystem_error("Ambiguous file lookup in VFS on case-sensitive platform.", path, mountPhysRoot, std::make_error_code(std::errc::no_such_file_or_directory));
+							chosenName = name;
+						}
+					}
+
+					if (chosenName.empty())
+					{
+						found = false;
+						break;
+					}
+
+					incrementalPhysPath /= chosenName;
+				}
+			}
+
+			if (found)
+				return incrementalPhysPath;
+#endif
+		}
+		
+		return std::nullopt;
+	}
+
+	std::vector<fs::path> enumeratePhysicalDirsContainingExt(const std::wstring& ext) const
+	{
+		const heck::ci_wstring_view extCI(ext);
+
+		std::unordered_set<fs::path> visitSet;
+		std::vector<fs::path> list;
+
+		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
+		{
+			for (const fs::directory_entry& dirEntry : fs::recursive_directory_iterator(mountPhysRoot, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied))
+			{
+				const fs::path& physPath = dirEntry.path();
+				const std::wstring physExt = physPath.extension().wstring();
+				if (heck::ci_wstring_view(physExt) == extCI)
+					if (const fs::path& physDir = physPath.parent_path(); visitSet.insert(physDir).second)
+						list.push_back(physDir.parent_path());
+			}
+		}
+
+		return list;
+	}
+
+#endif
 };
 
 //bool CvVFS::Mounting::isInsideMountPoint(const fs::path& path) const
@@ -333,41 +562,22 @@ CvVFS::~CvVFS() noexcept = default;
 
 fs::path CvVFS::resolve(const fs::path& path) const
 {
-	const std::vector<VfsString> segments = vfsSegmentPath(path);
-
-	if (const MountRelPath* const result = vfsFindFile(mInternals->mVfsRoot, segments))
-		return mInternals->mMountings[result->fileMountPointI] / result->relPath;
+	if (path.is_relative())
+	{
+		if (auto optPath = mInternals->tryResolve(path))
+			return std::move(*optPath);
+		throw std::filesystem::filesystem_error("Could not find file in VFS.", path, std::make_error_code(std::errc::no_such_file_or_directory));
+	}
 	else
-		throw std::filesystem::filesystem_error("VFS failed to resolve path.", path, std::make_error_code(std::errc::no_such_file_or_directory));
-
-
-	//if (path.is_relative())
-	//{
-	//	for (const Mounting& mounting : mMountings | std::views::reverse)
-	//		if (const std::optional<fs::path> optRel = mounting.rel(path))
-	//			if (fs::path absPath = mounting.physPath / *optRel; fs::exists(absPath))
-	//				return absPath;
-	//	throw std::runtime_error("Failed to resolve path.");
-	//}
-	//
-	//return path;
+		return path;
 }
 
 bool CvVFS::exists(const std::filesystem::path& path) const
 {
-	const std::vector<VfsString> segments = vfsSegmentPath(path);
-	return !!vfsFindFile(mInternals->mVfsRoot, segments);
-
-	//if (path.is_relative())
-	//{
-	//	for (const Mounting& mounting : mMountings | std::views::reverse)
-	//		if (const std::optional<fs::path> optRel = mounting.rel(path))
-	//			if (fs::path absPath = mounting.physPath / *optRel; fs::exists(absPath))
-	//				return true;
-	//	return false;
-	//}
-	//
-	//return fs::exists(path);
+	if (path.is_relative())
+		return mInternals->tryResolve(path).has_value();
+	else
+		return fs::exists(path);
 }
 
 /*fs::path CvVFS::resolveAsset(const fs::path& path)
@@ -383,50 +593,63 @@ std::ifstream CvVFS::open(const fs::path& path, std::ios_base::openmode mode) co
 	return std::ifstream(resolve(path), mode);
 }
 
-std::vector<fs::path> CvVFS::enumerateExtRecursive(const fs::path& vfsPath, const std::wstring& filenamePrefix, const std::wstring& filenameSuffix) const
+std::vector<fs::path> CvVFS::enumeratePhysExtRecursive(const fs::path& vfsPath, const std::wstring& filenamePrefix, const std::wstring& filenameSuffix) const
 {
-	//return enumerateExt<fs::recursive_directory_iterator>(path, ext, false);
-	
+#if BUILD_FILE_CATALOG
 	const auto vfsPathSegments = vfsSegmentPath(vfsPath);
 	std::vector<fs::path> foundVfsFilePaths;
 	if (const VfsDirEntriesMap* const folder = vfsFindFolder(&mInternals->mVfsRoot, vfsPathSegments))
 		Internals::enumerateExt(foundVfsFilePaths, *folder, vfsPath, vfsCaseFold(filenamePrefix), vfsCaseFold(filenameSuffix), true);
 	return foundVfsFilePaths;
+#else
+	return mInternals->enumerateFilesWithExt(vfsPath, filenamePrefix, filenameSuffix, true, nullptr);
+#endif
 }
 
-std::vector<fs::path> CvVFS::enumerateExtNonRecursive(const fs::path& vfsPath, const std::wstring& ext) const
+std::vector<fs::path> CvVFS::enumeratePhysExtNonRecursive(const fs::path& vfsPath, const std::wstring& ext) const
 {
-	//return enumerateExt<fs::directory_iterator>(path, ext, false);
-
+#if BUILD_FILE_CATALOG
 	const auto vfsPathSegments = vfsSegmentPath(vfsPath);
 	std::vector<fs::path> foundVfsFilePaths;
 	if (const VfsDirEntriesMap* const folder = vfsFindFolder(&mInternals->mVfsRoot, vfsPathSegments))
 		Internals::enumerateExt(foundVfsFilePaths, *folder, vfsPath, {}, vfsCaseFold(ext), false);
 	return foundVfsFilePaths;
+#else
+	return mInternals->enumerateFilesWithExt(vfsPath, {}, ext, false, nullptr);
+#endif
 }
 
 std::vector<fs::path> CvVFS::enumeratePhysicalDirsContainingExt(const std::wstring& ext) const
 {
-	std::unordered_set<MountRelPath, MountRelPathHash> set;
-	std::vector<fs::path> list;
-	mInternals->enumeratePhysicalDirsContainingExt(set, list, mInternals->mVfsRoot, vfsCaseFold(ext));
-	return list;
+	return mInternals->enumeratePhysicalDirsContainingExt(ext);
 }
 
 
 std::optional<std::string> CvVFS::loadPythonCodeIfExists(const std::string& filename, std::filesystem::path& vfsPathOut) const
 {
+#if BUILD_FILE_CATALOG
 	if (const auto it = mInternals->mPythonModuleLookup.find(filename); it != mInternals->mPythonModuleLookup.end())
+#else
+	if (const auto it = mInternals->mPythonModuleLookup.find(toLower(filename)); it != mInternals->mPythonModuleLookup.end())
+#endif
 	{
 		std::stringstream ss;
 		// Important encoding override for BUG mod files.
 		ss << "# coding=cp1252\n";
+#if BUILD_FILE_CATALOG
 		const fs::path physPath = mInternals->mMountings[it->second->fileMountPointI] / it->second->relPath;
+#else
+		const fs::path& physPath = it->second.physPath;
+#endif
 		std::ifstream file(physPath);
 		ss << file.rdbuf();
 		if (!file)
 			throw fs::filesystem_error("Failed to read python module, but the file was listed in the VFS.", physPath, std::error_code());
+#if BUILD_FILE_CATALOG
 		vfsPathOut = it->second->relPath; // This is also the VFS path as mounts always mount at the root.
+#else
+		vfsPathOut = it->second.vfsPath;
+#endif
 		return std::move(ss).str();
 	}
 	else

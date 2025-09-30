@@ -1264,7 +1264,7 @@ void MyCvDLLUtility::enumerateFiles(std::vector<CvString>& files, const char* sz
 	const std::string_view suffix = patternSV.substr(wildcardStart + 1);
 	const std::filesystem::path prefixPath(prefix);
 
-	files = gVFS->enumerateExtRecursive(prefixPath.parent_path(), prefixPath.filename().wstring(), std::filesystem::path(suffix).wstring())
+	files = gVFS->enumeratePhysExtRecursive(prefixPath.parent_path(), prefixPath.filename().wstring(), std::filesystem::path(suffix).wstring())
 		| std::views::transform([](const std::filesystem::path& path) { return CvString(path.string()); })
 		| std::ranges::to<std::vector>();
 }

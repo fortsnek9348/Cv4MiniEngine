@@ -22,7 +22,7 @@ using heck::range;
 static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts()
 {
 	// If the map script doesn't exist, just pick anything.
-	const auto files = gVFS->enumerateExtNonRecursive(L"", L".py");
+	const auto files = gVFS->enumeratePhysExtNonRecursive(L"", L".py");
 	if (files.empty())
 		throw std::runtime_error("There are no map scripts!");
 

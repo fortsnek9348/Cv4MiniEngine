@@ -8,6 +8,8 @@
 
 #include <CvDllTranslator.h>
 
+#include <CommonStuff/StringConversion.h>
+
 #include <algorithm>
 #include <ranges>
 #include <cwctype>
@@ -206,37 +208,6 @@ namespace
 	//			c += L'a' - L'A';
 	//}
 
-	struct ci_wchar_traits : std::char_traits<wchar_t>
-	{
-		static bool eq(wchar_t c1, wchar_t c2) { return towupper(c1) == towupper(c2); }
-		static bool ne(wchar_t c1, wchar_t c2) { return towupper(c1) != towupper(c2); }
-		static bool lt(wchar_t c1, wchar_t c2) { return towupper(c1) <  towupper(c2); }
-		static int compare(const wchar_t* s1, const wchar_t* s2, size_t n) {
-			return 
-#ifdef _WIN32
-				_wcsnicmp
-#else
-				wcsncasecmp
-#endif
-				(s1, s2, n);
-			//while (n-- != 0) {
-			//	if (towupper(*s1) < towupper(*s2)) return -1;
-			//	if (towupper(*s1) > towupper(*s2)) return 1;
-			//	++s1; ++s2;
-			//}
-			//return 0;
-		}
-		static const wchar_t* find(const wchar_t* s, size_t n, wchar_t a) {
-			while (n-- > 0 && towupper(*s) != towupper(a)) {
-				++s;
-			}
-			return s;
-		}
-	};
-
-	using ci_wstring_view = std::basic_string_view<wchar_t, ci_wchar_traits>;
-	//using ci_wstring_view = std::wstring_view;
-
 
 	// The most rough XML parsing. In case of error, just spit out the rest of the string.
 	std::vector<hecktui::Pixel> renderCiv4Xml(std::wstring_view remaining, hecktui::Pixel defPixel)
@@ -245,10 +216,10 @@ namespace
 		std::vector<hecktui::Pixel> pixels;
 		pixels.reserve(remaining.size());
 
-		static thread_local std::vector<ci_wstring_view> tlsTagStack;
+		static thread_local std::vector<heck::ci_wstring_view> tlsTagStack;
 		static thread_local std::vector<hecktui::Pixel> tlsAttribStack;
 
-		static std::vector<ci_wstring_view>& tagStack = tlsTagStack;
+		static std::vector<heck::ci_wstring_view>& tagStack = tlsTagStack;
 		static std::vector<hecktui::Pixel>& attribStack = tlsAttribStack;
 		tagStack.clear();
 		attribStack.assign({ defPixel });
@@ -290,7 +261,7 @@ namespace
 
 				temp = remaining.substr(0, tagSpan);
 				//toAsciiLower(temp);
-				ci_wstring_view tagContents(temp.c_str(), temp.size());
+				heck::ci_wstring_view tagContents(temp.c_str(), temp.size());
 
 				bool isBGColour = false;
 
@@ -299,7 +270,7 @@ namespace
 					tagContents.remove_prefix(1);
 					if (tagStack.size() && tagStack.back() == tagContents)
 					{
-						if (tagContents.contains(ci_wstring_view(L"color")) || tagContents == L"u")
+						if (tagContents.contains(heck::ci_wstring_view(L"color")) || tagContents == L"u")
 							attribStack.pop_back();
 						tagStack.pop_back();
 					}

@@ -22,6 +22,7 @@
 #include <CommonStuff/range.h>
 
 #include <iostream>
+#include <chrono>
 
 using heck::range;
 
@@ -82,8 +83,13 @@ CvApp::CvApp()
 	loadEnhancedDLLConfigFromINI();
 
 	const std::filesystem::path dataDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L"");
-	std::cout << "Building VFS file catalog with CV4MiniEngine data directory " << dataDir << std::endl;
+	//std::cout << "Building VFS file catalog with CV4MiniEngine data directory " << dataDir << std::endl;
+	std::cout << "Initialising VFS with Cv4MiniEngine data directory " << dataDir << std::endl;
+	// File cataloging is ~3x slower.
+	const auto t0 = std::chrono::steady_clock::now();
 	mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"");
+	const auto t1 = std::chrono::steady_clock::now();
+	std::clog << "VFS initialisation took " << std::chrono::duration<double, std::milli>(t1 - t0) << std::endl;
 	//mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"Next War\\");
 	gVFS = mVFS.get();
 
