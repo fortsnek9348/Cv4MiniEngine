@@ -43,11 +43,11 @@ namespace
 			++serial;
 
 			// Needed for CvUnVictoryScreen
-#ifdef _WIN32
-			_putenv("PYTHONCASEOK=1");
-#else
-			putenv(std::string("PYTHONCASEOK=1").data());
-#endif
+//#ifdef _WIN32
+//			_putenv("PYTHONCASEOK=1");
+//#else
+//			putenv(std::string("PYTHONCASEOK=1").data());
+//#endif
 				
 			//_putenv("PYTHONIOENCODING=cp1252");
 			
@@ -92,10 +92,10 @@ class Civ4ModuleImporter:
 		del self.codeDict[fullname]
 		mod = imp.new_module(fullname)
 		sys.modules[fullname] = mod
-		mod.__file__ = vfsPath # "<%s>" % self.__class__.__name__
+		mod.__file__ = vfsPath.upper() # "<%s>" % self.__class__.__name__
 		mod.__loader__ = self
 		mod.__package__ = fullname.rpartition('.')[0]
-		exec(compile(code, vfsPath, 'exec'), mod.__dict__)
+		exec(compile(code, vfsPath.upper(), 'exec'), mod.__dict__)
 		return mod
 
 sys.meta_path.append(Civ4ModuleImporter())
