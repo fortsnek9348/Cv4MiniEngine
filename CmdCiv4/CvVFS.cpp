@@ -33,6 +33,13 @@ namespace
 		return static_cast<wchar_t>(towupper(c));
 	}
 
+	[[nodiscard]] std::string toLower(std::string s)
+	{
+		for (char& c : s)
+			c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+		return s;
+	}
+
 #if BUILD_FILE_CATALOG
 	// VFS file cataloging. I don't like it, it's slow for startup, and it's only needed because Linux.
 	// This could probably be avoided by doing case-insensitive file IO open/enumeration.
@@ -191,12 +198,7 @@ namespace
 		return nullptr;
 	}
 #else
-	std::string toLower(std::string s)
-	{
-		for (char& c : s)
-			c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-		return s;
-	}
+	
 
 	//struct CIPathEq
 	//{
@@ -311,7 +313,7 @@ struct CvVFS::Internals
 				buildPythonModuleLookup(*dirEntry.folderDirEntries, recursive);
 			
 			if (dirEntry.fileMountRelPath && filename.ends_with(kExt))
-				mPythonModuleLookup.emplace(dirEntry.fileMountRelPath.relPath.stem().string(), &dirEntry.fileMountRelPath);
+				mPythonModuleLookup.emplace(toLower(dirEntry.fileMountRelPath.relPath.stem().string()), &dirEntry.fileMountRelPath);
 		}
 
 		//for (const Mounting& mounting : mMountings | std::views::reverse)
@@ -627,11 +629,7 @@ std::vector<fs::path> CvVFS::enumeratePhysicalDirsContainingExt(const std::wstri
 
 std::optional<std::string> CvVFS::loadPythonCodeIfExists(const std::string& filename, std::filesystem::path& vfsPathOut) const
 {
-#if BUILD_FILE_CATALOG
-	if (const auto it = mInternals->mPythonModuleLookup.find(filename); it != mInternals->mPythonModuleLookup.end())
-#else
 	if (const auto it = mInternals->mPythonModuleLookup.find(toLower(filename)); it != mInternals->mPythonModuleLookup.end())
-#endif
 	{
 		std::stringstream ss;
 		// Important encoding override for BUG mod files.
