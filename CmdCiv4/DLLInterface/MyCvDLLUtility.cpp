@@ -153,46 +153,6 @@ CvDLLPythonIFaceBase* MyCvDLLUtility::getPythonIFace()
 	return &x;
 }
 
-void MyCvDLLUtility::delMem(void*)
-{
-	std::abort();
-}
-
-void* MyCvDLLUtility::newMem(size_t size)
-{
-	return operator new(size);
-}
-
-void MyCvDLLUtility::delMem(void* p, [[maybe_unused]] const char* pcFile, [[maybe_unused]] int iLine)
-{
-	return operator delete(p);
-}
-
-void* MyCvDLLUtility::newMem(size_t size, [[maybe_unused]] const char* pcFile, [[maybe_unused]] int iLine)
-{
-	return operator new(size);
-}
-
-void MyCvDLLUtility::delMemArray(void* p, [[maybe_unused]] const char* pcFile, [[maybe_unused]] int iLine)
-{
-	return operator delete(p);
-}
-
-void* MyCvDLLUtility::newMemArray(size_t size, [[maybe_unused]] const char* pcFile, [[maybe_unused]] int iLine)
-{
-	return operator new(size);
-}
-
-void* MyCvDLLUtility::reallocMem([[maybe_unused]] void* a, [[maybe_unused]] unsigned int uiBytes, [[maybe_unused]] const char* pcFile, [[maybe_unused]] int iLine)
-{
-	std::abort();
-}
-
-unsigned int MyCvDLLUtility::memSize(void*)
-{
-	std::abort();
-}
-
 void MyCvDLLUtility::clearVector(std::vector<int>& vec)
 {
 	vec.clear();

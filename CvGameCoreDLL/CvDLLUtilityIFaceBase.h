@@ -61,18 +61,6 @@ public:
 	virtual CvDLLFlagEntityIFaceBase* getFlagEntityIFace() = 0;
 	virtual CvDLLPythonIFaceBase* getPythonIFace() = 0;
 
-	virtual void delMem(void *p) = 0;
-	virtual void* newMem(size_t size) = 0;
-
-	virtual void delMem(void *p, const char* pcFile, int iLine) = 0;
-	virtual void* newMem(size_t size, const char* pcFile, int iLine) = 0;
- 
-	virtual void delMemArray(void *p, const char* pcFile, int iLine) = 0;
-	virtual void* newMemArray(size_t size, const char* pcFile, int iLine) = 0;
-
-	virtual void* reallocMem(void* a, unsigned int uiBytes, const char* pcFile, int iLine) = 0; 
-	virtual unsigned int memSize(void* a) = 0;
-
 	virtual void clearVector(std::vector<int>& vec) = 0;
 	virtual void clearVector(std::vector<uint8_t>& vec) = 0;
 	virtual void clearVector(std::vector<float>& vec) = 0;

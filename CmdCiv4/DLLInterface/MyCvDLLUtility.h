@@ -44,14 +44,6 @@ public:
 	virtual CvDLLXmlIFaceBase* getXMLIFace() override;
 	virtual CvDLLFlagEntityIFaceBase* getFlagEntityIFace() override;
 	virtual CvDLLPythonIFaceBase* getPythonIFace() override;
-	virtual void delMem(void* p) override;
-	virtual void* newMem(size_t size) override;
-	virtual void delMem(void* p, const char* pcFile, int iLine) override;
-	virtual void* newMem(size_t size, const char* pcFile, int iLine) override;
-	virtual void delMemArray(void* p, const char* pcFile, int iLine) override;
-	virtual void* newMemArray(size_t size, const char* pcFile, int iLine) override;
-	virtual void* reallocMem(void* a, unsigned int uiBytes, const char* pcFile, int iLine) override;
-	virtual unsigned int memSize(void* a) override;
 	virtual void clearVector(std::vector<int>& vec) override;
 	virtual void clearVector(std::vector<uint8_t>& vec) override;
 	virtual void clearVector(std::vector<float>& vec) override;
