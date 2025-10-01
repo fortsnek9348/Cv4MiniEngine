@@ -38,15 +38,7 @@ const std::filesystem::path(::kReplaysDirName) = "Replays (Cv4MiniEngine)";
 const std::filesystem::path(::kCustomAssetsDirName) = "CustomAssets";
 const std::filesystem::path(::kPublicMapsDirName) = "PublicMaps";
 
-#if !CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
-#ifdef _WIN32
-#define HECK_NFD_STRING_LITERAL(s) L##s
-#else
-#define HECK_NFD_STRING_LITERAL(s) s
-#endif
-#endif
-
-static constexpr const auto* kSaveFileExtension = HECK_NFD_STRING_LITERAL("CivBeyondSwordSave");
+static constexpr const wchar_t* kSaveFileExtension = L"CivBeyondSwordSave";
 
 #ifdef _WIN32
 void ::outputDebugString(const char* s)
@@ -336,14 +328,28 @@ static bool initNFD()
 	return x;
 }
 
+#ifdef _WIN32
+#define HECK_NFD_STRING_LITERAL(s) L##s
+static std::wstring convertToNFDString(std::wstring_view s)
+{
+	return std::wstring(s);
+}
+#else
+#define HECK_NFD_STRING_LITERAL(s) s
+static std::string convertToNFDString(std::wstring_view s)
+{
+	return heck::convertWideToUtf8(s);
+}
+#endif
 
+static const auto kNfdSaveFileExtension = convertToNFDString(kSaveFileExtension);
 
 std::optional<std::filesystem::path>(::promptSaveFilePath)(const std::filesystem::path& defPath)
 {
 	(void)initNFD();
 
 	nfdnchar_t* outPath{};
-	nfdnfilteritem_t filters[] = { { HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kSaveFileExtension } };
+	nfdnfilteritem_t filters[] = { { HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kNfdSaveFileExtension.c_str() } };
 	const std::filesystem::path& defDir = std::filesystem::absolute(defPath.parent_path());
 	const std::filesystem::path& defName = defPath.filename();
 	const nfdsavedialognargs_t args{
@@ -376,7 +382,7 @@ std::optional<std::filesystem::path>(::promptLoadFilePath)(const std::filesystem
 	(void)initNFD();
 
 	nfdnchar_t* outPath{};
-	nfdnfilteritem_t filters[] = { { HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kSaveFileExtension } };
+	nfdnfilteritem_t filters[] = { { HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kNfdSaveFileExtension.c_str() } };
 	const nfdopendialognargs_t args{
 		.filterList = filters,
 		.filterCount = std::size(filters),
