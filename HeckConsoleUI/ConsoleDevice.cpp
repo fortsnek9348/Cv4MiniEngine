@@ -322,7 +322,7 @@ void ConsoleDevice::print(const Framebuffer& fb)
 	WriteConsoleW(console, output.data(), (DWORD)output.size(), &numWritten, nullptr);
 #else
 	//fputws(output.c_str(), stdout);
-	fputs(heck::toUtf8(output).c_str(), stdout);
+	fputs(heck::convertWideToUtf8(output).c_str(), stdout);
 	fflush(stdout);
 #endif
 }

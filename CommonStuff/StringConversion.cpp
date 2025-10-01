@@ -34,7 +34,7 @@ std::string heck::toAsciiLower(std::string s)
 	return s;
 }
 
-std::string heck::toUtf8(std::wstring_view w)
+std::string heck::convertWideToUtf8(std::wstring_view w)
 {
 	std::string out;
 	out.reserve(w.size());
@@ -63,7 +63,7 @@ std::string heck::toUtf8(std::wstring_view w)
 //#endif
 }
 
-std::wstring heck::toWide(std::string_view s)
+std::wstring heck::convertUtf8ToWide(std::string_view s)
 {
 	std::wstring out;
 	out.reserve(s.size());
@@ -96,6 +96,23 @@ std::wstring heck::toWide(std::string_view s)
 //	wstr.resize_and_overwrite(len, [&](wchar_t* buf, size_t size) { std::mbsrtowcs(buf, &mbstr, size, &state); return size; });
 //	return wstr;
 //#endif
+}
+
+std::wstring heck::convertAsciiToWide(std::string_view s)
+{
+	std::wstring w;
+	w.resize_and_overwrite(s.size(), [s](wchar_t* out, size_t n) {
+		for (size_t i = 0; i < n; ++i)
+		{
+			const unsigned char uc = s[i];
+			if (uc < 0x80)
+				out[i] = static_cast<wchar_t>(uc);
+			else
+				throw std::runtime_error("Given string contains non-ASCII.");
+		}
+		return n;
+		});
+	return w;
 }
 
 #ifndef _WIN32

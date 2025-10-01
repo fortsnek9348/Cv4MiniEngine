@@ -10,7 +10,7 @@
 class CvVFS
 {
 public:
-	explicit CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::wstring& optModName);
+	explicit CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::filesystem::path& optRelModPath);
 	~CvVFS() noexcept;
 
 	std::filesystem::path resolve(const std::filesystem::path& path) const;

@@ -236,7 +236,7 @@ bool MyCvDLLPython::isInitialized()
 const char* MyCvDLLPython::getMapScriptModule()
 {
 	static std::string temp;
-	temp = heck::toUtf8(gGlobals.getInitCore().getMapScriptName());
+	temp = heck::convertWideToUtf8(gGlobals.getInitCore().getMapScriptName());
 	return temp.c_str();
 }
 

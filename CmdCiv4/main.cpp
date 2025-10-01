@@ -11,6 +11,7 @@
 #include "DLLMessageQueue.h"
 #include "CvEngine.h"
 #include "CivIni.h"
+#include "CommandLine.h"
 
 #include <HeckTextUI/BasicControls.h>
 
@@ -827,28 +828,36 @@ void InGameCvAppState::onLeave(CvApp&)
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+	// Call this first!
+	std::ios::sync_with_stdio(false);
+
 #ifndef _WIN32
 	// Allow GDB to attach - https://man7.org/linux/man-pages/man2/pr_set_ptracer.2const.html
 	prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY);
 #endif
 
-	// Call this first!
-	std::ios::sync_with_stdio(false);
-
-	if (heck::toWide(heck::toUtf8(L"\x1b[↑")) != L"\x1b[↑")
+	if (heck::convertUtf8ToWide(heck::convertWideToUtf8(L"\x1b[↑")) != L"\x1b[↑")
 	{
-		for (const uint8_t c : heck::toUtf8(L"\x1b[↑"))
+		for (const uint8_t c : heck::convertWideToUtf8(L"\x1b[↑"))
 			printf("%#02x\n", c);
 		printf("-\n");
-		for (const wint_t c : heck::toWide(heck::toUtf8(L"\x1b[↑")))
+		for (const wint_t c : heck::convertUtf8ToWide(heck::convertWideToUtf8(L"\x1b[↑")))
 			printf("%#x\n", c);
 		throw std::runtime_error("String conversion isn't working.");
 	}
 
+	AppStartupConfig appStartConfig = parseCommandLine(argc, argv);
+
+	if (!appStartConfig.save.empty())
+	{
+		appStartConfig.modRelPath = CvApp::extractModRelPathFromSave(appStartConfig.save);
+		std::wclog << L"Overriding mod with " << std::quoted(appStartConfig.modRelPath) << L" from save file." << std::endl;
+	}
+
 	// Start CvApp now.
-	(void)CvApp::getInstance();
+	CvApp::getInstance().start(appStartConfig);
 
 	initCommon(); // python initialised here
 
@@ -867,18 +876,10 @@ int main()
 
 	CvApp::getInstance().startUI();
 
-	CvApp::getInstance().deferMainMenu();
-
-	[[maybe_unused]] const auto standardSavesPath = getUserDataDir() / kSavesDirName / kSavesSingleDirName;
-#ifdef _WIN32
-	[[maybe_unused]] const auto originalSavesPath = getUserDataDir() / "Saves" / kSavesSingleDirName;
-#else
-	[[maybe_unused]] const auto originalSavesPath = standardSavesPath;
-#endif
-
-	//CvApp::getInstance().deferLoadGame(R"(Giant Pangea begin T209.CivBeyondSwordSave)");
-
-	//CvApp::getInstance().deferLoadGame(getUserDataDir() / R"(Cv4MiniEngine Testing\Axolotl10-Diplo AD-1802 diplo voted.CivBeyondSwordSave)");
+	if (appStartConfig.save.empty())
+		CvApp::getInstance().deferMainMenu();
+	else
+		CvApp::getInstance().deferLoadGame(appStartConfig.save);
 
 	return CvApp::getInstance().run();
 }

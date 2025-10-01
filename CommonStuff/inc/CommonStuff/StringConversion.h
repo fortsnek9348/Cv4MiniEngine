@@ -19,8 +19,10 @@ namespace heck
 			return c;
 	}
 
-	std::string toUtf8(std::wstring_view s);
-	std::wstring toWide(std::string_view s);
+	std::string convertWideToUtf8(std::wstring_view s);
+	std::wstring convertUtf8ToWide(std::string_view s);
+	std::wstring convertAsciiToWide(std::string_view s);
+
 #ifndef _WIN32
 	std::u16string toUtf16(std::wstring s);
 	std::wstring toWide(std::u16string_view s);

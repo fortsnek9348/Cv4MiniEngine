@@ -38,8 +38,8 @@ std::optional<std::wstring> heck::findEnvironmentVariable(const std::wstring& na
 		// else, try again.
 	}
 #else
-	if (const char* const value = getenv(toUtf8(name).c_str()))
-		return toWide(value);
+	if (const char* const value = getenv(convertWideToUtf8(name).c_str()))
+		return convertUtf8ToWide(value);
 	else
 		return std::nullopt;
 #endif
@@ -127,9 +127,9 @@ std::wstring heck::getUserName()
 	return name;
 #else
 	if (const char* const name1 = std::getenv("LOGNAME"); name1 && name1[0])
-		return toWide(name1);
+		return convertUtf8ToWide(name1);
 	else if (const char* const name2 = getlogin(); name2 && name2[0])
-		return toWide(name2);
+		return convertUtf8ToWide(name2);
 	else
 		return L"Unknown User";
 #endif

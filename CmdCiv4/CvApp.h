@@ -123,6 +123,7 @@ private:
 };
 
 class CvVFS;
+struct AppStartupConfig;
 
 class CvApp
 {
@@ -131,6 +132,8 @@ public:
 
 	CvApp();
 	~CvApp();
+
+	void start(const AppStartupConfig& config);
 
 	void redirectLoggingOutput();
 
@@ -157,6 +160,8 @@ public:
 
 	// Main loop. Returns exit code.
 	int run();
+
+	static std::wstring extractModRelPathFromSave(const std::filesystem::path& path);
 	
 	void serialise(FFile<StdRawBinaryStream>& file) const;
 	void deserialise(FFile<StdRawBinaryStream>& file);

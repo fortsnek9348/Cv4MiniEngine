@@ -8,6 +8,7 @@
 #include "AppMainMenusState.h"
 #include "CivIni.h"
 #include "CvVFS.h"
+#include "CommandLine.h"
 
 #include <CvGlobals.h>
 #include <CvInitCore.h>
@@ -33,6 +34,10 @@ CvApp& CvApp::getInstance()
 }
 
 CvApp::CvApp()
+{
+}
+
+void CvApp::start(const AppStartupConfig& config)
 {
 	std::clog << "User config directory: " << getUserConfigDir() << std::endl;
 	std::clog << "User data directory: " << getUserDataDir() << std::endl;
@@ -87,7 +92,7 @@ CvApp::CvApp()
 	std::cout << "Initialising VFS with Cv4MiniEngine data directory " << dataDir << std::endl;
 	// File cataloging is ~3x slower.
 	const auto t0 = std::chrono::steady_clock::now();
-	mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"");
+	mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, std::filesystem::path(config.modRelPath));
 	const auto t1 = std::chrono::steady_clock::now();
 	std::clog << "VFS initialisation took " << std::chrono::duration<double, std::milli>(t1 - t0) << std::endl;
 	//mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"Next War\\");
@@ -176,6 +181,19 @@ int CvApp::run()
 	}
 
 	return 0;
+}
+
+std::wstring CvApp::extractModRelPathFromSave(const std::filesystem::path& path)
+{
+	FFile<StdRawBinaryStream> file(path, std::ios::in);
+	uint32_t u32{};
+	file.Read(&u32);
+	// Can't check this until mod is determined...
+	//if (u32 != (unsigned)gGlobals.getDefineINT("SAVE_VERSION"))
+	//	std::abort();
+	CvString str;
+	file.ReadString(str);
+	return heck::convertAsciiToWide(str);
 }
 
 void CvApp::serialise(FFile<StdRawBinaryStream>& file) const

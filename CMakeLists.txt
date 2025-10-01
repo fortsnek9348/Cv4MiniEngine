@@ -303,7 +303,7 @@ else()
 	install(TARGETS CvGameCoreDLL LIBRARY DESTINATION "CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}")
 	FILE(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/Cv4MiniEngine_${CvGameCoreDLL_NameSuffix}.sh CONTENT 
 		"#!/bin/sh
-		LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\"CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}\" ./Cv4MiniEngine
+		LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\"CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}\" ./Cv4MiniEngine \"$@\"
 		"
 		FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 	)

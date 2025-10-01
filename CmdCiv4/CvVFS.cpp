@@ -226,11 +226,25 @@ namespace
 	//	}
 	//};
 #endif
+
+	std::optional<fs::recursive_directory_iterator> getRecursiveDirectoryIteratorIfExists(const fs::path& root)
+	{
+		try
+		{
+			return fs::recursive_directory_iterator(root, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied);
+		}
+		catch (const fs::filesystem_error& ex)
+		{
+			if (ex.code() == std::errc::no_such_file_or_directory)
+				return std::nullopt;
+			throw;
+		}
+	}
 }
 
 struct CvVFS::Internals
 {
-	explicit Internals(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, std::wstring optRelModName)
+	explicit Internals(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, fs::path optModRelPath)
 	{
 		const fs::path btsRoot = vanillaCiv4RootDir / "Beyond the Sword";
 
@@ -246,12 +260,16 @@ struct CvVFS::Internals
 			getUserConfigDir() / kPublicMapsDirName       /**/,
 		});
 
-		if (!optRelModName.empty())
+		// Remove trailing slash.
+		if (optModRelPath.has_parent_path() && !optModRelPath.has_filename())
+			optModRelPath = optModRelPath.parent_path();
+
+		if (!optModRelPath.empty())
 		{
 			mMountings.insert(mMountings.end(), {
-				btsRoot / "Mods" / optRelModName / "Assets"      /**/,
-				btsRoot / "Mods" / optRelModName / kPublicMapsDirName  /**/,
-				btsRoot / "Mods" / optRelModName / "PrivateMaps" /**/,
+				btsRoot / optModRelPath / "Assets"      /**/,
+				btsRoot / optModRelPath / kPublicMapsDirName  /**/,
+				btsRoot / optModRelPath / "PrivateMaps" /**/,
 			});
 		}
 
@@ -277,14 +295,11 @@ struct CvVFS::Internals
 		buildPythonModuleLookup("Python", true); // Let's hope there are no conflicts with maps.
 #endif
 
-		if (!optRelModName.empty() && (optRelModName.back() == L'\\' || optRelModName.back() == L'/'))
-			optRelModName.pop_back();
-
-		mModName = optRelModName;
-		if (!optRelModName.empty())
+		mModName = optModRelPath.filename().wstring();
+		if (!mModName.empty())
 		{
-			mModFullPath = (btsRoot / "Mods" / optRelModName).wstring();
-			mModRelPath = (fs::path("Mods") / optRelModName).wstring();
+			mModFullPath = (btsRoot / optModRelPath).wstring();
+			mModRelPath = optModRelPath.wstring();
 			// Used for save files, we need a specific format.
 			std::ranges::replace(mModRelPath, L'/', L'\\');
 			mModRelPath += L'\\';
@@ -422,28 +437,18 @@ struct CvVFS::Internals
 
 		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
 		{
-			fs::recursive_directory_iterator it;
-
-			try
+			if (auto optIt = getRecursiveDirectoryIteratorIfExists(mountPhysRoot / vfsPath))
 			{
-				it = fs::recursive_directory_iterator(mountPhysRoot / vfsPath, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied);
-			}
-			catch (const fs::filesystem_error& ex)
-			{
-				if (ex.code() == std::errc::no_such_file_or_directory)
-					continue;
-				throw;
-			}
+				for (const fs::directory_entry& dirEntry : *optIt)
+				{
+					const fs::path& physPath = dirEntry.path();
+					const std::wstring filename = physPath.filename().wstring();
+					if (heck::ci_wstring_view(filename).starts_with(filenamePrefixCI) && heck::ci_wstring_view(filename).ends_with(filenameSuffixCI))
+						files.emplace(physPath.lexically_proximate(mountPhysRoot), physPath);
 
-			for (const fs::directory_entry& dirEntry : it)
-			{
-				const fs::path& physPath = dirEntry.path();
-				const std::wstring filename = physPath.filename().wstring();
-				if (heck::ci_wstring_view(filename).starts_with(filenamePrefixCI) && heck::ci_wstring_view(filename).ends_with(filenameSuffixCI))
-					files.emplace(physPath.lexically_proximate(mountPhysRoot), physPath);
-
-				if (!recursive)
-					it.disable_recursion_pending();
+					if (!recursive)
+						optIt->disable_recursion_pending();
+				}
 			}
 		}
 
@@ -525,13 +530,16 @@ struct CvVFS::Internals
 
 		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
 		{
-			for (const fs::directory_entry& dirEntry : fs::recursive_directory_iterator(mountPhysRoot, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied))
+			if (auto optIt = getRecursiveDirectoryIteratorIfExists(mountPhysRoot))
 			{
-				const fs::path& physPath = dirEntry.path();
-				const std::wstring physExt = physPath.extension().wstring();
-				if (heck::ci_wstring_view(physExt) == extCI)
-					if (const fs::path& physDir = physPath.parent_path(); visitSet.insert(physDir).second)
-						list.push_back(physDir.parent_path());
+				for (const fs::directory_entry& dirEntry : *optIt)
+				{
+					const fs::path& physPath = dirEntry.path();
+					const std::wstring physExt = physPath.extension().wstring();
+					if (heck::ci_wstring_view(physExt) == extCI)
+						if (const fs::path& physDir = physPath.parent_path(); visitSet.insert(physDir).second)
+							list.push_back(physDir.parent_path());
+				}
 			}
 		}
 
@@ -556,8 +564,8 @@ struct CvVFS::Internals
 
 
 
-CvVFS::CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::wstring& optRelModName)
-	: mInternals(std::make_unique<Internals>(cv4EngineRootDir, vanillaCiv4RootDir, optRelModName))
+CvVFS::CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const fs::path& optRelModPath)
+	: mInternals(std::make_unique<Internals>(cv4EngineRootDir, vanillaCiv4RootDir, optRelModPath))
 {
 }
 

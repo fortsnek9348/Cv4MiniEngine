@@ -122,6 +122,7 @@
     <ClCompile Include="AppUIUtil.cpp" />
     <ClCompile Include="AudioSystem.cpp" />
     <ClCompile Include="CivIni.cpp" />
+    <ClCompile Include="CommandLine.cpp" />
     <ClCompile Include="CvButtonPopup.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="CvApp.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="AudioSystem.h" />
     <ClInclude Include="CivIni.h" />
     <ClInclude Include="CLinkListIterator.h" />
+    <ClInclude Include="CommandLine.h" />
     <ClInclude Include="CvButtonPopup.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="CvApp.h" />

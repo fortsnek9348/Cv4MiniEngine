@@ -213,13 +213,13 @@ namespace
 			if (n > 0 && 0xD800 <= mBuf[n - 1] && mBuf[n - 1] < 0xDC00) [[unlikely]]
 			{
 				// Last element is the start of a UTF16 surrogates pair. Leave it in the buffer.
-				mTarget << heck::toUtf8(std::wstring_view(mBuf).substr(0, n - 1));
+				mTarget << heck::convertWideToUtf8(std::wstring_view(mBuf).substr(0, n - 1));
 				mBufPosition = 1;
 				mBuf[0] = mBuf[n - 1];
 			}
 			else
 			{
-				mTarget << heck::toUtf8(std::wstring_view(mBuf).substr(0, n));
+				mTarget << heck::convertWideToUtf8(std::wstring_view(mBuf).substr(0, n));
 				mBufPosition = 0;
 			}
 		}
