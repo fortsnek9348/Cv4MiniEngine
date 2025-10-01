@@ -289,7 +289,7 @@ endif()
 
 if (WIN32)
 	install(TARGETS CvGameCoreDLL RUNTIME DESTINATION "CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}")
-	# Note that when dragging a file onto the batch file, Windows change the working directory.
+	# Note that when dragging a file onto the batch file, Windows will change the working directory.
 	FILE(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/Cv4MiniEngine_${CvGameCoreDLL_NameSuffix}.bat CONTENT 
 		"
 		SET PATH=%PATH%;%~dp0CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}
