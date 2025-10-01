@@ -340,7 +340,7 @@ std::string GiganticMapsOptimisationsLib::toString(UnitAITypes x)
 {
 	CvWString str;
 	getUnitAIString(str, x);
-	return CvString(str);
+	return heck::toAsciiString(str);
 }
 
 static_assert(
