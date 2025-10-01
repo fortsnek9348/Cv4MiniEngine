@@ -16,7 +16,7 @@ An x64 engine reimplementation of Civlization IV in the terminal, with optional 
 
 #### Configuration
 
-* Config is stored in your `My Games\Beyond the Sword\CivilizationIV.ini` if on Windows.
+* Config is stored in a new INI: `My Games\Beyond the Sword\Cv4MiniEngine.ini` if on Windows.
 * On Linux, Cv4MiniEngine should conform to XDG
 	* Saves and replays are stored in `~/.local/share/Beyond the Sword`, by default.
 	* Config is stored in `~/.config/Beyond the Sword`, by default.

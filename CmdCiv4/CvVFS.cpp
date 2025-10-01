@@ -266,6 +266,8 @@ struct CvVFS::Internals
 
 		if (!optModRelPath.empty())
 		{
+			if (!fs::exists(btsRoot / optModRelPath))
+				throw std::runtime_error("Mod does not exist.");
 			mMountings.insert(mMountings.end(), {
 				btsRoot / optModRelPath / "Assets"      /**/,
 				btsRoot / optModRelPath / kPublicMapsDirName  /**/,
@@ -273,10 +275,14 @@ struct CvVFS::Internals
 			});
 		}
 
+		// Make this absolute so that file enumeration always returns absolute physical paths.
+		// And it looks like empty paths are unchanged by absolute.
+		const fs::path absCv4EngineRootDir = cv4EngineRootDir.empty() ? fs::current_path() : fs::absolute(cv4EngineRootDir);
+
 		// Cv4MiniEngine overrides.
 		mMountings.insert(mMountings.end(), {
-			cv4EngineRootDir / kCustomAssetsDirName /**/,
-			cv4EngineRootDir / kPublicMapsDirName         /**/,
+			absCv4EngineRootDir / kCustomAssetsDirName /**/,
+			absCv4EngineRootDir / kPublicMapsDirName         /**/,
 		});
 
 		mPythonModuleLookup.reserve(200);
