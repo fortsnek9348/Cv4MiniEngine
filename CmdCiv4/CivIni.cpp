@@ -35,7 +35,7 @@ constexpr IniDocKey(::kCivilizationIVIniProp_WorldSizeMultiplier) { "WorldSizeMu
 
 static const std::filesystem::path& getPath()
 {
-	static const std::filesystem::path kPath = getUserConfigDir() / "CivilizationIV.ini";
+	static const std::filesystem::path kPath = getUserConfigDir() / "Cv4MiniEngine.ini";
 	return kPath;
 }
 

@@ -15,8 +15,9 @@ struct IniDocKey
 class IniData
 {
 public:
+	// NOTE: Strings are now UTF-8.
+
 	void set(const IniDocKey& section, const IniDocKey& key, std::string value);
-	// TODO: Unicode is not properly handled.
 	void set(const IniDocKey& section, const IniDocKey& key, std::wstring value);
 
 	void setDefault(const IniDocKey& section, const IniDocKey& key, std::string value);

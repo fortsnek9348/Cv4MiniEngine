@@ -8,14 +8,7 @@
 #include <algorithm>
 #include <fstream>
 
-// TODO: Store INI as UTF-8.
-
-//static void toAsciiLowerInplace(std::string& s)
-//{
-//	for (char& c : s)
-//		if ('A' <= c && c <= 'Z')
-//			c = c - 'A' + 'a';
-//}
+// UPDATE: INI shall now be UTF-8 encoded (although, keys and whitespace are still treated as ASCII).
 
 static constexpr char (*toAsciiCharLower)(char) = heck::toAsciiLower;
 
@@ -77,7 +70,7 @@ void IniData::set(const IniDocKey& section, const IniDocKey& key, std::string va
 
 void IniData::set(const IniDocKey& section, const IniDocKey& key, std::wstring value)
 {
-	set(section, key, heck::toAsciiString(value));
+	set(section, key, heck::convertWideToUtf8(value));
 }
 
 void IniData::setDefault(const IniDocKey& sectionInfo, const IniDocKey& key, std::string value)
@@ -96,7 +89,7 @@ void IniData::setDefault(const IniDocKey& sectionInfo, const IniDocKey& key, std
 	Section& section = grabSection(sectionInfo);
 	if (!section.propLookup.contains(key.name))
 	{
-		const auto it = section.props.insert(section.props.end(), Section::Prop{ { std::string(key.doc) }, std::string(key.name), heck::toAsciiString(value) });
+		const auto it = section.props.insert(section.props.end(), Section::Prop{ { std::string(key.doc) }, std::string(key.name), heck::convertWideToUtf8(value) });
 		section.propLookup.emplace(it->name, it);
 		mChanged = true;
 	}
@@ -115,8 +108,7 @@ std::wstring IniData::get(const IniDocKey& section, const IniDocKey& key, const 
 {
 	if (const auto sectionIt = mSectionLookup.find(section.name); sectionIt != mSectionLookup.end())
 		if (const auto keyIt = sectionIt->second->propLookup.find(key.name); keyIt != sectionIt->second->propLookup.end())
-			// TODO: What is the encoding of the INI when it contains non-ASCII?
-			return CvWString(keyIt->second->value);
+			return heck::convertUtf8ToWide(keyIt->second->value);
 
 	return def;
 }
