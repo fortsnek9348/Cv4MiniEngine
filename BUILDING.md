@@ -5,7 +5,7 @@ Cv4MiniEngine depends on:
 * SFML 3.0.2 (for audio)
 	* At least this specific version. Fixes use-after-free bug in the audio engine.
 * Python 2.7.18 (final Python 2)
-* pguxml 1.15: https://github.com/zeux/pugixml
+* pugixml 1.15: https://github.com/zeux/pugixml
 	* At least this specific version. Adds `string_view` support.
 * zlib
 * https://github.com/Benjamin-Dobell/s3tc-dxt-decompression
@@ -25,7 +25,7 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 * Use the provided VS solution.
 * AVX2/AVX512 setting is in the common property sheet.
 * Configuration is done through the `ExternalDependencies.props` file. Change the "user macros" to point to the required directories. This can be done within the IDE. Further tweaks may be required if your lib installs have a different layout.
-	* Note that the S3TC and tinyxml2 source files are referenced directly using paths from `ExternalDependencies.props`.
+	* Note that the S3TC source file is referenced directly using paths from `ExternalDependencies.props`.
 * If you get an ambiguous function error in pybind11 pointing to `foward_like`, just patch the headers to rename the function.
 
 #### Windows CMake
