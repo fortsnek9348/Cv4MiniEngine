@@ -230,16 +230,14 @@ namespace
 
 	std::optional<fs::recursive_directory_iterator> getRecursiveDirectoryIteratorIfExists(const fs::path& root)
 	{
-		try
-		{
-			return fs::recursive_directory_iterator(root, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied);
-		}
-		catch (const fs::filesystem_error& ex)
-		{
-			if (ex.code() == std::errc::no_such_file_or_directory)
-				return std::nullopt;
-			throw;
-		}
+		std::error_code ec;
+		fs::recursive_directory_iterator it(root, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied, ec);
+		if (ec == std::errc())
+			return it;
+		else if (ec == std::errc::no_such_file_or_directory)
+			return std::nullopt;
+		else
+			throw fs::filesystem_error("Could not create recursive_directory_iterator.", root, ec);
 	}
 }
 
