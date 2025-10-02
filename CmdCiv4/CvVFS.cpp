@@ -24,6 +24,7 @@ namespace fs = std::filesystem;
 
 constinit const CvVFS* ::gVFS = nullptr;
 
+// NOTE: BUILD_FILE_CATALOG == 1 doesn't sort file enumeration output by mount point index.
 #define BUILD_FILE_CATALOG 0
 
 namespace
@@ -439,9 +440,15 @@ struct CvVFS::Internals
 		const heck::ci_wstring_view filenamePrefixCI(filenamePrefix);
 		const heck::ci_wstring_view filenameSuffixCI(filenameSuffix);
 
-		std::map<fs::path, fs::path, CIPathCmp> files;
+		struct FoundFile
+		{
+			ptrdiff_t mountI = 0;
+			fs::path physPath;
+		};
 
-		for (const fs::path& mountPhysRoot : mMountings | std::views::reverse)
+		std::map<fs::path, FoundFile, CIPathCmp> files;
+
+		for (const auto& [mountI, mountPhysRoot] : mMountings | std::views::enumerate)
 		{
 			if (auto optIt = getRecursiveDirectoryIteratorIfExists(mountPhysRoot / vfsPath))
 			{
@@ -450,7 +457,7 @@ struct CvVFS::Internals
 					const fs::path& physPath = dirEntry.path();
 					const std::wstring filename = physPath.filename().wstring();
 					if (heck::ci_wstring_view(filename).starts_with(filenamePrefixCI) && heck::ci_wstring_view(filename).ends_with(filenameSuffixCI))
-						files.emplace(physPath.lexically_proximate(mountPhysRoot), physPath);
+						files[physPath.lexically_proximate(mountPhysRoot)] = { mountI, physPath };
 
 					if (!recursive)
 						optIt->disable_recursion_pending();
@@ -458,10 +465,17 @@ struct CvVFS::Internals
 			}
 		}
 
-		if (vfsPathsOut)
-			vfsPathsOut->assign_range(files | std::views::keys | std::views::as_rvalue);
+		// CvXMLLoadUtility::LoadGlobalText wants vanilla text files listed before BTS.
+		// Important for TXT_KEY_CITY_NAME_AACHEN.
+		std::vector<std::pair<fs::path, FoundFile>> filesSorted(std::from_range, files);
+		std::ranges::stable_sort(filesSorted, std::less<>(), [](const decltype(filesSorted)::value_type& kv) {
+			return kv.second.mountI;
+			});
 
-		return { std::from_range, files | std::views::values | std::views::as_rvalue };
+		if (vfsPathsOut)
+			vfsPathsOut->assign_range(filesSorted | std::views::keys | std::views::as_rvalue);
+
+		return { std::from_range, filesSorted | std::views::values | std::views::transform(&FoundFile::physPath) | std::views::as_rvalue };
 	}
 
 	std::optional<fs::path> tryResolve(const fs::path& path) const
