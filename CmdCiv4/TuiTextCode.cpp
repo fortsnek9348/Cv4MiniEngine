@@ -328,6 +328,14 @@ namespace
 					defPixel.underline = true;
 					attribStack.push_back(defPixel);
 				}
+				// This shows up in Next War, CvDawnOfMan.
+				else if (tagContents == L"b")
+				{
+					tagStack.push_back(L"b");
+					defPixel = attribStack.back();
+					defPixel.bold = true;
+					attribStack.push_back(defPixel);
+				}
 				else if (tagContents == L"tab")
 				{
 					write(L"    ");
