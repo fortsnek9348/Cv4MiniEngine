@@ -66,7 +66,7 @@
       <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;SFML_STATIC;ZLIB_CONST;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(TINYXML2_DIR);$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(PUGIXML_DIR)\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -76,7 +76,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;zlibstaticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;zlibstaticd.lib;$(PUGIXML_DIR)\lib\pugixml_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
     </Link>
@@ -89,7 +89,7 @@
       <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;SFML_STATIC;ZLIB_CONST;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(TINYXML2_DIR);$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(PUGIXML_DIR)\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -101,7 +101,7 @@
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s.lib;sfml-audio-s.lib;zlibstatic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s.lib;sfml-audio-s.lib;zlibstatic.lib;$(PUGIXML_DIR)\lib\pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -113,7 +113,6 @@
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
     </ClCompile>
-    <ClCompile Include="$(TINYXML2_DIR)\tinyxml2.cpp" />
     <ClCompile Include="AppGameSetupConfigPanel.cpp" />
     <ClCompile Include="AppGameSetupMapScript.cpp" />
     <ClCompile Include="AppGameSetupPlayerListPanel.cpp" />

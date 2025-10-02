@@ -4,11 +4,11 @@
     <SFML_DIR>D:\Lib\SFML 3 (aef34af5568c410f971be0fc53175f131127afde)</SFML_DIR>
     <NFD_DIR>D:\Lib\nativefiledialog-extended-1.2.1</NFD_DIR>
     <ZLIB_DIR>D:\Lib\zlib-1.3.1\install</ZLIB_DIR>
-    <TINYXML2_DIR>D:\Lib\tinyxml2-master</TINYXML2_DIR>
     <PYBIND11_DIR>D:\Lib\pybind11-2.9.2</PYBIND11_DIR>
     <PYTHON_DIR>C:\Python27</PYTHON_DIR>
     <STB_DIR>D:\Lib\stb-master</STB_DIR>
     <S3TC_DXT_DIR>D:\Lib\s3tc-dxt-decompression-master</S3TC_DXT_DIR>
+    <PUGIXML_DIR>D:\Lib\pugixml-1.15\Install</PUGIXML_DIR>
   </PropertyGroup>
   <ItemGroup>
     <BuildMacro Include="SFML_DIR">
@@ -19,9 +19,6 @@
     </BuildMacro>
     <BuildMacro Include="ZLIB_DIR">
       <Value>$(ZLIB_DIR)</Value>
-    </BuildMacro>
-    <BuildMacro Include="TINYXML2_DIR">
-      <Value>$(TINYXML2_DIR)</Value>
     </BuildMacro>
     <BuildMacro Include="PYBIND11_DIR">
       <Value>$(PYBIND11_DIR)</Value>
@@ -34,6 +31,9 @@
     </BuildMacro>
     <BuildMacro Include="S3TC_DXT_DIR">
       <Value>$(S3TC_DXT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="PUGIXML_DIR">
+      <Value>$(PUGIXML_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

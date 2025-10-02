@@ -240,9 +240,6 @@
     <ClCompile Include="$(S3TC_DXT_DIR)\s3tc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(TINYXML2_DIR)\tinyxml2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CommandLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
