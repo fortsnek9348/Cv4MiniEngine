@@ -211,8 +211,9 @@ if (ENABLE_BUILD_ENGINE)
 	target_link_libraries(Cv4MiniEngine PRIVATE ZLIB::ZLIB)
 	target_compile_definitions(Cv4MiniEngine PRIVATE ZLIB_CONST=1)
 
-	find_package(tinyxml2 REQUIRED)
-	target_link_libraries(Cv4MiniEngine PRIVATE tinyxml2::tinyxml2)
+	# 1.15 needed for string_view.
+	find_package(pugixml 1.15 REQUIRED)
+	target_link_libraries(Cv4MiniEngine PRIVATE pugixml::pugixml)
 
 	if (WIN32)
 		find_path(STB_INC_DIR stb REQUIRED)

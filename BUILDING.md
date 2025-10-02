@@ -5,7 +5,8 @@ Cv4MiniEngine depends on:
 * SFML 3.0.2 (for audio)
 	* At least this specific version. Fixes use-after-free bug in the audio engine.
 * Python 2.7.18 (final Python 2)
-* tinyxml2
+* pguxml 1.15: https://github.com/zeux/pugixml
+	* At least this specific version. Adds `string_view` support.
 * zlib
 * https://github.com/Benjamin-Dobell/s3tc-dxt-decompression
 * If you have a GUI: nativefiledialog-extended
@@ -41,7 +42,7 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 * Preferably, use a fast linker like `mold` or `lld`.
 * `sudo apt install clang-20 mold libstdc++-15`
 * `sudo apt install cmake pkg-config patch`
-* `sudo apt install libtinyxml2-dev libstb-dev zlib1g-dev`
+* `sudo apt install libstb-dev zlib1g-dev`
 * SFML dependencies: `sudo apt install libvorbis-dev libflac-dev libogg-dev`
 * `export CC=clang-20 CXX=clang++-20`
 * Grab SFML 3 sources and build them:
@@ -53,6 +54,14 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 	cmake -DCMAKE_BUILD_TYPE=Release                         -DSFML_BUILD_WINDOW=OFF -DSFML_BUILD_GRAPHICS=OFF -DSFML_BUILD_NETWORK=OFF -DBUILD_SHARED_LIBS=ON -B BuildRelease -S . && cmake --build BuildRelease && cmake --install BuildRelease --prefix BuildInstall
 	```
 	This creates a cmake package.
+* Grab pugixml sources and build them:
+	```
+	unzip pugixml-1.15.zip
+	cd pugixml-1.15
+	mkdir BuildDebug BuildRelease BuildInstall
+	cmake -DCMAKE_BUILD_TYPE=Debug   -DPUGIXML_USE_POSTFIX=ON -B BuildDebug   -S . && cmake --build BuildDebug   && cmake --install BuildDebug   --prefix BuildInstall
+	cmake -DCMAKE_BUILD_TYPE=Release -DPUGIXML_USE_POSTFIX=ON -B BuildRelease -S . && cmake --build BuildRelease && cmake --install BuildRelease --prefix BuildInstall
+	```
 * Grab S3TC DXT decompression and pybind11, and put them somewhere.
 	* `git clone https://github.com/Benjamin-Dobell/s3tc-dxt-decompression.git`
 	* `git clone --depth 1 --branch v2.9.2 https://github.com/pybind/pybind11.git`
@@ -72,7 +81,7 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 	```
 	cmake -DCMAKE_BUILD_TYPE=Release            \
 		-DPYBIND11_INC_DIR=~/pybind11/include                              \
-		-DCMAKE_PREFIX_PATH="~/SFML-3.0.1/BuildInstall;~/python27-install;~/nfd-build/install" \
+		-DCMAKE_PREFIX_PATH="~/SFML-3.0.2/BuildInstall;~/pugixml-1.15/BuildInstall;~/python27-install;~/nfd-build/install" \
 		-DS3TC_DIR=~/s3tc-dxt-decompression                                \
 		-DCMAKE_LINKER_TYPE=MOLD                                           \
 		-DENABLE_NFD=ON                                                    \

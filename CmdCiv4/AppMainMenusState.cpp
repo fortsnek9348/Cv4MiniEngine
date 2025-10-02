@@ -46,7 +46,7 @@ namespace
 			text << L"    SFML 3: https://www.sfml-dev.org/\n";
 			text << L"    pybind11: https://github.com/pybind/pybind11/releases/tag/v2.9.2\n";
 			text << L"    Python 2.7: https://www.python.org/ftp/python/2.7.18/\n";
-			text << L"    tinyxml2: https://github.com/leethomason/tinyxml2\n";
+			text << L"    pugixml: https://github.com/zeux/pugixml\n";
 			text << L"    STB DXT compression: https://github.com/nothings/stb/tree/master\n";
 			text << L"    DXT decompression: https://github.com/Benjamin-Dobell/s3tc-dxt-decompression\n";
 			text << L"    Save file compression: https://zlib.net/\n";
