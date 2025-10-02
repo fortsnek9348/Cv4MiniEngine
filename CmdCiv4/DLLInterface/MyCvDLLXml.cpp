@@ -1,6 +1,7 @@
 #include "MyCvDLLXml.h"
 #include "../CvVFS.h"
 #include "../Common.h"
+#include "../CivIni.h"
 
 #include <CommonStuff/StringConversion.h>
 
@@ -15,7 +16,8 @@
 #include <iostream>
 #include <cerrno>
 #include <string_view>
-#include <fstream>
+#include <filesystem>
+
 
 class FXml
 {
@@ -55,11 +57,38 @@ FXmlSchemaCache* MyCvDLLXml::CreateFXmlSchemaCache()
 	return nullptr;
 }
 
+/*
+#include <fstream>
+#include <mutex>
+
+static void checkFileHasUtf8ExtensionBytes(const std::filesystem::path& path)
+{
+	std::ifstream file(path);
+	std::ostringstream buffer;
+	buffer << file.rdbuf();
+	const size_t numUtf8ExtBytes = std::ranges::count_if(buffer.view(), [](unsigned char c) { return 0x80 <= c && c < 0xA0; });
+	if (numUtf8ExtBytes)
+		std::wclog << L"WARNING: " << path << " contains characters that are Windows-1252 but not ISO-8859-1 (UTF-8 extension bytes)." << std::endl;
+}*/
+
 bool MyCvDLLXml::LoadXml(FXml* xml, const TCHAR* pszXmlFile)
 {
 	//return xml->doc.LoadFile(gVFS->resolve(pszXmlFile).string().c_str()) == tinyxml2::XML_SUCCESS;
 
-	const std::wstring wpath = gVFS->resolve(pszXmlFile).wstring();
+	//static bool kCheckAllXML = [] {
+	//	for (const std::filesystem::directory_entry& dirEntry : std::filesystem::recursive_directory_iterator(
+	//		gCivilizationIVIni.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L""),
+	//		std::filesystem::directory_options::follow_directory_symlink
+	//	))
+	//	{
+	//		if (heck::ci_wstring_view(dirEntry.path().extension().wstring()) == L".xml")
+	//			checkFileHasUtf8ExtensionBytes(dirEntry.path());
+	//	}
+	//	return true;
+	//	}();
+
+	const std::filesystem::path& physPath = gVFS->resolve(pszXmlFile);
+	const std::wstring wpath = physPath.wstring();
 
 	std::wclog << L"Loading " << wpath << L"..." << std::endl;
 
@@ -68,14 +97,7 @@ bool MyCvDLLXml::LoadXml(FXml* xml, const TCHAR* pszXmlFile)
 	std::wclog << L"Status = " << std::to_underlying(result.status) << L", encoding = " << std::to_underlying(result.encoding) << std::endl;
 
 	// If you want to check whether any XML files contain potential Windows-1252.
-	{
-		std::ifstream file(wpath);
-		std::ostringstream buffer;
-		buffer << file.rdbuf();
-		const size_t numUtf8ExtBytes = std::ranges::count_if(buffer.view(), [](unsigned char c) { return 0x80 <= c && c < 0xA0; });
-		if (numUtf8ExtBytes)
-			std::wclog << L"WARNING: XML file contains characters that are Windows-1252 but not ISO-8859-1 (UTF-8 extension bytes)." << std::endl;
-	}
+	//checkFileHasUtf8ExtensionBytes(physPath);
 
 	return result.status == pugi::status_ok;
 }
