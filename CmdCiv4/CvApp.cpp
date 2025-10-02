@@ -204,7 +204,7 @@ void CvApp::serialise(FFile<StdRawBinaryStream>& file) const
 	//static constexpr uint32_t kU32Unk1 = 1;
 
 	file.Write(gGlobals.getDefineINT("SAVE_VERSION"));
-	file.WriteString(gVFS->getModRelPathString());
+	file.WriteString(heck::toAsciiString(gVFS->getModRelPathString()));
 	file.WriteString(std::string()); // modMd5Hash
 	file.Write(kU32Unk0);
 	file.WriteString(std::string()); // versionStr
