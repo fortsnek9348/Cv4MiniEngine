@@ -4643,96 +4643,103 @@ void CvCityAI::AI_updateRouteToCity()
 #ifdef ENABLE_GAMECOREDLL_ENHANCEMENTS
 	if (gGlobals.enhancedDLLConfig[EEnhancedDLLConfigOption::Faster_CvCityAI_AI_updateRouteToCity])
 	{
-		// Necessarily, because the first unreachable city is what we're looking for, most cities will be pathed to anyway, and potentially visiting the whole map.
-		// And as this is only a reachability query, we can just do a flood fill algorithm on a bitmap. Nice and fast.
-		// Be sure to return the exact same city too.
+		// If the player can't build any routes, then calcRouteValid always returns true at the start, causing a whole map visit for every player.
+		// This is rather slow, and because the player can't build routes, let's just leave pBestCity as null.
+		if (gGlobals.enhancedDLLConfig[EEnhancedDLLConfigOption::GeneralFixes]
+			? GET_PLAYER(getOwnerINLINE()).getBestRoute() != NO_ROUTE
+			: true)
+		{
+			// Necessarily, because the first unreachable city is what we're looking for, most cities will be pathed to anyway, and potentially visiting the whole map.
+			// And as this is only a reachability query, we can just do a flood fill algorithm on a bitmap. Nice and fast.
+			// Be sure to return the exact same city too.
 
-		// NOTE: CPU time is almost entirely getBestRoute.
+			// NOTE: CPU time is almost entirely getBestRoute.
 
-		const CvMap& map = GC.getMapINLINE();
+			const CvMap& map = GC.getMapINLINE();
 
-		// FAStar spec:
-		// gDLL->getFAStarIFace()->Initialize(&GC.getRouteFinder(), getGridWidthINLINE(), getGridHeightINLINE(), isWrapXINLINE(), isWrapYINLINE(),
-		// 	nullptr, nullptr, nullptr, // dest valid, heuristic, cost
-		// 	routeValid, // validFunc
-		// 	nullptr, nullptr, nullptr); // notify child, notify list, data
+			// FAStar spec:
+			// gDLL->getFAStarIFace()->Initialize(&GC.getRouteFinder(), getGridWidthINLINE(), getGridHeightINLINE(), isWrapXINLINE(), isWrapYINLINE(),
+			// 	nullptr, nullptr, nullptr, // dest valid, heuristic, cost
+			// 	routeValid, // validFunc
+			// 	nullptr, nullptr, nullptr); // notify child, notify list, data
 
-		const heck::ivec2 origin = GiganticMapsOptimisationsLib::getPlotCoord(*plot());
+			const heck::ivec2 origin = GiganticMapsOptimisationsLib::getPlotCoord(*plot());
 
-		const auto calcRouteValid = [&map, ePlayer = getOwnerINLINE(), teamI = GET_PLAYER(getOwnerINLINE()).getTeam(), origin](heck::ivec2 coord) {
-			if (coord == origin)
-			{
-				return true;
-			}
-
-			const CvPlot* const pNewPlot = map.plotSorenINLINE(coord.x, coord.y);
-
-			if (!pNewPlot->isOwned() || pNewPlot->getTeam() == teamI)
-			{
-				if (pNewPlot->getRouteType() == GET_PLAYER(ePlayer).getBestRoute(pNewPlot))
+			const auto calcRouteValid = [&map, ePlayer = getOwnerINLINE(), teamI = GET_PLAYER(getOwnerINLINE()).getTeam(), origin](heck::ivec2 coord) {
+				if (coord == origin)
 				{
 					return true;
 				}
-			}
 
-			return false;
-			};
+				const CvPlot* const pNewPlot = map.plotSorenINLINE(coord.x, coord.y);
 
-		const GiganticMapsOptimisationsLib::CivMapGeometry mapGeom(map);
-		GiganticMapsOptimisationsLib::DynamicBitmap2D reachable(mapGeom.dim);
-		std::vector<heck::i16vec2> stack{ origin };
-		reachable[origin] = true;
-
-		constexpr int kNumAdj = std::size(heck::kAdj);
-
-		while (!stack.empty())
-		{
-			const heck::ivec2 coord = stack.back();
-			stack.pop_back();
-
-			for (int adjI = 0; adjI < kNumAdj; ++adjI)
-			{
-				if (const auto optToCoord = mapGeom.tryCanonicalise(coord + heck::kAdj[adjI]))
+				if (!pNewPlot->isOwned() || pNewPlot->getTeam() == teamI)
 				{
-					if (calcRouteValid(*optToCoord) && !reachable[*optToCoord])
+					if (pNewPlot->getRouteType() == GET_PLAYER(ePlayer).getBestRoute(pNewPlot))
 					{
-						reachable[*optToCoord] = true;
-						stack.push_back(*optToCoord);
+						return true;
+					}
+				}
+
+				return false;
+				};
+
+			const GiganticMapsOptimisationsLib::CivMapGeometry mapGeom(map);
+			GiganticMapsOptimisationsLib::DynamicBitmap2D reachable(mapGeom.dim);
+			std::vector<heck::i16vec2> stack{ origin };
+			reachable[origin] = true;
+
+			constexpr int kNumAdj = std::size(heck::kAdj);
+
+			while (!stack.empty())
+			{
+				const heck::ivec2 coord = stack.back();
+				stack.pop_back();
+
+				for (int adjI = 0; adjI < kNumAdj; ++adjI)
+				{
+					if (const auto optToCoord = mapGeom.tryCanonicalise(coord + heck::kAdj[adjI]))
+					{
+						if (calcRouteValid(*optToCoord) && !reachable[*optToCoord])
+						{
+							reachable[*optToCoord] = true;
+							stack.push_back(*optToCoord);
+						}
 					}
 				}
 			}
-		}
 
-		for (iI = 0; iI < MAX_PLAYERS; iI++)
-		{
-			if (GET_PLAYER((PlayerTypes)iI).getTeam() == getTeam())
+			for (iI = 0; iI < MAX_PLAYERS; iI++)
 			{
-				for (pLoopCity = GET_PLAYER((PlayerTypes)iI).firstCity(&iLoop); pLoopCity != nullptr; pLoopCity = GET_PLAYER((PlayerTypes)iI).nextCity(&iLoop))
+				if (GET_PLAYER((PlayerTypes)iI).getTeam() == getTeam())
 				{
-					if (pLoopCity != this)
+					for (pLoopCity = GET_PLAYER((PlayerTypes)iI).firstCity(&iLoop); pLoopCity != nullptr; pLoopCity = GET_PLAYER((PlayerTypes)iI).nextCity(&iLoop))
 					{
-						if (pLoopCity->area() == area())
+						if (pLoopCity != this)
 						{
-							if (!reachable[{ pLoopCity->getX_INLINE(), pLoopCity->getY_INLINE() }])
+							if (pLoopCity->area() == area())
 							{
-								iValue = plotDistance(getX_INLINE(), getY_INLINE(), pLoopCity->getX_INLINE(), pLoopCity->getY_INLINE());
-
-								if (iValue < iBestValue)
+								if (!reachable[{ pLoopCity->getX_INLINE(), pLoopCity->getY_INLINE() }])
 								{
-									iBestValue = iValue;
-									pBestCity = pLoopCity;
+									iValue = plotDistance(getX_INLINE(), getY_INLINE(), pLoopCity->getX_INLINE(), pLoopCity->getY_INLINE());
+
+									if (iValue < iBestValue)
+									{
+										iBestValue = iValue;
+										pBestCity = pLoopCity;
+									}
 								}
 							}
 						}
 					}
-				}
 
-				// Just checking...
-				// But careful, because this is called in parallel! You'd trash FAStar state now.
-				//const CvCity* const ourCitySel = pBestCity;
-				//originalFunc();
-				//if (ourCitySel != pBestCity)
-				//	std::abort();
+					// Just checking...
+					// But careful, because this is called in parallel! You'd trash FAStar state now.
+					//const CvCity* const ourCitySel = pBestCity;
+					//originalFunc();
+					//if (ourCitySel != pBestCity)
+					//	std::abort();
+				}
 			}
 		}
 	}
