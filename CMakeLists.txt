@@ -320,3 +320,4 @@ else()
 endif()
 
 install(FILES "LICENSE.txt" DESTINATION .)
+install(FILES "README.md" DESTINATION .)
