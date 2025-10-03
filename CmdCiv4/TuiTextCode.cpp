@@ -1,4 +1,4 @@
-#include "TuiTextCode.h"
+﻿#include "TuiTextCode.h"
 #include "CvTranslator.h"
 #include "Common.h"
 #include "CvApp.h"
@@ -355,7 +355,86 @@ namespace
 					// Image tags. Used in the great general unit attach dialog.
 					//tagContents.remove_prefix(std::wstring_view(L"link=").size());
 
-					write(L"<img>");
+					tagContents.remove_prefix(4);
+					const size_t spaceI = std::min(tagContents.find(L' '), tagContents.size());
+					const std::wstring_view imgSpec(tagContents.substr(0, spaceI));
+					std::wstring_view path;
+					if (imgSpec.starts_with(L','))
+					{
+						const size_t atlasStart = std::min(imgSpec.find(L',', 1), imgSpec.size()) + 1;
+						path = imgSpec.substr(atlasStart);
+					}
+					else
+						path = imgSpec;
+
+					static const std::unordered_map<std::wstring_view, std::wstring_view> kImgMap{
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,8,2", L"✶" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,1,6", L"✶" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,2,6", L"✶" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,6", L"✶" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,6", L"✶" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,2,5", L"cover" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,5", L"shock" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,5", L"pinch" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,1,2", L"form" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,1,5", L"charge" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,1", L"ambush" }, // Ambush
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,1", L"≈" }, // AMPH
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,2,4", L"march" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,8,1", L"blitz" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,1,3", L"commando" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,4", L"+" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,4", L"+" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,5", L"H1" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,6,5", L"H2" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,7,5", L"H3" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,6,6", L"F1" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,7,6", L"F2" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,8,6", L"F3" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,2", L">Ξ<" }, // CR
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,6,2", L">Ξ<" }, // CR
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,7,2", L">Ξ<" }, // CR
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,2,2", L"Ξ+" }, // CG
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,2", L"Ξ+" }, // CG
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,2", L"Ξ+" }, // CG
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,2,3", L"»" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,3,3", L"»" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,3", L"»" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,3", L"»" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,4,1", L"/ϡ" }, // Barrage
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,1", L"/ϡ" }, // Barrage
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,6,1", L"/ϡ" }, // Barrage
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,1,1", L"/Ξ" }, // Accuracy
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,6,3", L"↑+↓" }, // flanking 1
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,7,3", L"↑+↓" }, // flanking 2
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,6", L"ʃ+" }, // sentry
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,5,4", L"↔" },
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,7,4", L"→" }, // nav 1
+						{ L"Art/Interface/Buttons/Promotions_Atlas.dds,8,4", L"→" }, // nav 2
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,5,10", L"✶ϡ✶" }, // PROMOTION_LEADER
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,5,16", L"↑ϡ↑" }, // PROMOTION_LEADERSHIP
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,6,16", L"→*" }, // PROMOTION_TACTICS
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,6,15", L"✶" }, // PROMOTION_COMBAT6
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,7,16", L"☻→" }, // PROMOTION_MORALE
+						{ L"Art/Interface/Buttons/Warlords_Atlas_1.dds,8,16", L"+" }, // PROMOTION_MEDIC3
+						{ L"Art/Interface/Buttons/Beyond_the_Sword_Atlas.dds,1,15", L"○+" }, // PROMOTION_RANGE1
+						{ L"Art/Interface/Buttons/Beyond_the_Sword_Atlas.dds,2,15", L"○+" }, // PROMOTION_RANGE2
+						{ L"Art/Interface/Buttons/Beyond_the_Sword_Atlas.dds,3,15", L"ϔ" }, // PROMOTION_INTERCEPTION1
+						{ L"Art/Interface/Buttons/Beyond_the_Sword_Atlas.dds,4,15", L"ϔ" }, // PROMOTION_INTERCEPTION2
+						{ L"Art/Interface/Buttons/Beyond_the_Sword_Atlas.dds,5,15", L"↑ϔ↓" }, // PROMOTION_ACE
+						{ L"Art/Interface/Buttons/NextWar_Atlas.dds,7,1", L"BIO" }, // PROMOTION_ANTIBIOLOGICAL
+						{ L"Art/Interface/Buttons/NextWar_Atlas.dds,8,1", L"NANO" }, // PROMOTION_NANOIDS
+					};
+
+					if (const auto it = kImgMap.find(path); it != kImgMap.end())
+					{
+						write(L"[");
+						write(it->second);
+						write(L"]");
+					}
+					else
+						write(L"<img>");
+
 					tagStack.push_back(L"img");
 				}
 				else
