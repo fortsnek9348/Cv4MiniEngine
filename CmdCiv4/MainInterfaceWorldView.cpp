@@ -193,9 +193,10 @@ namespace
 			constexpr int additionalWidth = 3;
 			billboardWidth = std::max(billboardWidth, plotInnerRect.size().x + additionalWidth * 2);
 
-			setRect(iaabb2::sized({ ((plotInnerRect.min.x + plotInnerRect.max.x) - billboardWidth) / 2, plotInnerRect.max.y - 1 }, { billboardWidth, 3 })
-				.shrunk({ -kBorderThickness, -kBorderThickness })
-			);
+			iaabb2 innerRect = iaabb2::sized({ ((plotInnerRect.min.x + plotInnerRect.max.x) - billboardWidth) / 2, plotInnerRect.max.y - 1 }, { billboardWidth, 3 });
+			if (isSelected)
+				innerRect = innerRect.expanded(kBorderThickness);
+			setRect(innerRect);
 		}
 
 		virtual void drawThis(ivec2 offset, hecktui::Framebuffer& fb) override
@@ -207,9 +208,10 @@ namespace
 			iaabb2 rect = (offset + getRect());
 
 			if (isSelected)
+			{
 				fb.drawBox(rect, EBorderStyle::Rounded, { .text = EColour::White, .back = EColour::Black });
-
-			rect = rect.shrunk({ kBorderThickness, kBorderThickness });
+				rect = rect.shrunk(kBorderThickness);
+			}
 
 			const iaabb2 oldStencilRect = fb.intersectScissorRect(rect);
 
