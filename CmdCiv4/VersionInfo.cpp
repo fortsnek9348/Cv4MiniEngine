@@ -1,3 +1,10 @@
 #include "VersionInfo.h"
 
-constexpr std::wstring_view (::kEngineVersionString) = L"0.9";
+#define CV4MINIENGINE_STR(s) #s
+#define CV4MINIENGINE_MAKE_VERSIONSTRING(s) L"" CV4MINIENGINE_STR(s)
+
+#ifndef CV4MINIENGINE_VERSION_STRING
+#define CV4MINIENGINE_VERSION_STRING dev
+#endif
+
+constexpr std::wstring_view(::kEngineVersionString) = CV4MINIENGINE_MAKE_VERSIONSTRING(CV4MINIENGINE_VERSION_STRING);

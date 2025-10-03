@@ -249,6 +249,30 @@ if (ENABLE_BUILD_ENGINE)
 		target_compile_definitions(Cv4MiniEngine PRIVATE CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER=1)
 	endif()
 
+	# Get version string from Git
+	# https://dev.to/khozaei/automating-semver-with-git-and-cmake-2hji
+	# https://stackoverflow.com/questions/1704907/how-can-i-get-my-c-code-to-automatically-print-out-its-git-version-hash/12368262#12368262
+	find_package(Git QUIET OPTIONAL)
+	if(Git_FOUND)
+		execute_process(
+			COMMAND ${GIT_EXECUTABLE} describe --abbrev=4 --dirty --always --tags
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			OUTPUT_VARIABLE GIT_TAG
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+			RESULT_VARIABLE GIT_RESULT
+		)
+
+		if(NOT GIT_RESULT EQUAL 0)
+			message(WARNING "Failed to get git tag")
+			return()
+		endif()
+
+		message(STATUS "Using git version string: ${GIT_TAG}")
+		set_source_files_properties("CmdCiv4/VersionInfo.cpp" PROPERTIES COMPILE_DEFINITIONS "CV4MINIENGINE_VERSION_STRING=${GIT_TAG}")
+	else()
+		message(WARNING "Git not found. Can't embed version string.")
+	endif()
+
 	# What is this. "RPATH"? Why can't you just search for libs in the current directory?
 	set_target_properties(Cv4MiniEngine PROPERTIES INSTALL_RPATH .)
 	set_target_properties(HeckTUIInputTest PROPERTIES INSTALL_RPATH .)
