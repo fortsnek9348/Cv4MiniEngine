@@ -19,7 +19,11 @@ option(ENABLE_GAMECOREDLL_ENHANCEMENTS "Compile in the DLL enhancements that can
 option(ENABLE_AVX512 "Compile everything with AVX512/x86-64-v4 support." OFF)
 option(ENABLE_NFD "Use native file dialogs via nativefiledialog-extended. Don't enable on pure console systems." OFF)
 
-# Break glass in case of emergancy
+# Doesn't work for some reason
+#option(ENABLE_PGO_GENERATE "Enable DLL PGO instrumentation." OFF)
+#option(ENABLE_PGO_USE "Enable DLL PGO optimisation using instrumentation output." OFF)
+
+# Break glass in case of emergency
 #add_compile_options(-fsanitize=address -static-libasan)
 #add_link_options(-fsanitize=address -static-libasan)
 # Then, put "interceptor_via_lib:libpython2.7" in a text file and run with ASAN_OPTIONS=suppressions=supp.txt
@@ -136,6 +140,12 @@ if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 	target_compile_options(CvGameCoreDLL PRIVATE /bigobj)
 else()
 	target_compile_definitions(CvGameCoreDLL PUBLIC register=)
+
+	#if (ENABLE_PGO_GENERATE)
+	#	target_compile_options(CvGameCoreDLL PRIVATE -fprofile-instr-generate)
+	#elseif(ENABLE_PGO_USE)
+	#	target_compile_options(CvGameCoreDLL PRIVATE -fprofile-instr-use=CvGameCoreDLL.profdata)
+	#endif()
 endif()
 target_compile_definitions(CvGameCoreDLL PRIVATE _USRDLL=1)
 target_compile_definitions(CvGameCoreDLL PUBLIC PYBIND11_EXPORT=)
@@ -252,7 +262,7 @@ if (ENABLE_BUILD_ENGINE)
 	# Get version string from Git
 	# https://dev.to/khozaei/automating-semver-with-git-and-cmake-2hji
 	# https://stackoverflow.com/questions/1704907/how-can-i-get-my-c-code-to-automatically-print-out-its-git-version-hash/12368262#12368262
-	find_package(Git QUIET OPTIONAL)
+	find_package(Git QUIET)
 	if(Git_FOUND)
 		execute_process(
 			COMMAND ${GIT_EXECUTABLE} describe --abbrev=4 --dirty --always --tags

@@ -34,10 +34,10 @@
       <FunctionLevelLinking Condition="$(Configuration.StartsWith('Release'))">true</FunctionLevelLinking>
       <DisableSpecificWarnings>4251;4324;4371;4435;4505;4514;4623;4625;4626;4668;4686;4774;4820;5026;5027;5045;5244;5033</DisableSpecificWarnings>
       <!--<PreprocessorDefinitions Condition="$(Configuration) == 'Debug'">_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
-	  <AdditionalOptions Condition="$(UseClangCl) == 'True'">/utf-8 /clang:-Wno-extra-qualification /clang:-Wno-undefined-inline /showFilenames %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="$(UseClangCl) == 'True'">/utf-8 /clang:-Wno-extra-qualification /clang:-Wno-undefined-inline -Wno-register /showFilenames %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="$(UseClangCl) != 'True'">/Zc:externConstexpr /Zc:throwingNew /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <UseStructuredOutput>false</UseStructuredOutput>
     </ClCompile>
