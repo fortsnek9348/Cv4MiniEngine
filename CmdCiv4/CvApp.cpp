@@ -98,6 +98,11 @@ void CvApp::start(const AppStartupConfig& config)
 	//mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"Next War\\");
 	gVFS = mVFS.get();
 
+	// Add defaults.
+	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
+	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
+	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_CheatCode, "");
+
 	saveCivilizationIniIfChanged();
 
 	audioSystem->loadXmlDefs();

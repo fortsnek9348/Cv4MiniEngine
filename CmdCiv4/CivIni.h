@@ -7,8 +7,8 @@ extern const IniDocKey kCivilizationIVIniSection_CONFIG;
 extern const IniDocKey kCivilizationIVIniProp_MapRandSeed;
 extern const IniDocKey kCivilizationIVIniProp_SyncRandSeed;
 extern const IniDocKey kCivilizationIVIniProp_CheatCode;
-extern const IniDocKey kCivilizationIVIniSection_GAME;
 
+extern const IniDocKey kCivilizationIVIniSection_GAME;
 extern const IniDocKey kCivilizationIVIniProp_GameName;
 extern const IniDocKey kCivilizationIVIniProp_WorldSize;
 extern const IniDocKey kCivilizationIVIniProp_Climate;
