@@ -15,7 +15,9 @@ Cv4MiniEngine depends on:
 
 Cv4MiniEngine also depends on the FAStar repository, as a submodule.
 
-On Linux, you will likely need to build SFML 3, Python 2.7, and NFD. Remember to build AND install (install to anywhere).
+On Linux, you will likely need to build SFML 3, Python 2.7, and NFD.
+
+When building dependencies with cmake, remember to build AND install (install to anywhere).
 
 Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 
@@ -26,7 +28,7 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 * AVX2/AVX512 setting is in the common property sheet.
 * Configuration is done through the `ExternalDependencies.props` file. Change the "user macros" to point to the required directories. This can be done within the IDE. Further tweaks may be required if your lib installs have a different layout.
 	* Note that the S3TC source file is referenced directly using paths from `ExternalDependencies.props`.
-* If you get an ambiguous function error in pybind11 pointing to `foward_like`, just patch the headers to rename the function.
+* If you get an ambiguous function error in pybind11 pointing to `forward_like`, just patch the headers to rename the function.
 
 #### Windows CMake
 
