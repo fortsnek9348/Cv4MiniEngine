@@ -11,7 +11,7 @@ using heck::range;
 
 constexpr int kDXT1BlockSize = 8;
 
-std::vector<uint8_t> (::encodeDXT1)(hecktui::ivec2 dim, std::span<const std::array<uint8_t, 3>> src)
+std::vector<uint8_t> cvengine::encodeDXT1(hecktui::ivec2 dim, std::span<const std::array<uint8_t, 3>> src)
 {
 	assert(dim.x % 4 == 0 && dim.y % 4 == 0);
 
@@ -41,7 +41,7 @@ std::vector<uint8_t> (::encodeDXT1)(hecktui::ivec2 dim, std::span<const std::arr
 	return out;
 }
 
-std::vector<std::array<uint8_t, 3>> (::decodeDXT1)(hecktui::ivec2 dim, std::span<const uint8_t> src)
+std::vector<std::array<uint8_t, 3>> cvengine::decodeDXT1(hecktui::ivec2 dim, std::span<const uint8_t> src)
 {
 	assert(dim.x % 4 == 0 && dim.y % 4 == 0);
 

@@ -2237,12 +2237,12 @@ void CvDLLWidgetData::parseActionHelp(CvWidgetDataStruct &widgetDataStruct, CvWS
 						}
 
 						CvWStringBuffer szBonusList;
-						bool bValid = false;
+						bool bValid2 = false;
 						bool bFirst = true;
 						for (int i = 0; i < GC.getNUM_CORPORATION_PREREQ_BONUSES(); ++i)
 						{
-							BonusTypes eBonus = (BonusTypes)GC.getCorporationInfo(eCorporation).getPrereqBonus(i);
-							if (NO_BONUS != eBonus)
+							BonusTypes eBonus2 = (BonusTypes)GC.getCorporationInfo(eCorporation).getPrereqBonus(i);
+							if (NO_BONUS != eBonus2)
 							{
 								if (!bFirst)
 								{
@@ -2252,17 +2252,17 @@ void CvDLLWidgetData::parseActionHelp(CvWidgetDataStruct &widgetDataStruct, CvWS
 								{
 									bFirst = false;
 								}
-								szBonusList.append(GC.getBonusInfo(eBonus).getDescription());
+								szBonusList.append(GC.getBonusInfo(eBonus2).getDescription());
 
-								if (pMissionCity->hasBonus(eBonus))
+								if (pMissionCity->hasBonus(eBonus2))
 								{
-									bValid = true;
+									bValid2 = true;
 									break;
 								}
 							}
 						}
 
-						if (!bValid)
+						if (!bValid2)
 						{
 							szBuffer.append(NEWLINE);
 							szBuffer.append(gDLL->getText("TXT_KEY_ACTION_CORPORATION_NO_RESOURCES", pMissionCity->getNameKey(), szBonusList.getCString()));

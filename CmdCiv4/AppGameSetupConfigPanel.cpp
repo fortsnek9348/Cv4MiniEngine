@@ -16,6 +16,9 @@
 
 namespace tui = hecktui;
 using heck::range;
+using cvengine::MyComboBox;
+using cvengine::MyCheckBox;
+using cvengine::strictStringToUInt;
 
 static constexpr tui::EComboboxStyle kSettingsComboboxStyle = tui::EComboboxStyle::Bulky;
 

@@ -9,13 +9,26 @@
 
 namespace heck::simd
 {
+#ifdef HECK_USING_GCC_SIMD
+	template<class T> struct GccAvx512RegType;
+	template<> struct GccAvx512RegType<std:: int8_t> : std::type_identity<__v64qi> {};
+	template<> struct GccAvx512RegType<std::uint8_t> : std::type_identity<__v64qu> {};
+	template<> struct GccAvx512RegType<std:: int16_t> : std::type_identity<__v32hi> {};
+	template<> struct GccAvx512RegType<std::uint16_t> : std::type_identity<__v32hu> {};
+	template<> struct GccAvx512RegType<std:: int32_t> : std::type_identity<__v16si> {};
+	template<> struct GccAvx512RegType<std::uint32_t> : std::type_identity<__v16su> {};
+	template<> struct GccAvx512RegType<std:: int64_t> : std::type_identity<__v8di> {};
+	template<> struct GccAvx512RegType<std::uint64_t> : std::type_identity<__v8du> {};
+#endif
+
 	template<IntegerType T>
 	struct RegOps<Avx512IntegerReg, T>
 	{
 		using Reg = Avx512IntegerReg;
+		using CompilerRegType = __m512i;
 		static constexpr size_t kNumElements = sizeof(Reg) / sizeof(T);
 		static constexpr size_t kHalfNumElements = kNumElements / 2;
-		static_assert(sizeof(Reg) == sizeof(__m512i));
+		static_assert(sizeof(Reg) == sizeof(CompilerRegType));
 
 		static constexpr RegTraits kTraits{
 			.supportsGather = true,
@@ -133,16 +146,14 @@ namespace heck::simd
 				r.bits.m512i_u16[i] = value;
 			else if constexpr (sizeof(T) == 4)
 				r.bits.m512i_u32[i] = value;
-#else
-			if constexpr (sizeof(T) == 1)
-				reinterpret_cast<__v64qu&>(r.bits)[i] = value;
-			else if constexpr (sizeof(T) == 2)
-				reinterpret_cast<__v32hu&>(r.bits)[i] = value;
-			else if constexpr (sizeof(T) == 4)
-				reinterpret_cast<__v16su&>(r.bits)[i] = value;
-#endif
 			else
 				static_assert(false);
+#else
+			auto temp = reinterpret_cast<GccAvx512RegType<T>::type>(r.bits);
+			temp[i] = value;
+			r.bits = reinterpret_cast<CompilerRegType>(temp);
+#endif
+			
 		}
 
 		static T get(Reg r, size_t i)
@@ -154,16 +165,11 @@ namespace heck::simd
 				return r.bits.m512i_u16[i];
 			else if constexpr (sizeof(T) == 4)
 				return r.bits.m512i_u32[i];
-#else
-			if constexpr (sizeof(T) == 1)
-				return reinterpret_cast<const __v64qu&>(r.bits)[i];
-			else if constexpr (sizeof(T) == 2)
-				return reinterpret_cast<const __v32hu&>(r.bits)[i];
-			else if constexpr (sizeof(T) == 4)
-				return reinterpret_cast<const __v16su&>(r.bits)[i];
-#endif
 			else
 				static_assert(false);
+#else
+			return reinterpret_cast<GccAvx512RegType<T>::type>(r.bits)[i];
+#endif
 		}
 
 		static Reg add(Reg a, Reg b)

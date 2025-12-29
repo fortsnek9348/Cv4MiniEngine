@@ -924,7 +924,7 @@ TechTypes getDiscoveryTech(UnitTypes eUnit, PlayerTypes ePlayer)
 }
 
 
-void ::setListHelp(wchar_t* szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
+void setListHelp(wchar_t* szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
 {
 	if (bFirst)
 	{
@@ -938,7 +938,7 @@ void ::setListHelp(wchar_t* szBuffer, std::wstring_view szStart, std::wstring_vi
 	wcsncat(szBuffer, szItem.data(), szItem.size());
 }
 
-void ::setListHelp(CvWString& szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
+void setListHelp(CvWString& szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
 {
 	if (bFirst)
 	{
@@ -952,7 +952,7 @@ void ::setListHelp(CvWString& szBuffer, std::wstring_view szStart, std::wstring_
 	szBuffer += szItem;
 }
 
-void ::setListHelp(CvWStringBuffer& szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
+void setListHelp(CvWStringBuffer& szBuffer, std::wstring_view szStart, std::wstring_view szItem, std::wstring_view szSeparator, bool bFirst)
 {
 	if (bFirst)
 	{

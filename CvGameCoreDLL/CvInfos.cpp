@@ -5177,14 +5177,14 @@ bool CvSpecialUnitInfo::isCarrierUnitAIType(int i) const
 {
 	FAssertMsg(i < NUM_UNITAI_TYPES, "Index out of bounds");
 	FAssertMsg(i > -1, "Index out of bounds");
-	return m_pbCarrierUnitAITypes ? m_pbCarrierUnitAITypes[i] : -1;
+	return m_pbCarrierUnitAITypes ? m_pbCarrierUnitAITypes[i] : true;
 }
 
 int CvSpecialUnitInfo::getProductionTraits(int i) const		
 {
 	FAssertMsg(i < GC.getNumTraitInfos(), "Index out of bounds");
 	FAssertMsg(i > -1, "Index out of bounds");
-	return m_piProductionTraits ? m_piProductionTraits[i] : -1;
+	return m_piProductionTraits ? m_piProductionTraits[i] : true;
 }
 
 bool CvSpecialUnitInfo::read(CvXMLLoadUtility* pXML)

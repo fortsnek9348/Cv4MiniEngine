@@ -44,7 +44,7 @@ static void resetTerminal()
 #ifdef _WIN32
 	fwrite(buf.data(), buf.size(), 1, stdout);
 #else
-	write(0, buf.data(), buf.size());
+	(void)write(0, buf.data(), buf.size());
 	
 	// Terminal non-canonical mode.
 	struct termios raw {};

@@ -6736,7 +6736,7 @@ void CvPlot::changePlayerCityRadiusCount(PlayerTypes eIndex, int iChange)
 CvPlotGroup* CvPlot::getPlotGroup(PlayerTypes ePlayer) const
 {
 	FAssertMsg(ePlayer >= 0, "eIndex is expected to be non-negative (invalid Index)");
-	FAssertMsg(ePlayer < MAX_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+	FAssertMsg(std::to_underlying(ePlayer) < MAX_PLAYERS, "ePlayer is expected to be within maximum bounds (invalid Index)");
 
 //#ifdef ENABLE_GAMECOREDLL_ENHANCEMENTS
 //	std::atomic_ref aiPlotGroupAtomic(m_aiPlotGroup);

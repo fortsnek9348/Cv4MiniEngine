@@ -2,10 +2,13 @@
 
 #include <string>
 
-struct [[nodiscard]] AppStartupConfig
+namespace cvengine
 {
-	std::wstring modRelPath;
-	std::wstring save;
-};
+	struct [[nodiscard]] AppStartupConfig
+	{
+		std::wstring modRelPath;
+		std::wstring save;
+	};
 
-AppStartupConfig parseCommandLine(int argc, const char * const * argv);
+	AppStartupConfig parseCommandLine(int argc, const char * const * argv);
+}

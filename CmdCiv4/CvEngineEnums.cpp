@@ -15,7 +15,7 @@ static auto cyenum(const pybind11::module& m, const char* name)
 	return e;
 }
 
-void CvEngineEnums::registerWithPython(pybind11::module& m)
+void cvengine::registerEnumsWithPython(pybind11::module& m)
 {
 #define R(x) value(#x, x)
 

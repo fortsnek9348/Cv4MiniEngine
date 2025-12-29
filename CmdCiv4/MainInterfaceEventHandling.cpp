@@ -55,7 +55,7 @@ namespace
 	}
 }
 
-bool ::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterface& interfaceController)
+bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterface& interfaceController)
 {
 	struct Handler
 	{
@@ -154,7 +154,7 @@ bool ::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterface& inter
 	return dispatch(e, Handler(interfaceController));
 }
 
-std::vector<int>(::buildListOfActionsToShow)()
+std::vector<int> cvengine::buildListOfActionsToShow()
 {
 	gGlobals.getGame().setupActionCache();
 	return range(gGlobals.getNumActionInfos()) | std::views::filter(isPlayableAction) | std::ranges::to<std::vector>();

@@ -7,7 +7,7 @@
 using namespace hecktui;
 
 //
-// /---------------------+---\
+// /---------------------+---\   [silence multi-line comment warning]
 // |Label                | v |
 // \---------------------+---/
 //

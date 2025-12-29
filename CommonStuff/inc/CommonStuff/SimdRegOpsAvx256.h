@@ -8,15 +8,29 @@
 #include "SimdAvx2Polyfills.h"
 
 #include <cassert>
+#include <cstdint>
 
 namespace heck::simd
 {
+#ifdef HECK_USING_GCC_SIMD
+	template<class T> struct GccAvx256RegType;
+	template<> struct GccAvx256RegType<std:: int8_t> : std::type_identity<__v32qi> {};
+	template<> struct GccAvx256RegType<std::uint8_t> : std::type_identity<__v32qu> {};
+	template<> struct GccAvx256RegType<std:: int16_t> : std::type_identity<__v16hi> {};
+	template<> struct GccAvx256RegType<std::uint16_t> : std::type_identity<__v16hu> {};
+	template<> struct GccAvx256RegType<std:: int32_t> : std::type_identity<__v8si> {};
+	template<> struct GccAvx256RegType<std::uint32_t> : std::type_identity<__v8su> {};
+	template<> struct GccAvx256RegType<std:: int64_t> : std::type_identity<__v4di> {};
+	template<> struct GccAvx256RegType<std::uint64_t> : std::type_identity<__v4du> {};
+#endif
+
 	template<IntegerType T>
 	struct RegOps<Avx256IntegerReg, T>
 	{
 		using Reg = Avx256IntegerReg;
+		using CompilerRegType = __m256i;
 		static constexpr int kNumElements = sizeof(Reg) / sizeof(T);
-		static_assert(sizeof(Reg) == sizeof(__m256i));
+		static_assert(sizeof(Reg) == sizeof(CompilerRegType));
 
 		static constexpr RegTraits kTraits{
 			.supportsGather = true,
@@ -203,16 +217,13 @@ namespace heck::simd
 				r.bits.m256i_u16[i] = value;
 			else if constexpr (sizeof(T) == 4)
 				r.bits.m256i_u32[i] = value;
-#else
-			if constexpr (sizeof(T) == 1)
-				reinterpret_cast<__v32qu&>(r.bits)[i] = value;
-			else if constexpr (sizeof(T) == 2)
-				reinterpret_cast<__v16hu&>(r.bits)[i] = value;
-			else if constexpr (sizeof(T) == 4)
-				reinterpret_cast<__v8su&>(r.bits)[i] = value;
-#endif
 			else
 				static_assert(false);
+#else
+			auto temp = reinterpret_cast<GccAvx256RegType<T>::type>(r.bits);
+			temp[i] = value;
+			r.bits = reinterpret_cast<CompilerRegType>(temp);
+#endif
 		}
 
 		static T get(Reg r, size_t i)
@@ -224,16 +235,11 @@ namespace heck::simd
 				return r.bits.m256i_u16[i];
 			else if constexpr (sizeof(T) == 4)
 				return r.bits.m256i_u32[i];
-#else
-			if constexpr (sizeof(T) == 1)
-				return reinterpret_cast<const __v32qu&>(r.bits)[i];
-			else if constexpr (sizeof(T) == 2)
-				return reinterpret_cast<const __v16hu&>(r.bits)[i];
-			else if constexpr (sizeof(T) == 4)
-				return reinterpret_cast<const __v8su&>(r.bits)[i];
-#endif
 			else
 				static_assert(false);
+#else
+			return reinterpret_cast<GccAvx256RegType<T>::type>(r.bits)[i];
+#endif
 		}
 
 		static Reg add(Reg a, Reg b)
@@ -490,24 +496,24 @@ namespace heck::simd
 						return polyfills::convertU32RangeDoubleToU32(a);
 					};
 
-				const auto convertTo512PD = [](__m256i a) -> __m512d {
-					if constexpr (std::is_signed_v<T>)
-						return _mm512_cvtepi32_pd(a);
-					else
-						return _mm512_cvtepu32_pd(a);
-				};
-
-				const auto convertFrom512PD = [](__m512d a) -> __m256i {
-					if constexpr (std::is_signed_v<T>)
-						return _mm512_cvttpd_epi32(a);
-					else
-						return _mm512_cvttpd_epu32(a);
-					};
-
 				using UOps = RegOps<Reg, std::make_unsigned_t<T>>;
 
 				if constexpr (kEnableAVX512)
 				{
+					const auto convertTo512PD = [](__m256i a) -> __m512d {
+						if constexpr (std::is_signed_v<T>)
+							return _mm512_cvtepi32_pd(a);
+						else
+							return _mm512_cvtepu32_pd(a);
+						};
+
+					const auto convertFrom512PD = [](__m512d a) -> __m256i {
+						if constexpr (std::is_signed_v<T>)
+							return _mm512_cvttpd_epi32(a);
+						else
+							return _mm512_cvttpd_epu32(a);
+					};
+
 					// Just use DP.
 					return { convertFrom512PD(_mm512_div_pd(convertTo512PD(a.bits), convertTo512PD(b.bits))) };
 				}

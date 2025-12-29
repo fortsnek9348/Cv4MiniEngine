@@ -11,9 +11,10 @@
 #include <unordered_set>
 
 class CvInitCore;
+
 struct SimplifiedInitCore;
 
-class AppGameSetupPlayerListPanel : public hecktui::Element, public IWindowChildEventHandler
+class AppGameSetupPlayerListPanel : public hecktui::Element, public cvengine::IWindowChildEventHandler
 {
 public:
 	explicit AppGameSetupPlayerListPanel(const CvInitCore& initCore);

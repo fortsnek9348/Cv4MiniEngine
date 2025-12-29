@@ -4,7 +4,7 @@
 
 #include <CyPlot.h>
 
-
+using cvengine::unimplementedPythonFunction;
 
 void CySign::registerWithPython(const pybind11::module& m)
 {
@@ -113,12 +113,12 @@ void CyEngine::addSign([[maybe_unused]] CyPlot plot, [[maybe_unused]] PlayerType
 
 void CyEngine::clearAreaBorderPlots([[maybe_unused]] int iLayer)
 {
-	cmdciv4::logDebug("Unimplemented.");
+	cvengine::logDebug("Unimplemented.");
 }
 
 void CyEngine::clearColoredPlots([[maybe_unused]] int iLayer)
 {
-	cmdciv4::logDebug("Unimplemented.");
+	cvengine::logDebug("Unimplemented.");
 }
 
 void CyEngine::fillAreaBorderPlot([[maybe_unused]] int plotX, [[maybe_unused]] int plotY, [[maybe_unused]] NiColorA color, [[maybe_unused]] int iLayer)

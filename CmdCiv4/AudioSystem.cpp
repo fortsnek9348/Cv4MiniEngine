@@ -24,6 +24,7 @@
 #include <random>
 
 using heck::range;
+using namespace cvengine;
 
 static constexpr bool kEnable = true;
 //static constexpr float kWorldSoundscapeVolume = 70.0f;
@@ -663,8 +664,7 @@ namespace
 						const size_t n = std::min<size_t>({ size_t(fadeInDurationSamples - newFadeState.samples), (size_t)fadeResolutionSamples, bufSamplesRemaining.size() / numChannels });
 						newFadeState.samples += (int)n;
 					}
-					else
-						;
+					// else, finished fade in
 				}
 				else
 				{
@@ -673,8 +673,7 @@ namespace
 						const size_t n = std::min<size_t>({ size_t(fadeOutDurationSamples - newFadeState.samples), (size_t)fadeResolutionSamples, bufSamplesRemaining.size() / numChannels });
 						newFadeState.samples += (int)n;
 					}
-					else // Finished fading out.
-						;
+					// else, finished fade out
 				}
 
 				if (fadeState.compare_exchange_weak(localFadeSate, newFadeState))
@@ -1047,9 +1046,8 @@ struct AudioSystem::Internals
 	{
 		const Soundscape& soundscape = xmlDefs.soundscapes[index];
 
-		PlayingSoundscape playingSoundscape{
-			.soundscapeId = index,
-		};
+		PlayingSoundscape playingSoundscape{};
+		playingSoundscape.soundscapeId = index;
 
 		for (const auto& element : soundscape.elements)
 		{

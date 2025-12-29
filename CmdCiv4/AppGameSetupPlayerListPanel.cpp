@@ -32,7 +32,7 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 	Element* const client = this; //getPanel();
 
 	const CvWString teamStr = MyCvDLLUtility::getInstance().getText(L"TXT_KEY_PITBOSS_TEAM");
-	const std::wstring randomStr = getRandomText();
+	const std::wstring randomStr = cvengine::getRandomText();
 
 	mNumPlayers = MAX_CIV_PLAYERS;
 
@@ -57,10 +57,10 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 
 
 
-		row.leader = std::make_shared<MyComboBox>(*this, tui::EComboboxStyle::Compact);
+		row.leader = std::make_shared<cvengine::MyComboBox>(*this, tui::EComboboxStyle::Compact);
 		client->addChild(row.leader);
 
-		row.civ = std::make_shared<MyComboBox>(*this, tui::EComboboxStyle::Compact);
+		row.civ = std::make_shared<cvengine::MyComboBox>(*this, tui::EComboboxStyle::Compact);
 		client->addChild(row.civ);
 
 		mPlayers.push_back(row);
@@ -189,7 +189,7 @@ void AppGameSetupPlayerListPanel::refillLeadersList(PlayerTypes player)
 	std::ranges::sort(std::views::zip(names, leaders));
 
 	leaders.insert(leaders.begin(), NO_LEADER);
-	names.insert(names.begin(), getRandomText());
+	names.insert(names.begin(), cvengine::getRandomText());
 
 	tui::Combobox& lst = *mPlayers[player].leader;
 	const LeaderHeadTypes selectedLeader = mPlayers[player].leaderListData.size() ? mPlayers[player].leaderListData[lst.getSelectionIndex()] : NO_LEADER;
@@ -219,7 +219,7 @@ void AppGameSetupPlayerListPanel::refillCivsList(PlayerTypes player)
 	std::ranges::sort(std::views::zip(names, civs));
 
 	civs.insert(civs.begin(), NO_CIVILIZATION);
-	names.insert(names.begin(), getRandomText());
+	names.insert(names.begin(), cvengine::getRandomText());
 
 	tui::Combobox& lst = *mPlayers[player].civ;
 	const CivilizationTypes selectedCiv = mPlayers[player].civListData.size() ? mPlayers[player].civListData[lst.getSelectionIndex()] : NO_CIVILIZATION;

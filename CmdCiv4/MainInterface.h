@@ -42,10 +42,13 @@ namespace hecktui
 	struct ConsoleEvent;
 }
 
-std::shared_ptr<hecktui::Element> buildMainInterfaceWorldViewComponent(WorldView& worldView);
+namespace cvengine
+{
+	std::shared_ptr<hecktui::Element> buildMainInterfaceWorldViewComponent(WorldView& worldView);
 
-//std::shared_ptr<hecktui::Element> createMainInterfaceRootElement();
+	//std::shared_ptr<hecktui::Element> createMainInterfaceRootElement();
 
-bool handleMainInterfaceConsoleEvent(const hecktui::ConsoleEvent&, CvInterface& interfaceController);
+	bool handleMainInterfaceConsoleEvent(const hecktui::ConsoleEvent&, CvInterface& interfaceController);
 
-std::vector<int> buildListOfActionsToShow();
+	std::vector<int> buildListOfActionsToShow();
+}

@@ -18,6 +18,7 @@
 #include <CommonStuff/range.h>
 
 using namespace hecktui;
+using namespace cvengine;
 using heck::range;
 
 static constexpr bool kAllVisible = false;
@@ -174,7 +175,7 @@ iaabb2 MinimapSectionTracking::getCurrentRect() const
 
 ///
 
-hecktui::ivec2 (::getMinimapBaseTextureDim)()
+hecktui::ivec2 cvengine::getMinimapBaseTextureDim()
 {
 	return {
 		gGlobals.getDefineINT("MINIMAP_RENDER_SIZE"),
@@ -540,7 +541,7 @@ void Minimap::drawThis(ivec2 offset, hecktui::Framebuffer& fb)
 		const ivec2 uiCoord = plotMapping.toRenderCoord({ marker.coord.x + 0.5f, marker.coord.y + 0.5f }) / ivec2(1, 2);
 
 		pixel.c = marker.c;
-		pixel.colour.text = toTuiColour(marker.colourI);
+		pixel.colour.text = cvengine::toTuiColour(marker.colourI);
 		pixel.colour.back = EColour::Black;
 		fb.draw(mapping.panelDrawRect.min + uiCoord, pixel);
 	};

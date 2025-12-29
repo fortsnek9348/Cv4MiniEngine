@@ -4,7 +4,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-std::span<const std::string_view>(::getCvGameCoreDLLConfigStrings)()
+std::span<const std::string_view> getCvGameCoreDLLConfigStrings()
 {
 	static constexpr std::array k = std::to_array<std::string_view>({
 #if defined(_MSC_VER) && defined(__clang__) 

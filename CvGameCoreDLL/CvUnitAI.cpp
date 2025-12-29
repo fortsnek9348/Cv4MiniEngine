@@ -12349,7 +12349,7 @@ bool CvUnitAI::AI_pirateBlockade()
 			else
 			{
 				// Oh dear... Just go with something.
-				FAssertMsg(false, __FUNCTION__" found a path to the best plot using WholeMapSimpleDijkstra, but the general pathfinder could not.");
+				FAssertMsg(false, "Found a path to the best plot using WholeMapSimpleDijkstra, but the general pathfinder could not.");
 				pBestPlot = pBestBlockadePlot;
 			}
 

@@ -4,6 +4,7 @@
 #include <ranges>
 
 using namespace hecktui;
+using namespace cvengine;
 
 // TODO: Guages could use half-width blocks for double the resolution, but that's totally incompatible with overlaid labels.
 
@@ -46,7 +47,7 @@ void RichGuage::drawBareGuage(hecktui::Framebuffer& fb, const hecktui::iaabb2& r
 		// Minor hack for most bars.
 		EColour colour = givenColour;
 		if (colour == prevColour)
-			colour = darken(colour);
+			colour = cvengine::darken(colour);
 		prevColour = colour;
 
 		const int x = int((int64_t(accRatio + ratio) * width + max / 2) / max);

@@ -19,6 +19,7 @@
 #include <cwctype>
 
 using namespace hecktui;
+using cvengine::RichLabel;
 
 CvPopup::Control& CvPopup::findControl(EControlType type, int iGroup)
 {
@@ -129,7 +130,7 @@ CvPopupTuiDialog::CvPopupTuiDialog(CvPopup* popup)
 				text.insert(text.begin(), prefix.begin(), prefix.end());
 			}
 
-			auto btn = makeActionButtonWithManualLabel(text, desc.widgetData, [this, id = desc.iGroup] {
+			auto btn = cvengine::makeActionButtonWithManualLabel(text, desc.widgetData, [this, id = desc.iGroup] {
 				submit(id);
 				});
 			btn->getLabel().enableWrapping = true;

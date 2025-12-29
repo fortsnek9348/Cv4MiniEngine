@@ -26,6 +26,7 @@
 #include <chrono>
 
 using heck::range;
+using namespace cvengine;
 
 CvApp& CvApp::getInstance()
 {
@@ -121,7 +122,7 @@ void CvApp::redirectLoggingOutput()
 }
 
 
-const CvVFS& CvApp::getVFS() const
+const cvengine::CvVFS& CvApp::getVFS() const
 {
 	return *mVFS;
 }

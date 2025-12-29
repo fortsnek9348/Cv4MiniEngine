@@ -21,6 +21,8 @@
 #include <array>
 #include <ranges>
 
+using cvengine::Minimap;
+using cvengine::RichGuage;
 using heck::range;
 
 namespace
@@ -131,16 +133,16 @@ namespace
 			// Stick the star in front if this is the capital.
 			if (city.isCapital())
 				str.insert(str.begin(), CvApp::getInstance().symbols[STAR_CHAR]);
-			iconLineText = renderCiv4TextCode(str, defPixel);
+			iconLineText = cvengine::renderCiv4TextCode(str, defPixel);
 			
 			NiColorA textColour{};
 			city.getCityBillboardSizeIconColors(popBackColour, textColour);
 
 			textMgr.buildCityBillboardCitySizeString(buf, &city, textColour);
-			popText = renderCiv4TextCode(buf.getCString(), defPixel);
+			popText = cvengine::renderCiv4TextCode(buf.getCString(), defPixel);
 
 			textMgr.buildCityBillboardCityNameString(buf, &city);
-			nameText = renderCiv4TextCode(buf.getCString(), defPixel);
+			nameText = cvengine::renderCiv4TextCode(buf.getCString(), defPixel);
 
 			//iFoodDifference = pHeadSelectedCity.foodDifference(True)
 
@@ -150,7 +152,7 @@ namespace
 				std::vector<float> stackedPercentages;
 
 				textMgr.getCityBillboardFoodbarColors(&city, colours);
-				std::ranges::copy(colours | std::views::transform([](NiColorA c) { return toTuiColour(c); }), foodBarTuiColours.begin());
+				std::ranges::copy(colours | std::views::transform([](NiColorA c) { return cvengine::toTuiColour(c); }), foodBarTuiColours.begin());
 				city.getFoodBarPercentages(stackedPercentages);
 				foodBarRatios = {
 					static_cast<int>(std::lround(stackedPercentages[INFOBAR_STORED] * kFakeBarMax)),
@@ -159,9 +161,9 @@ namespace
 				};
 
 				textMgr.buildCityBillboardProductionString(buf, &city);
-				prodText = renderCiv4TextCode(buf.getCString(), defPixel);
+				prodText = cvengine::renderCiv4TextCode(buf.getCString(), defPixel);
 				textMgr.getCityBillboardProductionbarColors(&city, colours);
-				std::ranges::copy(colours | std::views::transform([](NiColorA c) { return toTuiColour(c); }), prodBarTuiColours.begin());
+				std::ranges::copy(colours | std::views::transform([](NiColorA c) { return cvengine::toTuiColour(c); }), prodBarTuiColours.begin());
 				city.getProductionBarPercentages(stackedPercentages);
 				prodBarRatios = {
 					static_cast<int>(std::lround(stackedPercentages[INFOBAR_STORED] * kFakeBarMax)),
@@ -224,7 +226,7 @@ namespace
 			
 
 			const iaabb2 popRect = iaabb2::sized(rect.min, { popWidth, 1 });
-			fb.drawFilledBox(popRect, Pixel{ .c = L' ', .colour{ .back = toTuiColour(popBackColour) } });
+			fb.drawFilledBox(popRect, Pixel{ .c = L' ', .colour{ .back = cvengine::toTuiColour(popBackColour) } });
 			fb.blit(popRect, popText, EAlign::Right, EAlign::Center, false);
 			rect.min.x += popWidth;
 			RichGuage::drawBareGuage(fb, rect, foodBarTuiColours, foodBarRatios, kFakeBarMax);
@@ -496,7 +498,7 @@ namespace
 	}
 }
 
-std::shared_ptr<hecktui::Element> (::buildMainInterfaceWorldViewComponent)(WorldView& worldView)
+std::shared_ptr<hecktui::Element> cvengine::buildMainInterfaceWorldViewComponent(WorldView& worldView)
 {
 	return std::make_shared<WorldViewUIComponent>(CvInterface::getInstance(), worldView);
 }

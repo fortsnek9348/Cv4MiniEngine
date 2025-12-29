@@ -25,9 +25,9 @@ public:
 	};
 
 	CvGInterfaceScreen() = default;
-	explicit CvGInterfaceScreen(std::string name, CvEngineEnums::ECvScreen kind);
+	explicit CvGInterfaceScreen(std::string name, cvengine::ECvScreen kind);
 
-	CvEngineEnums::ECvScreen getKind() const noexcept;
+	cvengine::ECvScreen getKind() const noexcept;
 
 	bool isActive() const;
 
@@ -61,7 +61,7 @@ public:
 	virtual ~CvGInterfaceScreen() = default;
 
 private:
-	CvEngineEnums::ECvScreen mScreenKind{};
+	cvengine::ECvScreen mScreenKind{};
 	std::string mName;
 	std::wstring mTitle;
 	EAutoSizeBehaviour mAutoSizeBehaviour = EAutoSizeBehaviour::GrowOnly;

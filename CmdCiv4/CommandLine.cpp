@@ -16,6 +16,8 @@
 #include <shellapi.h>
 #endif
 
+using namespace cvengine;
+
 static constexpr const char* kHelp = R"(Usage: Cv4MiniEngine [options] [save filename]
 Options:
     -mod <name of mod>     Load the specified mod. Ignored when loading a save.
@@ -66,7 +68,7 @@ namespace
 #endif
 }
 
-AppStartupConfig(::parseCommandLine)(int argc, const char * const * argv) try
+AppStartupConfig cvengine::parseCommandLine(int argc, const char * const * argv) try
 {
 	const std::vector<std::wstring> cmdLine = getCommandLine(argc, argv);
 

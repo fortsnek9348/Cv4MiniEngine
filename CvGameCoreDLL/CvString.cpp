@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-CvString(::convertToAscii)(const CvWString& s)
+CvString convertToAscii(const CvWString& s)
 {
 	return heck::toAsciiString(s);
 }

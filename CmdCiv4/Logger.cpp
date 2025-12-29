@@ -4,7 +4,7 @@
 #include <iostream>
 #include <utility>
 
-namespace cmdciv4
+namespace cvengine
 {
 	void _internalLog(ELogLevel level, const std::source_location& loc, const std::string_view& fmt, std::format_args&& formatArgs)
 	{

@@ -34,7 +34,7 @@ namespace
 		bool usingDefaultImpl = false;
 		//int mapSizeOverrideMultiplier = 1;
 
-		std::unordered_map<std::string, pybind11::module, StringHasher, std::equal_to<>> modules;
+		std::unordered_map<std::string, pybind11::module, cvengine::StringHasher, std::equal_to<>> modules;
 
 		uint64_t serial = 0;
 
@@ -108,7 +108,7 @@ sys.meta_path.append(Civ4ModuleImporter())
 				return p.native();
 			});
 			
-			sysPaths.append_range(gVFS->enumeratePhysicalDirsContainingExt(L".pyc") | convertPathToString);
+			sysPaths.append_range(cvengine::gVFS->enumeratePhysicalDirsContainingExt(L".pyc") | convertPathToString);
 			for (const auto& p : sysPaths)
 				std::wclog << L"Python compiled module (pyc) search path: " << std::filesystem::path(p) << std::endl;
 
@@ -121,7 +121,7 @@ sys.meta_path.append(Civ4ModuleImporter())
 		}
 		catch (const pybind11::error_already_set& ex)
 		{
-			cmdciv4::logError("Python init error: {}", ex.what());
+			cvengine::logError("Python init error: {}", ex.what());
 			throw;
 		}
 
@@ -138,7 +138,7 @@ sys.meta_path.append(Civ4ModuleImporter())
 				catch (const pybind11::error_already_set& ex)
 				{
 					// Failed to load module.
-					cmdciv4::logError("Python module load error.\n{}", ex.what());
+					cvengine::logError("Python module load error.\n{}", ex.what());
 					throw;
 					//return std::nullopt;
 
@@ -162,7 +162,7 @@ sys.meta_path.append(Civ4ModuleImporter())
 					// Error in the function somewhere.
 					//static std::unordered_set<std::string> messages;
 					//if (messages.insert(ex.what()).second)
-					cmdciv4::logError("{}", ex.what());
+					cvengine::logError("{}", ex.what());
 					throw;
 					//CvApp::getInstance().getUI().modalLoopPythonReloadPrompt(L"Failed to evaluate function.", L"Reload All Python");
 					//purge();
@@ -192,7 +192,7 @@ sys.meta_path.append(Civ4ModuleImporter())
 			catch (const pybind11::cast_error& ex)
 			{
 				// Result cast error, probably.
-				cmdciv4::logError("{}", ex.what());
+				cvengine::logError("{}", ex.what());
 				throw;
 				//return std::nullopt;
 

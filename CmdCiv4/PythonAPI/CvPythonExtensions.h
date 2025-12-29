@@ -5,10 +5,10 @@
 #include <exception>
 #include <source_location>
 
-// This triggers a nice stacktrace on unimplemented functions.
-[[noreturn]] void unimplementedPythonFunction(std::source_location = std::source_location::current());
-
-namespace CvEngineEnums
+namespace cvengine
 {
-	void registerWithPython(pybind11::module& m);
+	// This triggers a nice stacktrace on unimplemented functions.
+	[[noreturn]] void unimplementedPythonFunction(std::source_location = std::source_location::current());
+
+	void registerEnumsWithPython(pybind11::module& m);
 }

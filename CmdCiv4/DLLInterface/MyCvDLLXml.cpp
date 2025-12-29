@@ -16,8 +16,8 @@
 #include <iostream>
 #include <cerrno>
 #include <string_view>
-#include <filesystem>
 
+using cvengine::gVFS;
 
 class FXml
 {

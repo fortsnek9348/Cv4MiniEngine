@@ -41,6 +41,7 @@
 #endif
 
 using heck::range;
+using namespace cvengine;
 
 const int kMaxCivPlayers = gGlobals.getMaxCivPlayers(); // 18
 const int kMaxPlayers = kMaxCivPlayers + 1; // 19
@@ -179,7 +180,7 @@ static void initCommon()
 	//mainInitCore.setType(GAME_SP_NEW);
 	
 	// This is probably a static variable in the EXE as it's called at different times.
-	initialiseTextCodeTags();
+	cvengine::initialiseTextCodeTags();
 
 	loadPostMenuGlobals();
 }

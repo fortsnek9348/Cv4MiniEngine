@@ -17,6 +17,7 @@
 #include <iostream>
 
 using heck::range;
+using namespace cvengine;
 
 CvEngine& CvEngine::getInstance()
 {

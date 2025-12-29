@@ -57,6 +57,7 @@ if (MSVC)
 		target_compile_options(CommonStuff PUBLIC /showFilenames)
 	else()
 		target_compile_options(CommonStuff PUBLIC /wd4251) # ... needs to have dll-interface to be used by clients of ...
+		target_compile_options(CommonStuff PUBLIC /wd5311) # warning C5311: A literal-operator-id of the form 'operator string-literal identifier' has been deprecated
 	endif()
 else()
 	target_compile_options(CommonStuff PUBLIC -march=x86-64-v3)
@@ -113,8 +114,7 @@ else()
 	find_package(Patch REQUIRED)
 	add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h"
 		COMMAND "${Patch_EXECUTABLE}" -p1 -o "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${PYBIND11_INC_DIR}/pybind11/stl.h" -i "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pybind11_stl.patch"
-		# The build system actually tried to build these files. So how do you specify simple file dependencies?
-		#DEPENDS "${PYBIND11_INC_DIR}/pybind11/stl.h" "${CMAKE_CURRENT_SOURCE_DIR}/cmake data/pybind11_stl.patch"
+		DEPENDS "${PYBIND11_INC_DIR}/pybind11/stl.h" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pybind11_stl.patch"
 		VERBATIM
 	)
 endif()

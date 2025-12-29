@@ -8,7 +8,10 @@
 
 class CvDiplomacyScreen;
 
-class RichLabel;
+namespace cvengine
+{
+	class RichLabel;
+}
 
 class CvDiplomacyScreenUI : public hecktui::Element
 {
@@ -53,7 +56,7 @@ public:
 	void endTrade();
 
 private:
-	std::shared_ptr<RichLabel> mLblLeaderheadText;
+	std::shared_ptr<cvengine::RichLabel> mLblLeaderheadText;
 	std::shared_ptr<hecktui::Label> mLblAIComment;
 	std::shared_ptr<hecktui::Element> mUserCommentsPanel;
 	std::vector<std::shared_ptr<hecktui::Button>> mUserCommentButtons;

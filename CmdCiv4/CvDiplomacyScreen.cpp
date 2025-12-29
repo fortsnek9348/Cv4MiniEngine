@@ -34,11 +34,11 @@ static std::wstring getTradeItemLabel(PlayerTypes ownerPlayerI, PlayerTypes othe
 	CvWString label;
 	if (!GET_PLAYER(ownerPlayerI).getItemTradeString(otherPlayerI, isOffer, isShowCurrent, item, label, icon))
 		label = L"[UNKNOWN]";
-	return std::move(label);
+	return label;
 }
 
 CvDiplomacyScreen::CvDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams)
-	: CvGInterfaceScreen("Diplomacy Screen", CvEngineEnums::ECvScreen::DIPLOMACY_SCREEN)
+	: CvGInterfaceScreen("Diplomacy Screen", cvengine::ECvScreen::DIPLOMACY_SCREEN)
 	, mDiploParams(std::move(diploParams))
 	, mUI(std::make_shared<CvDiplomacyScreenUI>())
 	, mSides{ {

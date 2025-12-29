@@ -44,9 +44,9 @@ typedef uint64_t qword;
 #define M_PI       3.14159265358979323846
 #define fM_PI		3.141592654f		//!< Pi (float)
 
-HECK_FORCEINLINE dword FtoDW(float f) { return *(dword*)&f; }
-HECK_FORCEINLINE float DWtoF(dword n) { return *(float*)&n; }
-HECK_FORCEINLINE float MaxFloat() { return DWtoF(0x7f7fffff); }
+//HECK_FORCEINLINE dword FtoDW(float f) { return std::_Bit_cast<dword>(f); }
+//HECK_FORCEINLINE float DWtoF(dword n) { return std::_Bit_cast<float>(f); }
+//HECK_FORCEINLINE float MaxFloat() { return DWtoF(0x7f7fffff); }
 
 void startProfilingDLL();
 void stopProfilingDLL();

@@ -7,4 +7,4 @@
 #define CV4MINIENGINE_VERSION_STRING dev
 #endif
 
-constexpr std::wstring_view(::kEngineVersionString) = CV4MINIENGINE_MAKE_VERSIONSTRING(CV4MINIENGINE_VERSION_STRING);
+constexpr std::wstring_view cvengine::kEngineVersionString = CV4MINIENGINE_MAKE_VERSIONSTRING(CV4MINIENGINE_VERSION_STRING);

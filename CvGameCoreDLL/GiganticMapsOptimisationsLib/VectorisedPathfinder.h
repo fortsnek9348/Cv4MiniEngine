@@ -2,8 +2,6 @@
 
 #include "Util.h"
 
-#include <CommonStuff/BlockAStar.h>
-
 class CvSelectionGroup;
 
 namespace GiganticMapsOptimisationsLib
@@ -55,6 +53,6 @@ namespace GiganticMapsOptimisationsLib
 	};
 
 	std::unique_ptr<IVectorisedPathfinder> createPlotwiseAStarVectorisedPathfinder(VectorisedPathfinderMap& map);
-	std::unique_ptr<IVectorisedPathfinder> createBlockAStarVectorisedPathfinder(VectorisedPathfinderMap& map);
+	//std::unique_ptr<IVectorisedPathfinder> createBlockAStarVectorisedPathfinder(VectorisedPathfinderMap& map);
 	std::unique_ptr<IVectorisedPathfinder> createCoordPlotwiseAStarVectorisedPathfinder(VectorisedPathfinderMap& map);
 }

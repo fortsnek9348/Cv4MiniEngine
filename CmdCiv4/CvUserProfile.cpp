@@ -15,7 +15,7 @@ CvUserProfile& CvUserProfile::getInstance()
 	return g;
 }
 
-CvUserProfile::CvUserProfile() : mPath(getUserConfigDir() / "Cv4MiniEngine Profile.txt"), mPlayerOptions(GC.getNumPlayerOptionInfos())
+CvUserProfile::CvUserProfile() : mPath(cvengine::getUserConfigDir() / "Cv4MiniEngine Profile.txt"), mPlayerOptions(GC.getNumPlayerOptionInfos())
 {
 }
 

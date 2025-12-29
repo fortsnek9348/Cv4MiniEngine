@@ -128,7 +128,7 @@ void CyCamera::JustLookAt(NiPoint3 p3LookAt)
 
 void CyCamera::JustLookAtPlot([[maybe_unused]] CyPlot pPlot)
 {
-	cmdciv4::logWarning("Unimplemented.");
+	cvengine::logWarning("Unimplemented.");
 }
 
 void CyCamera::LookAt(NiPoint3 pt3LookAt, [[maybe_unused]] CameraLookAtTypes type, [[maybe_unused]] NiPoint3 attackDirection)
@@ -138,7 +138,7 @@ void CyCamera::LookAt(NiPoint3 pt3LookAt, [[maybe_unused]] CameraLookAtTypes typ
 
 void CyCamera::LookAtUnit([[maybe_unused]] CyUnit unit)
 {
-	cmdciv4::logWarning("Unimplemented.");
+	cvengine::logWarning("Unimplemented.");
 }
 
 void CyCamera::MoveBaseTurnLeft(float increment)
@@ -155,7 +155,7 @@ void CyCamera::MoveBaseTurnRight(float increment)
 
 void CyCamera::ReleaseLockedCamera()
 {
-	cmdciv4::logWarning("Unimplemented.");
+	cvengine::logWarning("Unimplemented.");
 }
 
 void CyCamera::ResetZoom()

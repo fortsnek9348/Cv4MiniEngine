@@ -489,5 +489,5 @@ std::wstring CvTranslator::formatText(std::wstring_view text, std::span<const Cv
 	//	return escaped;
 	//}
 	//else
-	return lowerCiv4TextCodeToXml(result);
+	return cvengine::lowerCiv4TextCodeToXml(result);
 }

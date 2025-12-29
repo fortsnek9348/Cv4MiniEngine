@@ -13,7 +13,7 @@
 
 using namespace hecktui;
 
-CvGInterfaceScreen::CvGInterfaceScreen(std::string name, CvEngineEnums::ECvScreen kind)
+CvGInterfaceScreen::CvGInterfaceScreen(std::string name, cvengine::ECvScreen kind)
 	: mScreenKind(kind)
 	, mName(std::move(name))
 	, mTitle(L"Civ4 Screen")
@@ -21,7 +21,7 @@ CvGInterfaceScreen::CvGInterfaceScreen(std::string name, CvEngineEnums::ECvScree
 {
 }
 
-CvEngineEnums::ECvScreen CvGInterfaceScreen::getKind() const noexcept
+cvengine::ECvScreen CvGInterfaceScreen::getKind() const noexcept
 {
 	return mScreenKind;
 }
@@ -104,7 +104,7 @@ void CvGInterfaceScreen::updatePlotHelp(CvPlot* plot)
 		//static_cast<RichLabel&>(*at(mPlotHelpTargetName)).debug = std::wstring_view(buf.getCString()).starts_with(L"Defense");
 		//if (std::wstring_view(buf.getCString()).starts_with(L"Defense"))
 		//	_CrtDbgBreak();
-		static_cast<RichLabel&>(*at(mPlotHelpTargetName)).setLabel(buf.getCString());
+		static_cast<cvengine::RichLabel&>(*at(mPlotHelpTargetName)).setLabel(buf.getCString());
 	}
 }
 
@@ -137,10 +137,10 @@ std::shared_ptr<hecktui::Window> CvGInterfaceScreen::createTuiWindow(bool passIn
 {
 	const hecktui::WindowConfig config{
 		.isDefaultFocus = passInput,
-		.isFullscreen = mScreenKind == CvEngineEnums::ECvScreen::MAIN_INTERFACE,
+		.isFullscreen = mScreenKind == cvengine::ECvScreen::MAIN_INTERFACE,
 		.isModal = mIsModal,
-		.canClose = mScreenKind != CvEngineEnums::ECvScreen::MAIN_INTERFACE,
-		.borderStyle = mScreenKind != CvEngineEnums::ECvScreen::MAIN_INTERFACE ? hecktui::EBorderStyle::Rounded : hecktui::EBorderStyle::None,
+		.canClose = mScreenKind != cvengine::ECvScreen::MAIN_INTERFACE,
+		.borderStyle = mScreenKind != cvengine::ECvScreen::MAIN_INTERFACE ? hecktui::EBorderStyle::Rounded : hecktui::EBorderStyle::None,
 	};
 
 	struct ScreenWindow : hecktui::Window
@@ -192,7 +192,7 @@ std::shared_ptr<hecktui::Window> CvGInterfaceScreen::createTuiWindow(bool passIn
 				setWantClose();
 				return true;
 			}
-			return hecktui::Window::onEvent(e) || (isPassInput && handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
+			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
 		}
 	};
 

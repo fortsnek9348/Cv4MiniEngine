@@ -5,7 +5,7 @@
 #include <format>
 #include <source_location>
 
-namespace cmdciv4
+namespace cvengine
 {
 	enum class ELogLevel
 	{

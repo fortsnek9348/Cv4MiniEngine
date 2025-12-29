@@ -18,6 +18,7 @@
 
 namespace tui = hecktui;
 using heck::range;
+using namespace cvengine;
 
 static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts()
 {

@@ -11,7 +11,7 @@ class AppGameSetupPlayerListPanel;
 struct SimplifiedInitCore;
 struct AppGameSetupMapScriptInfo;
 
-class AppGameSetupConfigPanel : public hecktui::ScrollBarPanel, public IWindowChildEventHandler
+class AppGameSetupConfigPanel : public hecktui::ScrollBarPanel, public cvengine::IWindowChildEventHandler
 {
 public:
 	explicit AppGameSetupConfigPanel(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, AppGameSetupWindow& singlePlayerCustomWindow, std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel);

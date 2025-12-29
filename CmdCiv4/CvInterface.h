@@ -159,10 +159,10 @@ public:
 	const WorldView& getWorldView() const noexcept;
 	WorldView& getWorldView() noexcept;
 
-	CvGInterfaceScreen& grabPythonScreen(std::string name, CvEngineEnums::ECvScreen kind);
+	CvGInterfaceScreen& grabPythonScreen(std::string name, cvengine::ECvScreen kind);
 	
-	void showScreen(CvEngineEnums::ECvScreen kind, PopupStates popupState, bool passInput);
-	bool isActive(CvEngineEnums::ECvScreen kind) const;
+	void showScreen(cvengine::ECvScreen kind, PopupStates popupState, bool passInput);
+	bool isActive(cvengine::ECvScreen kind) const;
 
 	// Called from python
 	void cacheInterfacePlotUnits(CvPlot*);
@@ -225,7 +225,7 @@ private:
 		std::shared_ptr<hecktui::Window> currentTuiWindow;
 	};
 
-	std::map<CvEngineEnums::ECvScreen, ScreenWindowEntry> mScreenWindowEntries;
+	std::map<cvengine::ECvScreen, ScreenWindowEntry> mScreenWindowEntries;
 	uint64_t mLastScreenUpdatePythonInstanceSerial = 0;
 
 	// Compared to Civ4, this CvInterface will only display one popup at a time. Even for immediate popups. They all get queued here.
@@ -243,7 +243,7 @@ private:
 
 	//std::shared_ptr<CvGDebugMenu> mDebugWindow;
 
-	MinimapSectionTracking mMinimapSectionTracking;
+	cvengine::MinimapSectionTracking mMinimapSectionTracking;
 
 	bool mUnitSelectionSoundPlayed = false;
 

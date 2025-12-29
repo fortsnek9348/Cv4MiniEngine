@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+using cvengine::unimplementedPythonFunction;
+
 void CyInterface::registerWithPython(const pybind11::module& m)
 {
 #define R(x) def(#x, &CyInterface::x)
@@ -260,7 +262,7 @@ void CyInterface::exitingToMainMenu([[maybe_unused]] const std::string& szLoadFi
 
 std::vector<int> CyInterface::getActionsToShow()
 {
-	return buildListOfActionsToShow();
+	return cvengine::buildListOfActionsToShow();
 }
 
 CyUnit CyInterface::getCachedInterfacePlotUnit(int iIndex)
@@ -627,7 +629,7 @@ void CyInterface::setShowInterface(InterfaceVisibility eInterfaceVisibility)
 void CyInterface::setSoundSelectionReady(bool bReady)
 {
 	// Called by CvDawnOfMan.
-	cmdciv4::logWarning("({}). Unimplemented.", bReady);
+	cvengine::logWarning("({}). Unimplemented.", bReady);
 }
 
 void CyInterface::setWorldBuilder([[maybe_unused]] bool bTurnOn)

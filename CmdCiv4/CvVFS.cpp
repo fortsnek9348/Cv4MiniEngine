@@ -17,12 +17,13 @@
 #include <memory>
 
 namespace fs = std::filesystem;
+using namespace cvengine;
 
 #ifndef _WIN32
 #define IS_CASE_SENSITIVE_PLATFORM 1
 #endif
 
-constinit const CvVFS* ::gVFS = nullptr;
+constinit const CvVFS* cvengine::gVFS = nullptr;
 
 // NOTE: BUILD_FILE_CATALOG == 1 doesn't sort file enumeration output by mount point index.
 #define BUILD_FILE_CATALOG 0
@@ -82,7 +83,7 @@ namespace
 		MountRelPath fileMountRelPath;
 		std::unique_ptr<VfsDirEntriesMap> folderDirEntries;
 
-		// NOTE: Can be both a file and a folder: Sid Meier's Civilization 4\Beyond the Sword\Assets\assets0.fpk\
+		// NOTE: Can be both a file and a folder: Sid Meier's Civilization 4\Beyond the Sword\Assets\assets0.fpk\.
 
 		//bool isFolder() const
 		//{
@@ -249,14 +250,14 @@ struct CvVFS::Internals
 
 		// https://forums.civfanatics.com/threads/differences-between-assets-folders.685453/#post-16505661
 		mMountings.insert(mMountings.end(), {
-			vanillaCiv4RootDir / "Assets"                  /**/,
-			vanillaCiv4RootDir / kPublicMapsDirName        /**/,
-			vanillaCiv4RootDir / "Warlords" / "Assets"     /**/,
-			vanillaCiv4RootDir / "Warlords" / kPublicMapsDirName /**/,
-			btsRoot / "Assets"                             /**/,
-			btsRoot / kPublicMapsDirName                   /**/,
-			getUserConfigDir() / kCustomAssetsDirName     /**/,
-			getUserConfigDir() / kPublicMapsDirName       /**/,
+			vanillaCiv4RootDir / "Assets"                                  /**/,
+			vanillaCiv4RootDir / cvengine::kPublicMapsDirName              /**/,
+			vanillaCiv4RootDir / "Warlords" / "Assets"                     /**/,
+			vanillaCiv4RootDir / "Warlords" / cvengine::kPublicMapsDirName /**/,
+			btsRoot / "Assets"                                             /**/,
+			btsRoot / cvengine::kPublicMapsDirName                         /**/,
+			cvengine::getUserConfigDir() / cvengine::kCustomAssetsDirName  /**/,
+			cvengine::getUserConfigDir() / cvengine::kPublicMapsDirName    /**/,
 		});
 
 		// Remove trailing slash.
@@ -268,9 +269,9 @@ struct CvVFS::Internals
 			if (!fs::exists(btsRoot / optModRelPath))
 				throw std::runtime_error("Mod does not exist.");
 			mMountings.insert(mMountings.end(), {
-				btsRoot / optModRelPath / "Assets"      /**/,
-				btsRoot / optModRelPath / kPublicMapsDirName  /**/,
-				btsRoot / optModRelPath / "PrivateMaps" /**/,
+				btsRoot / optModRelPath / "Assets",
+				btsRoot / optModRelPath / cvengine::kPublicMapsDirName,
+				btsRoot / optModRelPath / "PrivateMaps",
 			});
 		}
 
@@ -280,8 +281,8 @@ struct CvVFS::Internals
 
 		// Cv4MiniEngine overrides.
 		mMountings.insert(mMountings.end(), {
-			absCv4EngineRootDir / kCustomAssetsDirName /**/,
-			absCv4EngineRootDir / kPublicMapsDirName         /**/,
+			absCv4EngineRootDir / cvengine::kCustomAssetsDirName,
+			absCv4EngineRootDir / cvengine::kPublicMapsDirName,
 		});
 
 		mPythonModuleLookup.reserve(200);

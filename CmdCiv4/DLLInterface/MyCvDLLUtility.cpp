@@ -46,7 +46,7 @@
 #include <iostream>
 #include <fstream>
 
-using namespace cmdciv4;
+using namespace cvengine;
 using heck::range;
 
 static constexpr bool kEnableXmlCaching = true;
@@ -296,7 +296,7 @@ void MyCvDLLUtility::sendMessageData(CvMessageData* pData)
 
 void MyCvDLLUtility::sendPlayerInfo(PlayerTypes eActivePlayer)
 {
-	cmdciv4::logInfo("{}", int(eActivePlayer));
+	cvengine::logInfo("{}", int(eActivePlayer));
 }
 
 void MyCvDLLUtility::sendGameInfo([[maybe_unused]] const CvWString& szGameName, [[maybe_unused]] const CvWString& szAdminPassword)

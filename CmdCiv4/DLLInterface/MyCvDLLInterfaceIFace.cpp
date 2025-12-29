@@ -27,6 +27,9 @@
 
 #include <iostream>
 
+using cvengine::Minimap;
+using cvengine::getMinimapBaseTextureDim;
+using cvengine::encodeDXT1;
 using heck::range;
 
 void MyCvDLLInterfaceIFace::lookAtSelectionPlot(bool bRelease)
@@ -449,7 +452,7 @@ void MyCvDLLInterfaceIFace::addPopup(CvPopupInfo* pInfo, PlayerTypes ePlayer, bo
 
 void MyCvDLLInterfaceIFace::getDisplayedButtonPopups(CvPopupQueue&)
 {
-	cmdciv4::logInfo("Not implemented. Used to serialise player popups.");
+	cvengine::logInfo("Not implemented. Used to serialise player popups.");
 }
 
 int MyCvDLLInterfaceIFace::getCycleSelectionCounter()

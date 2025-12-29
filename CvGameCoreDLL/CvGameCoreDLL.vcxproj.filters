@@ -584,9 +584,6 @@
     <ClCompile Include="CyDeal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CyEnumsInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CyGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -831,6 +828,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CvString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CyEnumsInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

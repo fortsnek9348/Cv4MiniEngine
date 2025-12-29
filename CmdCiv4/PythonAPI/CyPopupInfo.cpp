@@ -43,7 +43,7 @@ void CyPopupInfo::registerWithPython(const pybind11::module& m)
 
 void CyPopupInfo::addPopup(int iPlayer)
 {
-	cmdciv4::logInfo("player {}", iPlayer);
+	cvengine::logInfo("player {}", iPlayer);
 	CvPlayerAI::getPlayerNonInl((PlayerTypes)iPlayer).addPopup(ptr.release());
 }
 

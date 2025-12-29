@@ -31,7 +31,7 @@ namespace
 			std::wstringstream text;
 			text << MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_SAVE_VERSION") << L' ' << gGlobals.getDefineINT("SAVE_VERSION") << L'\n';
 
-			text << MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(kEngineVersionString) << L'\n';
+			text << MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(cvengine::kEngineVersionString) << L'\n';
 			for (const std::string_view s : getCvGameCoreDLLConfigStrings())
 				text << CvWString(CvString(s)) << L'\n';
 			
@@ -81,7 +81,7 @@ namespace
                                                  |___/              
 )"));
 			std::wstring buildString;
-			buildString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(kEngineVersionString);
+			buildString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(cvengine::kEngineVersionString);
 			for (const std::string_view s : getCvGameCoreDLLConfigStrings())
 			{
 				buildString += L' ';

@@ -30,11 +30,11 @@ void MyCvDLLEngineIFace::AutoSave(bool bInitial)
 }
 void MyCvDLLEngineIFace::SaveReplay(PlayerTypes ePlayer)
 {
-	//cmdciv4::logInfo("TODO");
+	//cvengine::logInfo("TODO");
 
 	CvWString timeStr;
 	CvGameTextMgr::GetInstance().setTimeStr(timeStr, gGlobals.getGame().getGameTurn(), true);
-	const std::filesystem::path dir = getUserDataDir() / kReplaysDirName;
+	const std::filesystem::path dir = cvengine::getUserDataDir() / cvengine::kReplaysDirName;
 	std::filesystem::path path;
 	for (int i = 0; i < 1000; ++i)
 	{
@@ -62,7 +62,7 @@ void MyCvDLLEngineIFace::DoTurn()
 	clearColoredPlots(PLOT_LANDSCAPE_LAYER_ALL);
 
 	// Direct debug output for when logging AI autoplay to file.
-	outputDebugString(("MyCvDLLEngineIFace::DoTurn: " + std::to_string(gGlobals.getGame().getGameTurn()) + '\n').c_str());
+	cvengine::outputDebugString(("MyCvDLLEngineIFace::DoTurn: " + std::to_string(gGlobals.getGame().getGameTurn()) + '\n').c_str());
 }
 void MyCvDLLEngineIFace::ClearMinimap()	 { std::abort(); }
 uint8_t MyCvDLLEngineIFace::GetLandscapePlotTerrainData([[maybe_unused]] unsigned int uiX, [[maybe_unused]] unsigned int uiY, [[maybe_unused]] unsigned int uiPointX, [[maybe_unused]] unsigned int uiPointY) { abort(); }

@@ -30,6 +30,7 @@
 #include <ranges>
 
 using namespace hecktui;
+using namespace cvengine;
 
 void CyGInterfaceScreen::registerWithPython(const pybind11::module& m)
 {
@@ -115,7 +116,7 @@ void CyGInterfaceScreen::registerWithPython(const pybind11::module& m)
 		.V(hecktui::EColour, Red)
 		.V(hecktui::EColour, Green)
 		.V(hecktui::EColour, Grey100)
-		.def_static("fromColourType", [](int i) { return toTuiColour(ColorTypes(i)); })
+		.def_static("fromColourType", [](int i) { return cvengine::toTuiColour(ColorTypes(i)); })
 		;
 
 
@@ -246,7 +247,7 @@ void CyGInterfaceScreen::registerWithPython(const pybind11::module& m)
 }
 
 // Screens appear to be stored globally somewhere.
-CyGInterfaceScreen::CyGInterfaceScreen(std::string name, int kind) : impl(CvInterface::getInstance().grabPythonScreen(std::move(name), CvEngineEnums::ECvScreen(kind)))
+CyGInterfaceScreen::CyGInterfaceScreen(std::string name, int kind) : impl(CvInterface::getInstance().grabPythonScreen(std::move(name), cvengine::ECvScreen(kind)))
 {
 }
 
@@ -602,7 +603,7 @@ void CyGInterfaceScreen::newVRule(std::string parent, std::string name)
 
 static std::vector<EColour> toTuiColours(std::span<const ColorTypes> colours)
 {
-	return colours | std::views::transform([](ColorTypes c) { return toTuiColour(c); }) | std::ranges::to<std::vector>();
+	return colours | std::views::transform([](ColorTypes c) { return cvengine::toTuiColour(c); }) | std::ranges::to<std::vector>();
 }
 
 void CyGInterfaceScreen::newGuage(std::string parent, std::string name, std::vector<ColorTypes> colours, WidgetTypes widgetType)
@@ -680,7 +681,7 @@ void CyGInterfaceScreen::setVFlowLayout(std::string ctrlName)
 void CyGInterfaceScreen::setTableLayout(std::string ctrlName, hecktui::TableLayoutConfig config)
 {
 	auto layout = std::make_unique<hecktui::TableLayout>(std::move(config));
-	if (ctrlName == "" && impl.getKind() == CvEngineEnums::ECvScreen::SPACE_SHIP_SCREEN)
+	if (ctrlName == "" && impl.getKind() == cvengine::ECvScreen::SPACE_SHIP_SCREEN)
 		layout->debug = true;
 	impl.at(ctrlName)->setLayout(std::move(layout));
 }

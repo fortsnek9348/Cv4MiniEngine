@@ -122,8 +122,11 @@ private:
 	std::filesystem::path mPath;
 };
 
-class CvVFS;
-struct AppStartupConfig;
+namespace cvengine
+{
+	class CvVFS;
+	struct AppStartupConfig;
+}
 
 class CvApp
 {
@@ -133,11 +136,11 @@ public:
 	CvApp();
 	~CvApp();
 
-	void start(const AppStartupConfig& config);
+	void start(const cvengine::AppStartupConfig& config);
 
 	void redirectLoggingOutput();
 
-	const CvVFS& getVFS() const;
+	const cvengine::CvVFS& getVFS() const;
 
 	void startUI();
 	ICvAppUI& getUI() noexcept;
@@ -172,7 +175,7 @@ public:
 private:
 	void deferAppState(std::unique_ptr<ICvAppState>);
 
-	std::unique_ptr<CvVFS> mVFS;
+	std::unique_ptr<cvengine::CvVFS> mVFS;
 	std::unique_ptr<ICvAppUI> mAppUI;
 	std::unique_ptr<ICvAppState> mCurrentState;
 	std::unique_ptr<ICvAppState> mNextState;

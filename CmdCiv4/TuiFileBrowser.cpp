@@ -17,6 +17,7 @@
 #endif
 
 using namespace hecktui;
+using cvengine::TuiFileBrowserConfig;
 namespace fs = std::filesystem;
 
 namespace
@@ -31,7 +32,7 @@ namespace
 	{
 		std::vector<Root> roots;
 
-		roots.emplace_back(L"User Data", getUserDataDir());
+		roots.emplace_back(L"User Data", cvengine::getUserDataDir());
 
 #ifdef _WIN32
 		// C:\, D:\, etc.
@@ -448,7 +449,7 @@ namespace
 	};
 }
 
-std::optional<std::filesystem::path>(::tryPromptTuiFileBrowserPath)(const TuiFileBrowserConfig& config)
+std::optional<std::filesystem::path> cvengine::tryPromptTuiFileBrowserPath(const TuiFileBrowserConfig& config)
 {
 	ConsoleDevice consoleDevice;
 	Framebuffer fb(consoleDevice.getDim());

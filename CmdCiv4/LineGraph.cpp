@@ -27,7 +27,7 @@ void LineGraph::addSeries(std::vector<int> values, ColorTypes colour)
 {
 	if (const auto view = safeSubspan(values, mFirstX, mInclLastX + 1); !view.empty())
 		mMaxY = std::max(mMaxY, std::ranges::max(view));
-	mSeries.push_back({ std::move(values), toTuiColour(colour) });
+	mSeries.push_back({ std::move(values), cvengine::toTuiColour(colour) });
 }
 
 void LineGraph::setSeriesVisible(size_t i, bool b)

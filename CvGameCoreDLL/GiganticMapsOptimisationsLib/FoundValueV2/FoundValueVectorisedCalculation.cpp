@@ -70,7 +70,7 @@ namespace
 			if ((vcmpeq(wordIndices, 0) | ~accessMask).all())
 			{
 				// All word accesses within the first vector. We can avoid the gather/scatter.
-				U32Vector accessedWords(std::span(words).subspan<0, kVectorWidth>());
+				U32Vector accessedWords{ std::span(words).subspan<0, kVectorWidth>() };
 					
 				const I32Mask result = testAndSetVector(accessedWords, bitIndices, accessMask);
 

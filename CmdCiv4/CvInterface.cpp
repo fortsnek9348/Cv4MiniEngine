@@ -358,7 +358,7 @@ void CvInterface::updatePopups()
 	}
 
 	{
-		ScreenWindowEntry& diploEntry = mScreenWindowEntries[CvEngineEnums::ECvScreen::DIPLOMACY_SCREEN];
+		ScreenWindowEntry& diploEntry = mScreenWindowEntries[cvengine::ECvScreen::DIPLOMACY_SCREEN];
 		if (!diploEntry.currentTuiWindow)
 		{
 			// Try diplo.
@@ -371,7 +371,7 @@ void CvInterface::updatePopups()
 					if (!diploScreen->wantClose())
 					{
 						diploEntry.screen = std::move(diploScreen);
-						showScreen(CvEngineEnums::ECvScreen::DIPLOMACY_SCREEN, POPUPSTATE_IMMEDIATE, false);
+						showScreen(cvengine::ECvScreen::DIPLOMACY_SCREEN, POPUPSTATE_IMMEDIATE, false);
 					}
 					break;
 				}
@@ -411,7 +411,7 @@ void CvInterface::updatePopups()
 bool CvInterface::hasActiveScreens() const
 {
 	return isInCityScreen() || std::ranges::any_of(mScreenWindowEntries, [](const decltype(mScreenWindowEntries)::value_type& kv) {
-		return kv.first != CvEngineEnums::ECvScreen::MAIN_INTERFACE && kv.second.currentTuiWindow;
+		return kv.first != cvengine::ECvScreen::MAIN_INTERFACE && kv.second.currentTuiWindow;
 	});
 }
 
@@ -1313,7 +1313,7 @@ WorldView& CvInterface::getWorldView() noexcept
 	return mWorldView;
 }
 
-CvGInterfaceScreen& CvInterface::grabPythonScreen(std::string name, CvEngineEnums::ECvScreen kind)
+CvGInterfaceScreen& CvInterface::grabPythonScreen(std::string name, cvengine::ECvScreen kind)
 {
 	auto& screen = mScreenWindowEntries.emplace(kind, ScreenWindowEntry()).first->second.screen;
 	if (!screen)
@@ -1321,7 +1321,7 @@ CvGInterfaceScreen& CvInterface::grabPythonScreen(std::string name, CvEngineEnum
 	return *screen;
 }
 
-void CvInterface::showScreen(CvEngineEnums::ECvScreen kind, PopupStates popupState, bool passInput)
+void CvInterface::showScreen(cvengine::ECvScreen kind, PopupStates popupState, bool passInput)
 {
 	// TODO: What does a queued screen mean? (top civs)
 	//assert(popupState == PopupStates::POPUPSTATE_IMMEDIATE);
@@ -1335,13 +1335,13 @@ void CvInterface::showScreen(CvEngineEnums::ECvScreen kind, PopupStates popupSta
 		entry.currentTuiWindow = entry.screen->createTuiWindow(passInput);
 
 		// Screens are inserted front to back, in front of the main interface.
-		//const auto& mainInterfaceEntry = mScreenWindowEntries[CvEngineEnums::ECvScreen::MAIN_INTERFACE];
+		//const auto& mainInterfaceEntry = mScreenWindowEntries[cvengine::ECvScreen::MAIN_INTERFACE];
 		//CvApp::getInstance().getUI().insertWindowAfter(mainInterfaceEntry.currentTuiWindow.get(), entry.currentTuiWindow);
 		CvApp::getInstance().getUI().pushWindow(entry.currentTuiWindow);
 	}
 }
 
-bool CvInterface::isActive(CvEngineEnums::ECvScreen kind) const
+bool CvInterface::isActive(cvengine::ECvScreen kind) const
 {
 	const auto it = mScreenWindowEntries.find(kind);
 	return it != mScreenWindowEntries.end() && it->second.currentTuiWindow;

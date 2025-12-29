@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace hecktui;
+using namespace cvengine;
 using heck::range;
 
 constexpr int kVScrollBarWidth = 2;
@@ -243,7 +244,7 @@ struct RichTextTable::TableDataPanel : Element
 					}
 
 					(void)doPythonScreenEventHandling(table.mWidgetData, table.mPythonScreenControlId,
-						CvEngineEnums::NOTIFY_LISTBOX_ITEM_SELECTED, CvEngineEnums::MOUSE_LBUTTON | CvEngineEnums::MOUSE_LBUTTONDOWN);
+						cvengine::NOTIFY_LISTBOX_ITEM_SELECTED, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONDOWN);
 				}
 
 				return true;
@@ -365,7 +366,7 @@ void RichTextTable::addRow(std::span<const std::wstring_view> cells, std::vector
 	for (const auto& [colI, textcode] : cells | std::views::enumerate)
 	{
 		row.colStarts.push_back(row.pixels.size());
-		row.pixels.append_range(renderCiv4TextCode(textcode, { .colour{ .text = kTransparent, .back = kTransparent } }));
+		row.pixels.append_range(cvengine::renderCiv4TextCode(textcode, { .colour{ .text = kTransparent, .back = kTransparent } }));
 		const int width = int(row.pixels.size() - row.colStarts.back());
 		mColumns[colI].contentMaxWidth = std::max(mColumns[colI].contentMaxWidth, width);
 	}

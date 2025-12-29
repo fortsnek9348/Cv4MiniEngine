@@ -9,6 +9,8 @@
 
 using namespace hecktui;
 
+using namespace cvengine;
+
 class CvAppUI : public ICvAppUI
 {
 public:

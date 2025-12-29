@@ -14,6 +14,7 @@
 #include <pybind11/stl.h>
 
 using namespace hecktui;
+using namespace cvengine;
 
 void CyTuiDialog::registerWithPython(const pybind11::module& m)
 {
@@ -249,7 +250,7 @@ void CyTuiDialog::setVFlowLayout(std::string ctrlName)
 //void CyTuiDialog::setTableLayout(std::string ctrlName, hecktui::TableLayoutConfig config)
 //{
 //	auto layout = std::make_shared<hecktui::TableLayout>(std::move(config));
-//	if (ctrlName == "" && impl.getKind() == CvEngineEnums::ECvScreen::SPACE_SHIP_SCREEN)
+//	if (ctrlName == "" && impl.getKind() == cvengine::ECvScreen::SPACE_SHIP_SCREEN)
 //		layout->debug = true;
 //	impl.at(ctrlName)->setLayout(std::move(layout));
 //}

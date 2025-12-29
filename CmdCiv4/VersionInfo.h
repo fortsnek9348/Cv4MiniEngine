@@ -2,4 +2,7 @@
 
 #include <string>
 
-extern const std::wstring_view kEngineVersionString;
+namespace cvengine
+{
+	extern const std::wstring_view kEngineVersionString;
+}

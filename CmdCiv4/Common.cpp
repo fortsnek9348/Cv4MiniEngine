@@ -12,6 +12,7 @@
 #include <ranges>
 
 namespace fs = std::filesystem;
+using namespace cvengine;
 
 // For testing
 //#ifndef CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
@@ -31,31 +32,31 @@ namespace fs = std::filesystem;
 #endif
 
 static const std::filesystem::path kGameName = "Beyond the Sword";
-const std::filesystem::path(::kSavesDirName) = "Saves (Cv4MiniEngine)";
-const std::filesystem::path(::kSavesAutoDirName) = "auto";
-const std::filesystem::path(::kSavesSingleDirName) = "single";
-const std::filesystem::path(::kReplaysDirName) = "Replays (Cv4MiniEngine)";
-const std::filesystem::path(::kCustomAssetsDirName) = "CustomAssets";
-const std::filesystem::path(::kPublicMapsDirName) = "PublicMaps";
+const std::filesystem::path cvengine::kSavesDirName = "Saves (Cv4MiniEngine)";
+const std::filesystem::path cvengine::kSavesAutoDirName = "auto";
+const std::filesystem::path cvengine::kSavesSingleDirName = "single";
+const std::filesystem::path cvengine::kReplaysDirName = "Replays (Cv4MiniEngine)";
+const std::filesystem::path cvengine::kCustomAssetsDirName = "CustomAssets";
+const std::filesystem::path cvengine::kPublicMapsDirName = "PublicMaps";
 
 static constexpr const wchar_t* kSaveFileExtension = L"CivBeyondSwordSave";
 
 #ifdef _WIN32
-void ::outputDebugString(const char* s)
+void cvengine::outputDebugString(const char* s)
 {
 	OutputDebugStringA(s);
 }
 
-void ::outputDebugString(const wchar_t* s)
+void cvengine::outputDebugString(const wchar_t* s)
 {
 	OutputDebugStringW(s);
 }
 #else
-void ::outputDebugString(const char*)
+void cvengine::outputDebugString(const char*)
 {
 }
 
-void ::outputDebugString(const wchar_t*)
+void cvengine::outputDebugString(const wchar_t*)
 {
 }
 #endif
@@ -218,7 +219,7 @@ namespace
 	};
 }
 
-void ::initDebugOutput()
+void cvengine::initDebugOutput()
 {
 	const std::string defaultTarget = "file log.txt";
 
@@ -281,25 +282,25 @@ void ::initDebugOutput()
 	std::wcerr << L" and [TEST WCERR OUTPUT]" << std::endl;
 }
 
-const fs::path& (::getUserConfigDir)()
+const fs::path& cvengine::getUserConfigDir()
 {
 	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Config);
 	return kPath;
 }
 
-const fs::path& (::getUserDataDir)()
+const fs::path& cvengine::getUserDataDir()
 {
 	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Data);
 	return kPath;
 }
 
-const fs::path& (::getUserCacheDir)()
+const fs::path& cvengine::getUserCacheDir()
 {
 	static const fs::path kPath = heck::getUserGamesSpecialDirectory("Cv4MiniEngine", heck::EUserGamesSpecialDirectory::Cache);
 	return kPath;
 }
 
-std::wstring(::trim)(std::wstring s)
+std::wstring cvengine::trim(std::wstring s)
 {
 	const auto startIt = std::ranges::find_if_not(s, std::iswspace);
 	if (startIt != s.end())
@@ -344,7 +345,7 @@ static std::string convertToNFDString(std::wstring_view s)
 
 static const auto kNfdSaveFileExtension = convertToNFDString(kSaveFileExtension);
 
-std::optional<std::filesystem::path>(::promptSaveFilePath)(const std::filesystem::path& defPath)
+std::optional<std::filesystem::path> cvengine::promptSaveFilePath(const std::filesystem::path& defPath)
 {
 	(void)initNFD();
 
@@ -377,7 +378,7 @@ std::optional<std::filesystem::path>(::promptSaveFilePath)(const std::filesystem
 	}
 }
 
-std::optional<std::filesystem::path>(::promptLoadFilePath)(const std::filesystem::path& defDir)
+std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir)
 {
 	(void)initNFD();
 
@@ -409,7 +410,7 @@ std::optional<std::filesystem::path>(::promptLoadFilePath)(const std::filesystem
 	
 }
 
-std::optional<std::filesystem::path>(::promptDirectoryPath)()
+std::optional<std::filesystem::path> cvengine::promptDirectoryPath()
 {
 	(void)initNFD();
 
@@ -437,26 +438,26 @@ std::optional<std::filesystem::path>(::promptDirectoryPath)()
 //{
 //	return getUserDataDir() / kSavesDirName / kSavesSingleDirName;
 //}
-std::optional<std::filesystem::path>(::promptSaveFilePath)(const std::filesystem::path& defPath)
+std::optional<std::filesystem::path> cvengine::promptSaveFilePath(const std::filesystem::path& defPath)
 {
-	return tryPromptTuiFileBrowserPath({
+	return cvengine::tryPromptTuiFileBrowserPath({
 			.defPath = defPath,
 			.fileExt = kSaveFileExtension,
 			.toSave = true,
 		});
 }
 
-std::optional<std::filesystem::path>(::promptLoadFilePath)(const std::filesystem::path& defDir)
+std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir)
 {
-	return tryPromptTuiFileBrowserPath({
+	return cvengine::tryPromptTuiFileBrowserPath({
 			.defPath = defDir,
 			.fileExt = kSaveFileExtension,
 		});
 }
 
-std::optional<std::filesystem::path>(::promptDirectoryPath)()
+std::optional<std::filesystem::path> cvengine::promptDirectoryPath()
 {
-	return tryPromptTuiFileBrowserPath({
+	return cvengine::tryPromptTuiFileBrowserPath({
 		.defPath = heck::getUserHomeDirectory(),
 		.wantDirectory = true,
 		.useText = false, // This is used before text has been loaded.

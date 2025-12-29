@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <fstream>
 
+using namespace cvengine;
+
 // UPDATE: INI shall now be UTF-8 encoded (although, keys and whitespace are still treated as ASCII).
 
 static constexpr char (*toAsciiCharLower)(char) = heck::toAsciiLower;
@@ -206,7 +208,7 @@ void IniData::createIfNew(const std::filesystem::path& path)
 	(void)std::ofstream(path, std::ios::noreplace);
 }
 
-IniData (::loadINI)(const std::filesystem::path& path)
+IniData cvengine::loadINI(const std::filesystem::path& path)
 {
 	std::ifstream file(path);
 
@@ -276,7 +278,7 @@ IniData (::loadINI)(const std::filesystem::path& path)
 	return iniData;
 }
 
-void ::saveINI(const std::filesystem::path& path, const IniData& ini)
+void cvengine::saveINI(const std::filesystem::path& path, const IniData& ini)
 {
 	std::filesystem::path tempPath = path;
 	tempPath += ".tmp";

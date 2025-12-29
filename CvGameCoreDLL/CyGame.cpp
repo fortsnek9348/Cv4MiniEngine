@@ -132,7 +132,7 @@ int CyGame::getSecretaryGeneral(int /*VoteSourceTypes*/ eVoteSource) const
 
 bool CyGame::canHaveSecretaryGeneral(int /*VoteSourceTypes*/ eVoteSource) const
 {
-	return m_pGame ? (int)m_pGame->canHaveSecretaryGeneral((VoteSourceTypes) eVoteSource) : -1;
+	return m_pGame ? (int)m_pGame->canHaveSecretaryGeneral((VoteSourceTypes) eVoteSource) : true;
 }
 
 int CyGame::getVoteSourceReligion(int /*VoteSourceTypes*/ eVoteSource) const
@@ -731,7 +731,7 @@ int CyGame::getTeamScore(int /*TeamTypes*/ eTeam)
 
 bool CyGame::isOption(int /*GameOptionTypes*/ eIndex)
 {
-	return m_pGame ? m_pGame->isOption((GameOptionTypes)eIndex) : -1;
+	return m_pGame ? m_pGame->isOption((GameOptionTypes)eIndex) : true;
 }
 
 void CyGame::setOption(int /*GameOptionTypes*/ eIndex, bool bEnabled)
@@ -742,12 +742,12 @@ void CyGame::setOption(int /*GameOptionTypes*/ eIndex, bool bEnabled)
 
 bool CyGame::isMPOption(int /*MultiplayerOptionTypes*/ eIndex)
 {
-	return m_pGame ? m_pGame->isMPOption((MultiplayerOptionTypes)eIndex) : -1;
+	return m_pGame ? m_pGame->isMPOption((MultiplayerOptionTypes)eIndex) : true;
 }
 
 bool CyGame::isForcedControl(int /*ForceControlTypes*/ eIndex)
 {
-	return m_pGame ? m_pGame->isForcedControl((ForceControlTypes)eIndex) : -1;
+	return m_pGame ? m_pGame->isForcedControl((ForceControlTypes)eIndex) : true;
 }
 
 int CyGame::getUnitCreatedCount(int /*UnitTypes*/ eIndex)
@@ -762,7 +762,7 @@ int CyGame::getUnitClassCreatedCount(int /*UnitClassTypes*/ eIndex)
 
 bool CyGame::isUnitClassMaxedOut(int /*UnitClassTypes*/ eIndex, int iExtra)
 {
-	return m_pGame ? m_pGame->isUnitClassMaxedOut((UnitClassTypes)eIndex, iExtra) : -1;
+	return m_pGame ? m_pGame->isUnitClassMaxedOut((UnitClassTypes)eIndex, iExtra) : true;
 }
 
 int CyGame::getBuildingClassCreatedCount(int /*BuildingClassTypes*/ eIndex) 

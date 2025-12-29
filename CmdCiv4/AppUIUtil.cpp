@@ -1,7 +1,9 @@
 #include "AppUIUtil.h"
 #include "DLLInterface/MyCvDLLUtility.h"
 
-std::wstring (::getRandomText)()
+using namespace cvengine;
+
+std::wstring cvengine::getRandomText()
 {
 	return MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
 }
@@ -37,7 +39,7 @@ char const* UIInputError::what() const noexcept
 }
 
 
-unsigned int ::strictStringToUInt(std::wstring_view str, std::wstring_view inputName)
+unsigned int cvengine::strictStringToUInt(std::wstring_view str, std::wstring_view inputName)
 {
 	std::wstring trimmedStr = trim(std::wstring(str));
 

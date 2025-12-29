@@ -180,7 +180,6 @@ T& PaddedArray2D<T>::raw(ivec2 coord)
 template<class T>
 void PaddedArray2D<T>::setAllPadding()
 {
-	const std::span<T> storage = std::span(mMemory.get(), mAllocDim.x * mAllocDim.y);
 	//const size_t pitch = mAllocDim.x;
 	if (mMapSizeInfo.wrapX)
 	{

@@ -57,7 +57,7 @@ struct CvGTurnLogWindow::EventLogScrollPanel : tui::ScrollBarPanel
 	std::shared_ptr<tui::Button> btnLoadMore;
 	ETab currentTab = kEvents;
 
-	struct MessageLabel : RichLabel
+	struct MessageLabel : cvengine::RichLabel
 	{
 		heck::ivec2 plotCoord{};
 
@@ -66,7 +66,7 @@ struct CvGTurnLogWindow::EventLogScrollPanel : tui::ScrollBarPanel
 			, plotCoord(msg.getX(), msg.getY())
 		{
 			// Same code as TurnMessageDisplay.
-			colouring = { .text = msg.getFlashColor() != NO_COLOR ? toTuiColour(msg.getFlashColor()) : tui::EColour::Silver, .back = tui::kTransparent };
+			colouring = { .text = msg.getFlashColor() != NO_COLOR ? cvengine::toTuiColour(msg.getFlashColor()) : tui::EColour::Silver, .back = tui::kTransparent };
 			setLabel(buildMessageText(msg));
 		}
 

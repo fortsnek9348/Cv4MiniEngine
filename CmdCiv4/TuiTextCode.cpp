@@ -538,7 +538,7 @@ namespace
 	}
 }
 
-void ::initialiseTextCodeTags()
+void cvengine::initialiseTextCodeTags()
 {
 	kInfo = {};
 	CvDllTranslator::initializeTags(
@@ -547,18 +547,18 @@ void ::initialiseTextCodeTags()
 	);
 }
 
-std::vector<hecktui::Pixel> (::renderCiv4TextCode)(std::wstring_view textcode, hecktui::Pixel defPixel)
+std::vector<hecktui::Pixel> cvengine::renderCiv4TextCode(std::wstring_view textcode, hecktui::Pixel defPixel)
 {
 	//return renderCiv4Xml(replaceSymbolsAsXml(lowerToXml(textcode)), defPixel);
 	return renderCiv4Xml(replaceSymbolsAsXml(std::wstring(textcode)), defPixel);
 }
 
-std::wstring (::lowerCiv4TextCodeToXml)(std::wstring_view textcode)
+std::wstring cvengine::lowerCiv4TextCodeToXml(std::wstring_view textcode)
 {
 	return lowerToXml(textcode);
 }
 
-hecktui::EColour (::toTuiColour)(ColorTypes civ4Colour)
+hecktui::EColour cvengine::toTuiColour(ColorTypes civ4Colour)
 {
 	// I don't like this special case, but WorldView does.
 	if (civ4Colour == ColorTypes::NO_COLOR)
@@ -566,12 +566,12 @@ hecktui::EColour (::toTuiColour)(ColorTypes civ4Colour)
 	return toTuiColour(gGlobals.getColorInfo(civ4Colour).getColor());
 }
 
-hecktui::EColour(::toTuiColour)(NiColorA civ4Colour)
+hecktui::EColour cvengine::toTuiColour(NiColorA civ4Colour)
 {
 	return hecktui::toColourFromRGBF({ civ4Colour.r, civ4Colour.g, civ4Colour.b });
 }
 
-hecktui::EColour (::darken)(hecktui::EColour colour, int n)
+hecktui::EColour cvengine::darken(hecktui::EColour colour, int n)
 {
 	if (n <= 0)
 		return colour;
@@ -603,7 +603,7 @@ hecktui::EColour (::darken)(hecktui::EColour colour, int n)
 	return colour;
 }
 
-hecktui::EColour(::lighten)(hecktui::EColour colour, int n)
+hecktui::EColour cvengine::lighten(hecktui::EColour colour, int n)
 {
 	if (n <= 0)
 		return colour;
@@ -635,7 +635,7 @@ hecktui::EColour(::lighten)(hecktui::EColour colour, int n)
 	return colour;
 }
 
-std::wstring (::stripPixels)(std::span<const hecktui::Pixel> pixels)
+std::wstring cvengine::stripPixels(std::span<const hecktui::Pixel> pixels)
 {
 	return pixels | std::views::transform(&hecktui::Pixel::c) | std::ranges::to<std::wstring>();
 }

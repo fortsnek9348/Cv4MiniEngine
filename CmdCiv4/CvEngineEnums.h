@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace CvEngineEnums
+namespace cvengine
 {
 	enum MouseFlags
 	{

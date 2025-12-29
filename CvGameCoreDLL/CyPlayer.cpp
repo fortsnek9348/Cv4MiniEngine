@@ -300,7 +300,7 @@ int CyPlayer::getNumTradeBonusImports(int /*PlayerTypes*/ ePlayer)
 
 bool CyPlayer::hasBonus(int /*BonusTypes*/ eBonus)
 {
-	return m_pPlayer ? m_pPlayer->hasBonus((BonusTypes)eBonus) : NO_BONUS;
+	return m_pPlayer ? m_pPlayer->hasBonus((BonusTypes)eBonus) : true;
 }
 
 bool CyPlayer::canStopTradingWithTeam(int /*TeamTypes*/ eTeam)
@@ -1717,7 +1717,7 @@ int CyPlayer::getHurryCount(int /*HurryTypes*/ eIndex)
 
 bool CyPlayer::canHurry(int /*HurryTypes*/ eIndex)
 {
-	return m_pPlayer ? m_pPlayer->canHurry((HurryTypes)eIndex) : (int) NO_HURRY;
+	return m_pPlayer ? m_pPlayer->canHurry((HurryTypes)eIndex) : true;
 }
 
 int CyPlayer::getSpecialBuildingNotRequiredCount(int /*SpecialBuildingTypes*/ eIndex)
@@ -1727,7 +1727,7 @@ int CyPlayer::getSpecialBuildingNotRequiredCount(int /*SpecialBuildingTypes*/ eI
 
 bool CyPlayer::isSpecialBuildingNotRequired(int /*SpecialBuildingTypes*/ eIndex)
 {
-	return m_pPlayer ? m_pPlayer->isSpecialBuildingNotRequired((SpecialBuildingTypes)eIndex) : -1;
+	return m_pPlayer ? m_pPlayer->isSpecialBuildingNotRequired((SpecialBuildingTypes)eIndex) : (bool)-1;
 }
 
 bool CyPlayer::isHasCivicOption(int /*CivicOptionTypes*/ eIndex)

@@ -18,9 +18,9 @@
 #include <iostream>
 
 using namespace hecktui;
+using namespace cvengine;
 
-
-bool ::doPythonScreenEventHandling(const CvWidgetDataStruct& widgetData, const PythonScreenControlId& id, CvEngineEnums::NotifyCode notifyCode, CvEngineEnums::MouseFlags mouseFlags)
+bool cvengine::doPythonScreenEventHandling(const CvWidgetDataStruct& widgetData, const PythonScreenControlId& id, cvengine::NotifyCode notifyCode, cvengine::MouseFlags mouseFlags)
 {
 	if (widgetData.m_eWidgetType != WIDGET_PYTHON
 		&& widgetData.m_eWidgetType != WIDGET_LEADERHEAD
@@ -52,7 +52,7 @@ bool ::doPythonScreenEventHandling(const CvWidgetDataStruct& widgetData, const P
 }
 
 
-std::shared_ptr<Element> (::createWidgetTooltip)(CvWidgetDataStruct widgetData)
+std::shared_ptr<Element> cvengine::createWidgetTooltip(CvWidgetDataStruct widgetData)
 {
 	CvWString text;
 
@@ -158,7 +158,7 @@ RichLabel& ActionButton::getLabel()
 
 void ActionButton::onClick([[maybe_unused]] ModifierKeyState modifierKeyState)
 {
-	if (doPythonScreenEventHandling(widgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CLICKED, CvEngineEnums::MOUSE_LBUTTON | CvEngineEnums::MOUSE_LBUTTONUP))
+	if (doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONUP))
 		return;
 
 	(void)CvDLLWidgetData::getInstance().executeAction(widgetData);
@@ -181,7 +181,7 @@ void ActionButton::onRightClick(ModifierKeyState modifierKeyState)
 		// Alt action. Used by foreign advisor bonus page. Right-click on leader headers.
 		// NOTE: No capture state, can drag mouse and release on the button.
 		
-		(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CLICKED, CvEngineEnums::MOUSE_RBUTTON | CvEngineEnums::MOUSE_RBUTTONUP);
+		(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_RBUTTON | cvengine::MOUSE_RBUTTONUP);
 		
 		(void)CvDLLWidgetData::getInstance().executeAltAction(widgetData);
 		CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
@@ -195,7 +195,7 @@ bool ActionButton::onEvent(const hecktui::ConsoleEvent& e)
 	//	// Alt action. Used by foreign advisor bonus page. Right-click on leader headers.
 	//	// NOTE: No capture state, can drag mouse and release on the button.
 	//	
-	//	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CLICKED, CvEngineEnums::MOUSE_RBUTTON | CvEngineEnums::MOUSE_RBUTTONUP);
+	//	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_RBUTTON | cvengine::MOUSE_RBUTTONUP);
 	//
 	//	(void)CvDLLWidgetData::getInstance().executeAltAction(widgetData);
 	//	CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
@@ -208,12 +208,12 @@ bool ActionButton::onEvent(const hecktui::ConsoleEvent& e)
 void ActionButton::onBeginMouseHover()
 {
 	EmptyButton::onBeginMouseHover();
-	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CURSOR_MOVE_ON, CvEngineEnums::MouseFlags());
+	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CURSOR_MOVE_ON, cvengine::MouseFlags());
 }
 void ActionButton::onEndMouseHover()
 {
 	EmptyButton::onEndMouseHover();
-	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CURSOR_MOVE_OFF, CvEngineEnums::MouseFlags());
+	(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CURSOR_MOVE_OFF, cvengine::MouseFlags());
 }
 
 std::shared_ptr<Element> ActionButton::createTooltip() const
@@ -237,9 +237,9 @@ static std::wstring guessCommonString(std::wstring_view keyA, std::wstring_view 
 	const size_t commonEndLength = std::mismatch(textA.rbegin(), textA.rend(), textB.rbegin(), textB.rend()).first - textA.rbegin();
 
 	if (commonStartLength >= commonEndLength)
-		return trim(textA.substr(0, commonStartLength));
+		return cvengine::trim(textA.substr(0, commonStartLength));
 	else
-		return trim(textA.substr(textA.size() - commonEndLength));
+		return cvengine::trim(textA.substr(textA.size() - commonEndLength));
 }
 
 static std::wstring makeActionLabel(CvInterface& interfaceController, const CvWidgetDataStruct& widgetInfo)
@@ -324,7 +324,7 @@ static std::wstring makeActionLabel(CvInterface& interfaceController, const CvWi
 	return name;
 }
 
-std::shared_ptr<ActionButton>(::makeActionButtonWithAutoLabel)(const CvGame& game, CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex, int data2)
+std::shared_ptr<ActionButton> cvengine::makeActionButtonWithAutoLabel(const CvGame& game, CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex, int data2)
 {
 	CvWidgetDataStruct widgetInfo{
 		.m_iData1 = actionIndex, // Probably from python code.
@@ -341,12 +341,12 @@ std::shared_ptr<ActionButton>(::makeActionButtonWithAutoLabel)(const CvGame& gam
 	return btn;
 }
 
-std::shared_ptr<ActionButton> (::makeActionButtonWithManualLabel)(std::wstring_view label, CvWidgetDataStruct widgetType, std::function<void()> onClickCallback)
+std::shared_ptr<ActionButton> cvengine::makeActionButtonWithManualLabel(std::wstring_view label, CvWidgetDataStruct widgetType, std::function<void()> onClickCallback)
 {
 	return std::make_shared<ActionButton>(label, widgetType, std::move(onClickCallback));
 }
 
-std::shared_ptr<ActionButton> makeEmptyActionButton(CvWidgetDataStruct widgetType)
+std::shared_ptr<ActionButton> cvengine::makeEmptyActionButton(CvWidgetDataStruct widgetType)
 {
 	return std::make_shared<ActionButton>(widgetType, nullptr);
 }
@@ -364,12 +364,12 @@ void ActionCheckBox::setPythonScreenControlId(PythonScreenControlId screen)
 
 void ActionCheckBox::onCheckChanged()
 {
-	(void)doPythonScreenEventHandling(mWidgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_CLICKED, CvEngineEnums::MOUSE_LBUTTON | CvEngineEnums::MOUSE_LBUTTONUP);
+	(void)doPythonScreenEventHandling(mWidgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONUP);
 	(void)CvDLLWidgetData::getInstance().executeAction(mWidgetData);
 	CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
 }
 
-std::shared_ptr<ActionCheckBox>(::makeActionCheckBoxWithAutoLabel)(CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex)
+std::shared_ptr<ActionCheckBox> cvengine::makeActionCheckBoxWithAutoLabel(CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex)
 {
 	const CvWidgetDataStruct widgetInfo{
 		.m_iData1 = actionIndex,
@@ -392,7 +392,7 @@ namespace
 
 		virtual void onSelectionChanged() override
 		{
-			(void)doPythonScreenEventHandling(mWidgetData, mPythonScreenControlId, CvEngineEnums::NOTIFY_LISTBOX_ITEM_SELECTED, CvEngineEnums::MOUSE_LBUTTON | CvEngineEnums::MOUSE_LBUTTONUP);
+			(void)doPythonScreenEventHandling(mWidgetData, mPythonScreenControlId, cvengine::NOTIFY_LISTBOX_ITEM_SELECTED, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONUP);
 		}
 
 	private:
@@ -401,7 +401,7 @@ namespace
 	};
 }
 
-std::shared_ptr<hecktui::Combobox> (::makePythonCombobox)(WidgetTypes widgetType, int actionIndex, int data2, PythonScreenControlId pythonCtrlId)
+std::shared_ptr<hecktui::Combobox> cvengine::makePythonCombobox(WidgetTypes widgetType, int actionIndex, int data2, PythonScreenControlId pythonCtrlId)
 {
 	return std::make_shared<PythonCombobox>(CvWidgetDataStruct{ actionIndex, data2, false, widgetType }, std::move(pythonCtrlId));
 }
@@ -440,7 +440,7 @@ void TurnMessageDisplay::updateTurnMessageDisplay()
 
 		explicit MessageRichLabel(const CvTalkingHeadMessage& msg) : RichLabel(std::wstring_view()), location(msg.getX(), msg.getY())
 		{
-			colouring = { .text = msg.getFlashColor() != NO_COLOR ? toTuiColour(msg.getFlashColor()) : EColour::Silver, .back = kTransparent };
+			colouring = { .text = msg.getFlashColor() != NO_COLOR ? cvengine::toTuiColour(msg.getFlashColor()) : EColour::Silver, .back = kTransparent };
 			setLabel(msg.getDescription());
 		}
 
@@ -488,5 +488,5 @@ PythonScreenSlider::PythonScreenSlider(int max, PythonScreenControlId pythonScre
 void PythonScreenSlider::onSliderValueChanged()
 {
 	(void)doPythonScreenEventHandling({ .m_iData1 = -1, .m_iData2 = -1, .m_bOption{}, .m_eWidgetType = WIDGET_PYTHON },
-		mPythonScreenControlId, CvEngineEnums::NOTIFY_SLIDER_NEWSTOP, CvEngineEnums::MOUSE_LBUTTON | CvEngineEnums::MOUSE_LBUTTONDOWN);
+		mPythonScreenControlId, cvengine::NOTIFY_SLIDER_NEWSTOP, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONDOWN);
 }

@@ -90,8 +90,8 @@ std::shared_ptr<hecktui::Window> CvTuiDialog::createTuiWindow(bool passInputToMa
 	//	.isDefaultFocus = passInput,
 	//	.isFullscreen = mWantFullscreen,
 	//	.isModal = mIsModal,
-	//	.canClose = mScreenKind != CvEngineEnums::ECvScreen::MAIN_INTERFACE,
-	//	.borderStyle = mScreenKind != CvEngineEnums::ECvScreen::MAIN_INTERFACE ? hecktui::EBorderStyle::Rounded : hecktui::EBorderStyle::None,
+	//	.canClose = mScreenKind != cvengine::ECvScreen::MAIN_INTERFACE,
+	//	.borderStyle = mScreenKind != cvengine::ECvScreen::MAIN_INTERFACE ? hecktui::EBorderStyle::Rounded : hecktui::EBorderStyle::None,
 	//};
 
 	struct ScreenWindow : hecktui::Window
@@ -138,7 +138,7 @@ std::shared_ptr<hecktui::Window> CvTuiDialog::createTuiWindow(bool passInputToMa
 
 		virtual bool onEvent(const hecktui::ConsoleEvent& e) override
 		{
-			return hecktui::Window::onEvent(e) || (isPassInput && handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
+			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
 		}
 	};
 

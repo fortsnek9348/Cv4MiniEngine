@@ -9,7 +9,7 @@ void PythonScreen::rebuildPythonScreen()
 	clear();
 	switch (getKind())
 	{
-	case CvEngineEnums::ECvScreen::MAIN_INTERFACE:
+	case cvengine::ECvScreen::MAIN_INTERFACE:
 		(void)MyCvDLLPython().callFunction("CvScreensInterface", "showMainInterface", nullptr);
 		break;
 	default:

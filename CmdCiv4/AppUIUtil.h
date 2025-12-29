@@ -2,46 +2,50 @@
 
 #include <HeckTextUI/Combobox.h>
 
-std::wstring getRandomText();
 
-class IWindowChildEventHandler
+namespace cvengine
 {
-public:
-	virtual void onComboBoxSelectionChanged(hecktui::Combobox&) {}
-	virtual void onCheckBoxValueChanged(hecktui::Checkbox&) {}
-	virtual ~IWindowChildEventHandler() = default;
-};
+	std::wstring getRandomText();
 
-class MyComboBox : public hecktui::Combobox
-{
-public:
-	explicit MyComboBox(IWindowChildEventHandler& eventHandler, hecktui::EComboboxStyle style = hecktui::EComboboxStyle::Bulky);
+	class IWindowChildEventHandler
+	{
+	public:
+		virtual void onComboBoxSelectionChanged(hecktui::Combobox&) {}
+		virtual void onCheckBoxValueChanged(hecktui::Checkbox&) {}
+		virtual ~IWindowChildEventHandler() = default;
+	};
 
-	virtual void onSelectionChanged() override;
+	class MyComboBox : public hecktui::Combobox
+	{
+	public:
+		explicit MyComboBox(IWindowChildEventHandler& eventHandler, hecktui::EComboboxStyle style = hecktui::EComboboxStyle::Bulky);
 
-private:
-	IWindowChildEventHandler& mHandler;
-};
+		virtual void onSelectionChanged() override;
 
-class MyCheckBox : public hecktui::Checkbox
-{
-public:
-	explicit MyCheckBox(IWindowChildEventHandler& eventHandler, hecktui::ECheckStyle style, std::wstring label);
+	private:
+		IWindowChildEventHandler& mHandler;
+	};
 
-	virtual void onCheckChanged() override;
+	class MyCheckBox : public hecktui::Checkbox
+	{
+	public:
+		explicit MyCheckBox(IWindowChildEventHandler& eventHandler, hecktui::ECheckStyle style, std::wstring label);
 
-private:
-	IWindowChildEventHandler& mHandler;
-};
+		virtual void onCheckChanged() override;
 
-class UIInputError : public std::exception
-{
-public:
-	std::wstring msg;
+	private:
+		IWindowChildEventHandler& mHandler;
+	};
 
-	explicit UIInputError(std::wstring msg);
+	class UIInputError : public std::exception
+	{
+	public:
+		std::wstring msg;
 
-	virtual char const* what() const noexcept override;
-};
+		explicit UIInputError(std::wstring msg);
 
-unsigned int strictStringToUInt(std::wstring_view str, std::wstring_view inputName);
+		virtual char const* what() const noexcept override;
+	};
+
+	unsigned int strictStringToUInt(std::wstring_view str, std::wstring_view inputName);
+}

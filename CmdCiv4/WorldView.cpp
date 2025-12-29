@@ -30,6 +30,9 @@
 
 using heck::range;
 using heck::ivec2;
+using cvengine::darken;
+using cvengine::toTuiColour;
+using cvengine::renderCiv4TextCode;
 
 // originally 9x5 before zooming
 // NOTE: Round for wider plots because consoles are wide.
@@ -1226,7 +1229,7 @@ static void paintPlotText(WorldViewFramebuffer& fb, ivec2 coord, ivec2 zoomVec, 
 			const bool isEnemy = centerUnit->shouldShowEnemyGlow(team);
 
 			// Perfect centering padding.
-			if ((countStr.size() + unitDesc.size()) % 2 != (plotCenterSampledDim.x - 2) % 2)
+			if (static_cast<int>((countStr.size() + unitDesc.size()) % 2) != (plotCenterSampledDim.x - 2) % 2)
 				unitDesc = L" " + unitDesc;
 
 			cells.clear();

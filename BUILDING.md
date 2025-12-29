@@ -19,7 +19,7 @@ On Linux, you will likely need to build SFML 3, Python 2.7, and NFD.
 
 When building dependencies with cmake, remember to build AND install (install to anywhere).
 
-Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
+Tested with VS 2022 MSVC and Clang-CL, Ubuntu Clang 20, and Ubuntu 25.10 G++ 15.
 
 #### Windows VS
 
@@ -49,8 +49,8 @@ Tested with VS 2022 MSVC and Clang-CL, and Ubuntu Clang 20.
 * `export CC=clang-20 CXX=clang++-20`
 * Grab SFML 3 sources and build them:
 	```
-	tar -zxvf 3.0.1.tar.gz
-	cd SFML-3.0.1
+	unzip SFML-3.0.2-sources.zip
+	cd SFML-3.0.2
 	mkdir BuildDebug BuildRelease BuildInstall
 	cmake -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_DEBUG_POSTFIX=d -DSFML_BUILD_WINDOW=OFF -DSFML_BUILD_GRAPHICS=OFF -DSFML_BUILD_NETWORK=OFF -DBUILD_SHARED_LIBS=ON -B BuildDebug   -S . && cmake --build BuildDebug   && cmake --install BuildDebug   --prefix BuildInstall
 	cmake -DCMAKE_BUILD_TYPE=Release                         -DSFML_BUILD_WINDOW=OFF -DSFML_BUILD_GRAPHICS=OFF -DSFML_BUILD_NETWORK=OFF -DBUILD_SHARED_LIBS=ON -B BuildRelease -S . && cmake --build BuildRelease && cmake --install BuildRelease --prefix BuildInstall

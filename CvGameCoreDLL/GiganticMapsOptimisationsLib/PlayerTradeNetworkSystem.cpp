@@ -414,7 +414,7 @@ void PlayerTradeNetworkSystem::onUpdateBonusesAtPlot(const CvPlot& plot)
 	// void CvPlot::updatePlotGroupBonus(bool bAdd)
 	//if (int(mPlayerI) == 5 && getPlotCoord(plot) == i16vec2(21, 12))
 	//	std::clog << __FUNCTION__ << ": player = " << (int)mPlayerI << ' ' << getPlotCoord(plot) << std::endl;
-	const heck::ivec2 coord = getPlotCoord(plot);
+	//const heck::ivec2 coord = getPlotCoord(plot);
 	mGenericSys.onUpdateBonusesAtPlot(getPlotCoord(plot), CivDataSource(mPlayerI));
 	flushCityUpdates();
 	mPendingVerify = true;

@@ -82,7 +82,7 @@ void UnitPostUpdateQueue::setRevealed(CvPlot* plot, TeamTypes eTeam, bool bUpdat
 	//constexpr TeamTypes eFromTeam = NO_TEAM;
 
 	FAssertMsg(eTeam >= 0, "eTeam is expected to be non-negative (invalid Index)");
-	FAssertMsg(eTeam < MAX_TEAMS, "eTeam is expected to be within maximum bounds (invalid Index)");
+	FAssertMsg(std::to_underlying(eTeam) < MAX_TEAMS, "eTeam is expected to be within maximum bounds (invalid Index)");
 
 	struct Evil : CvPlot
 	{
@@ -256,7 +256,7 @@ static void changeInvisibleVisibilityCount(CvPlot* plot, TeamTypes eTeam, Invisi
 void UnitPostUpdateQueue::changeVisibilityCount(CvPlot* plot, TeamTypes eTeam, int iChange, InvisibleTypes eSeeInvisible, bool bUpdatePlotGroups)
 {
 	FAssertMsg(eTeam >= 0, "eTeam is expected to be non-negative (invalid Index)");
-	FAssertMsg(eTeam < MAX_TEAMS, "eTeam is expected to be within maximum bounds (invalid Index)");
+	FAssertMsg(std::to_underlying(eTeam) < MAX_TEAMS, "eTeam is expected to be within maximum bounds (invalid Index)");
 
 	if (iChange == 0)
 		return;

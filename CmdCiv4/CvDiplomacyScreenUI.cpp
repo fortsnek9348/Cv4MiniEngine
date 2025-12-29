@@ -76,7 +76,7 @@ namespace
 			//auto lblHelp = std::make_shared<RichLabel>(buf.getCString());
 			//lblHelp->enableWrapping = true;
 			//return lblHelp;
-			return createWidgetTooltip({
+			return cvengine::createWidgetTooltip({
 				.m_iData1 = tradeData.m_eItemType,
 				.m_iData2 = tradeData.m_iData,
 				.m_bOption = isAIPlayer,
@@ -191,7 +191,7 @@ CvDiplomacyScreenUI::CvDiplomacyScreenUI()
 		.gap{ 0, 1 },
 		}));
 
-	mLblLeaderheadText = std::make_shared<RichLabel>(L"");
+	mLblLeaderheadText = std::make_shared<cvengine::RichLabel>(L"");
 	mLblLeaderheadText->setLabelAlignment(hecktui::EAlign::Center);
 	centerPanel->addChild(mLblLeaderheadText);
 

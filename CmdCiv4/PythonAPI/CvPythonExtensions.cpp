@@ -46,7 +46,7 @@ PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
 
 	m.def("loadImportModuleSourceCode", [](const std::string& fullName) {
 		// Must return "bytes". Otherwise, I guess pybind11 passes the string along as unicode, which can't contain an encoding override.
-		return pybind11::bytes(gVFS->loadPythonCodeIfExists(fullName, gLastLoadedModuleVfsPath).value_or(std::string()));
+		return pybind11::bytes(cvengine::gVFS->loadPythonCodeIfExists(fullName, gLastLoadedModuleVfsPath).value_or(std::string()));
 	});
 
 	m.def("getLastImportModuleVfsPath", [] {
@@ -54,10 +54,10 @@ PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
 	});
 
 	m.def("getUserProfileDirectory", [] {
-		return getUserConfigDir().native();
+		return cvengine::getUserConfigDir().native();
 		});
 
-	CvEngineEnums::registerWithPython(m);
+	cvengine::registerEnumsWithPython(m);
 
 	pybind11::class_<CyTranslator>(m, "CyTranslator")
 		.def(pybind11::init())
@@ -100,7 +100,7 @@ PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
 	CyTuiDialog::registerWithPython(m);
 }
 
-void ::unimplementedPythonFunction(std::source_location loc)
+void cvengine::unimplementedPythonFunction(std::source_location loc)
 {
 	throw std::runtime_error(std::string("Unimplemented CvPythonExtensions function: ") + loc.function_name());
 }

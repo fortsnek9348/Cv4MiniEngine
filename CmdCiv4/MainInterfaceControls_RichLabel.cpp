@@ -3,6 +3,7 @@
 #include "UITheme.h"
 
 using namespace hecktui;
+using namespace cvengine;
 
 RichLabel::RichLabel(std::wstring_view label, bool wantMouseInteraction) : Label(L"")
 {
@@ -21,7 +22,7 @@ std::optional<EAxis> RichLabel::getThisWrappingAxis() const noexcept
 
 void RichLabel::setLabel(std::wstring_view label)
 {
-	pixels = renderCiv4TextCode(label, { .colour{ hecktui::kTransparent, hecktui::kTransparent } });
+	pixels = cvengine::renderCiv4TextCode(label, { .colour{ hecktui::kTransparent, hecktui::kTransparent } });
 	maxLineWidth = 0;
 	numLines = 0;
 
@@ -48,7 +49,7 @@ hecktui::LayoutSizeInfo RichLabel::measureThis() const noexcept
 {
 	if (enableWrapping)
 	{
-		const auto rawText = stripPixels(pixels);
+		const auto rawText = cvengine::stripPixels(pixels);
 		hecktui::LayoutSizeInfo info{
 			.minimum = calcWrappedTextMinSize(rawText),
 			.preferred = calcWrappedTextSizeForWidth(rawText, mLayoutWrappingWidth),

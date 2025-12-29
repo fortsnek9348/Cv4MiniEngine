@@ -11,6 +11,7 @@
 #include <ranges>
 
 using namespace hecktui;
+using namespace cvengine;
 
 namespace
 {

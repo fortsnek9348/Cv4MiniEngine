@@ -39,7 +39,7 @@ class CvWString : public std::wstring
 public:
 	CvWString() {}
 	CvWString(const std::string& s) { Copy(s.c_str()); 	}
-	CvWString(const CvWString& s) { *this = s; 	}
+	CvWString(const CvWString& s) : std::wstring() { *this = s; }
 	CvWString(const char* s) { Copy(s); 	}
 	CvWString(const wchar_t* s) { if (s) *this = s; }
 //	CvWString(const __wchar_t* s) { if (s) *this = s; }
