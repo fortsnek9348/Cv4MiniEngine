@@ -414,7 +414,7 @@ namespace GiganticMapsOptimisationsLib::FoundValueSystem
 
 		PlayerPlotInfo HECK_VECTORCALL getPlayerPlotInfo(int cityPlotI) const
 		{
-			return { static_cast<I16Vector>(loadByteVector(flags, addressingCoord + kCityPlotDeltaCoords[cityPlotI], pitch)) };
+			return { loadByteVector(flags, addressingCoord + kCityPlotDeltaCoords[cityPlotI], pitch) };
 		}
 
 		
