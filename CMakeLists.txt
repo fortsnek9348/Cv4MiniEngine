@@ -80,11 +80,13 @@ function (AddGccStyleOption target scope flag)
 	endif()
 endfunction()
 
-foreach(FLAG -Wall -Wextra -Wpedantic -Wno-range-loop-construct -Wno-extra-qualification -Wno-extra-semi
-	-Wno-deprecated-literal-operator -Wno-undefined-inline) # pybind11!
-	
+foreach(FLAG -Wall -Wextra -Wpedantic -Wno-range-loop-construct -Wno-extra-semi -Wno-deprecated-literal-operator)
 	AddGccStyleOption(CommonStuff PUBLIC ${FLAG})
 endforeach()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	target_compile_options(CommonStuff PUBLIC -Wno-undefined-inline -Wno-extra-qualification)
+endif()
 
 # Need this when linking into a Linux shared object, or you'll get a link error.
 set_target_properties(CommonStuff PROPERTIES POSITION_INDEPENDENT_CODE ON)
