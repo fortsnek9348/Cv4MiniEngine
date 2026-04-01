@@ -82,8 +82,8 @@ static uint16_t tieBreakCapital(const CivMapGeometry& mapGeom, heck::ivec2 coord
 			if (!isSettledArea || capitalCity->getArea() == nearestPlot.getArea())
 			{
 				// CvMap::findCity: if (iValue < iBestValue). So in the case of ties, the earlier city in the array is returned.
-				const int nearestId = nearestPlot.getPlotCity()->getID();
-				const int capitalId = map.plotINLINE(capitalCoord.x, capitalCoord.y)->getPlotCity()->getID();
+				const unsigned int nearestId = nearestPlot.getPlotCity()->getID();
+				const unsigned int capitalId = map.plotINLINE(capitalCoord.x, capitalCoord.y)->getPlotCity()->getID();
 				return uint16_t((nearestId & FLTA_INDEX_MASK) < (capitalId & FLTA_INDEX_MASK) ? cityDist : capitalDist | kNearestCityIsCapitalFlag);
 			}
 			// else, capital is not searched by findCity due to area filter.
@@ -127,6 +127,16 @@ void PlayerNearestCityCache::update()
 							prevAreaField = &mAreaCityDistanceFields.at(area->getID());
 						}
 
+						//if ((int)filterPlayerI == 1)
+						//{
+						//	const std::optional<i16vec2> nearestCityCoord = mGlobalCityDistanceField.tryGetNearestCityAt({ x, y });
+						//	std::cout << filterPlayerI << ", " << x << ", " << y
+						//		<< ": isSettledArea=" << isSettledArea
+						//		<< ", nearestCityCoord=" << nearestCityCoord.value_or({ -9 })
+						//		<< '\n';
+						//}
+
+						// If you get a crash around here and you're using clang-cl, make sure CommonStuff is also compiled using clang-cl!
 						if (const std::optional<i16vec2> nearestCityCoord = (isSettledArea ? *prevAreaField : mGlobalCityDistanceField).tryGetNearestCityAt({ x, y }))
 							mDistanceValueField.set({ x, y }, tieBreakCapital(mapGeom, { x, y }, *nearestCityCoord, mCapital, capitalCoord, isSettledArea));
 						else

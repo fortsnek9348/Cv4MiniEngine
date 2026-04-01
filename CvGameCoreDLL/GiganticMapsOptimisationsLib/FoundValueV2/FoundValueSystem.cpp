@@ -317,11 +317,13 @@ std::vector<int> System::computeFoundValuesRow(PlayerTypes playerI, EFilter filt
 		// Only use verification for maps bigger than this.
 		if constexpr (kEnableVerify)
 			std::abort();
-
-		// Non-gigantic map. Fallback to AI_foundValue to avoid out of bounds.
-		// Note that this may be called on multiple threads, so `update` will make sure that lazily calculated values are set before-hand.
-		for (const int x : range(mMapGeom.dim.x))
-			row[x] = calcResultAt(x);
+		else
+		{
+			// Non-gigantic map. Fallback to AI_foundValue to avoid out of bounds.
+			// Note that this may be called on multiple threads, so `update` will make sure that lazily calculated values are set before-hand.
+			for (const int x : range(mMapGeom.dim.x))
+				row[x] = calcResultAt(x);
+		}
 	}
 	else
 	{
