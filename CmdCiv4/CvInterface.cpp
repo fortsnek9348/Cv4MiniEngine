@@ -149,7 +149,8 @@ void CvInterface::processEvents()
 		const bool isStopOnVictory = isAIAutoPlay && game.getGameState() == GAMESTATE_ON;
 		const auto t0 = std::chrono::steady_clock::now();
 		// Used to be 10. `Nuke Test.CivBeyondSwordSave` needs 14 on end turn.
-		for (int i = 0; i < 100 || game.getAIAutoPlay() > 0; ++i)
+		//for (int i = 0; i < 100 || game.getAIAutoPlay() > 0; ++i)
+		for (;;)
 		{
 			if (isAIAutoPlay)
 			{
@@ -185,7 +186,13 @@ void CvInterface::processEvents()
 				}
 			}
 
+			CvPlayer& activePlayer = CvPlayerAI::getPlayerNonInl(game.getActivePlayer());
+
+			//if (activePlayer.isTurnActive() && activePlayer.isHuman() && !activePlayer.hasReadyUnit(true) && !activePlayer.isAutoMoves())
+			//	activePlayer.AI_unitUpdate();
+
 			game.update();
+
 			updateSelectionList();
 			game.updateTestEndTurn();
 			const bool newMessages = DLLMessageQueue::getInstance().execute();
@@ -193,12 +200,37 @@ void CvInterface::processEvents()
 			// Because this TUI loop is purely action-based, some logic is needed to process real-time events.
 			// This seems to work for now. Typically updates 2 to 4 times.
 			++numUpdates;
-			if (!newMessages && oldCycleSelectionCounter == mCycleSelectionCounter
-				&& CvPlayerAI::getPlayerNonInl(game.getActivePlayer()).isTurnActive()
-				//&& CvPlayerAI::getPlayerNonInl(game.getActivePlayer()).isAlive()
-				&& CvPlayerAI::getPlayerNonInl(game.getActivePlayer()).isHuman() // isHuman can be false in AI autoplay if the AI resurrects player 0 as a colony.
-				&& !CvPlayerAI::getPlayerNonInl(game.getActivePlayer()).isAutoMoves()) // This check stops the next update from interferring with unit selection.
-				break;
+			//if (!newMessages && oldCycleSelectionCounter == mCycleSelectionCounter
+			//	&& activePlayer.isTurnActive()
+			//	//&& CvPlayerAI::getPlayerNonInl(game.getActivePlayer()).isAlive()
+			//	&& activePlayer.isHuman() // isHuman can be false in AI autoplay if the AI resurrects player 0 as a colony.
+			//	&& !activePlayer.isAutoMoves()) // This check stops the next update from interferring with unit selection.
+			//{
+			//	break;
+			//}
+
+			const auto hasReadyNonAutomatedUnit = [&] {
+				CvSelectionGroup* pLoopSelectionGroup;
+				int iLoop;
+
+				for (pLoopSelectionGroup = activePlayer.firstSelectionGroup(&iLoop); pLoopSelectionGroup; pLoopSelectionGroup = activePlayer.nextSelectionGroup(&iLoop))
+				{
+					if (pLoopSelectionGroup->readyToMove(false) && !pLoopSelectionGroup->isAutomated())
+					{
+						return true;
+					}
+				}
+
+				return false;
+				};
+
+			// Try to return control to player only when there's something to do. Hopefully we don't get into an infinite loop.
+			// Intended to immediately update automated units at the end of a turn, as in "Automation turns test - Histories6 turn 112 BC-2380.CivBeyondSwordSave".
+			if (!newMessages && oldCycleSelectionCounter == mCycleSelectionCounter)
+				if (activePlayer.isTurnActive())
+					if (hasWaitingPopupsOrDiplo() || isFocusedWidget() || mCurrentPopup || isEndTurnMessage() || hasReadyNonAutomatedUnit())
+						break;
+
 			oldCycleSelectionCounter = mCycleSelectionCounter;
 		}
 		const auto t1 = std::chrono::steady_clock::now();

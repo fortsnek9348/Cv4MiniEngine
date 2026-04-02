@@ -114,7 +114,7 @@ public:
 
 	DllExport bool readyToSelect(bool bAny = false);																										// Exposed to Python
 	// fortsnek: const
-	bool readyToMove(bool bAny = false) const;																																// Exposed to Python
+	DllExportForInterface bool readyToMove(bool bAny = false) const;																																// Exposed to Python
 	bool readyToAuto();																																									// Exposed to Python 
 
 	int getID() const;																																												// Exposed to Python
@@ -143,7 +143,7 @@ public:
 
 	DllExportForInterface AutomateTypes getAutomateType() const;																																		// Exposed to Python
 	// fortsnek: const
-	bool isAutomated() const;																																									// Exposed to Python
+	DllExportForInterface bool isAutomated() const;																																									// Exposed to Python
 	void setAutomateType(AutomateTypes eNewValue);																											// Exposed to Python
 
 	FAStarNode* getPathLastNode() const;
