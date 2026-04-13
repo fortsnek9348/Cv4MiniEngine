@@ -1245,6 +1245,20 @@ bool Game::tryCancelOrders(CommandUnitGroup group)
 	return false;
 }
 
+bool Game::tryAutomate(CommandUnitGroup group, EAutomation automation)
+{
+	if (CvSelectionGroup* const missionGroup = regroup(group))
+	{
+		if (missionGroup->canDoCommand(COMMAND_AUTOMATE, static_cast<int>(automation), -1))
+		{
+			if (missionGroup->getAutomateType() != static_cast<int>(automation))
+				missionGroup->getHeadUnit()->doCommand(COMMAND_AUTOMATE, static_cast<int>(automation), -1); // It's a group command
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Game::tryStopAutomation(CommandUnitGroup group)
 {
 	if (CvSelectionGroup* const missionGroup = regroup(group))
@@ -1338,6 +1352,33 @@ bool Game::canChangeCivicsTo(std::span<const ECivic> civics) const
 bool Game::canChangeStateReligionTo(std::optional<EReligion> religion) const
 {
 	return GET_PLAYER(gGlobals.getGame().getActivePlayer()).canConvert(religion ? static_cast<ReligionTypes>(*religion) : NO_RELIGION);
+}
+
+bool Game::tryChangeCivicsTo(std::span<const ECivic> civics) const
+{
+	if (canChangeCivicsTo(civics))
+	{
+		GET_PLAYER(gGlobals.getGame().getActivePlayer()).revolution(
+			(civics | std::views::transform([](int i) { return static_cast<CivicTypes>(i); }) | std::ranges::to<std::vector>()).data(),
+			true
+		);
+		return true;
+	}
+	else
+		return false;
+}
+
+bool Game::tryChangeStateReligionTo(std::optional<EReligion> optReligion) const
+{
+	if (canChangeStateReligionTo(optReligion))
+	{
+		GET_PLAYER(gGlobals.getGame().getActivePlayer()).convert(
+			optReligion ? static_cast<ReligionTypes>(*optReligion) : NO_RELIGION
+			);
+		return true;
+	}
+	else
+		return false;
 }
 
 void Game::adjustSliders(std::array<int, ECommerce::Num> ratio)
@@ -1513,13 +1554,17 @@ std::vector<CityBuildChoice> Game::getCityProductionChoices(i16vec2 coord) const
 
 	out.reserve(100);
 
-	for (const auto i : heck::range<UnitTypes>(gGlobals.getNumUnitInfos()))
-		if (city.canTrain(i))
-			out.push_back({ ProductionChoice(static_cast<EUnitType>(i)), city.getProductionNeeded(i) });
+	// We're expected to loop over classes, as in CvMainInterface.py.
+	const CvCivilizationInfo& civInfo = gGlobals.getCivilizationInfo(GET_PLAYER(city.getOwnerINLINE()).getCivilizationType());
 
-	for (const auto i : heck::range<BuildingTypes>(gGlobals.getNumBuildingInfos()))
-		if (city.canConstruct(i))
-			out.push_back({ ProductionChoice(static_cast<EBuildingType>(i)), city.getProductionNeeded(i) });
+
+	for (const auto i : heck::range(gGlobals.getNumUnitClassInfos()))
+		if (const auto type = static_cast<UnitTypes>(civInfo.getCivilizationUnits(i)); city.canTrain(type))
+			out.push_back({ ProductionChoice(static_cast<EUnitType>(type)), city.getProductionNeeded(type) });
+
+	for (const auto i : heck::range(gGlobals.getNumBuildingClassInfos()))
+		if (const auto type = static_cast<BuildingTypes>(civInfo.getCivilizationBuildings(i)); city.canConstruct(type))
+			out.push_back({ ProductionChoice(static_cast<EBuildingType>(type)), city.getProductionNeeded(type) });
 
 	for (const auto i : heck::range<ProjectTypes>(gGlobals.getNumProjectInfos()))
 		if (city.canCreate(i))

@@ -5,6 +5,7 @@
 #include "CvGlobals.h"
 #include "CvPlayerAI.h"
 #include "CvDLLUtilityIFaceBase.h"
+#include "CvGameAI.h"
 
 
 //
@@ -95,6 +96,10 @@ void CvEventReporter::gameEnd()
 
 void CvEventReporter::beginGameTurn(int iGameTurn)
 {
+#if ENABLE_PLAYER_BOT
+	// Suppress the top civs popup if running a bot.
+	if (!(GET_PLAYER(gGlobals.getGameINLINE().getActivePlayer()).isPlayerBotRunning()))
+#endif
 	m_kPythonEventMgr.reportBeginGameTurn(iGameTurn);
 }
 

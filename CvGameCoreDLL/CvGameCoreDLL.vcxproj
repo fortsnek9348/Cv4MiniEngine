@@ -390,7 +390,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStrict|x64'">
     <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <UseStructuredOutput>false</UseStructuredOutput>
     <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>
@@ -400,7 +400,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEnhanced|x64'">
     <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <UseStructuredOutput>false</UseStructuredOutput>
     <IntDir>$(ProjectDir)obj\$(Configuration)_$(Platform)_$(PlatformToolset)\</IntDir>

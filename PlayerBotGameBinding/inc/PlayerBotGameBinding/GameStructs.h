@@ -185,12 +185,12 @@ namespace cvbot
 
 	struct TechState
 	{
-		bool isInQueue : 1 = false;
-		bool isResearched : 1 = false;
-		bool canBeFirstToFoundReligion : 1 = false;
-		bool canBeFirstToSpawnsGreatPerson : 1 = false;
-		bool canBeFirstToGetFreeTech : 1 = false;
-		bool canResearch : 1 = false;
+		bool isInQueue = false;
+		bool isResearched = false;
+		bool canBeFirstToFoundReligion = false;
+		bool canBeFirstToSpawnsGreatPerson = false;
+		bool canBeFirstToGetFreeTech = false;
+		bool canResearch = false;
 		int progress = 0;
 		int cost = 0;
 	};

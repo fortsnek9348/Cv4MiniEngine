@@ -21931,9 +21931,13 @@ void CvPlayer::runPlayerBot()
 		m_playerBot->run(cvbot::Game::getInstance());
 		if (!m_listDiplomacy.empty() || !m_listPopups.empty())
 			throw cvbot::BotFailure("Unexpected diplo/popups after running bot.");
-		//game.doControl(CONTROL_FORCEENDTURN);
-		// Send the message directly to bypass modifier keys check...
-		CvMessageControl::getInstance().sendTurnComplete();
+
+		if (game.getGameTurn() + 1 < m_playerBotFinishTurn)
+		{
+			//game.doControl(CONTROL_FORCEENDTURN);
+			// Send the message directly to bypass modifier keys check...
+			CvMessageControl::getInstance().sendTurnComplete();
+		}
 	}
 
 }
@@ -21955,6 +21959,7 @@ void CvPlayer::handleUIForPlayerBot()
 }
 DllExportForInterface bool CvPlayer::isPlayerBotRunning() const
 {
+	// TODO: Because the last turn is not ended, this is true until the user ends turns manually. This should probably be fixed.
 	CvGame& game = GC.getGameINLINE();
 	return m_playerBot && game.getGameTurn() < m_playerBotFinishTurn;
 }

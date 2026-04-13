@@ -225,7 +225,7 @@ void CvInterface::processEvents()
 			// Try to return control to player only when there's something to do. Hopefully we don't get into an infinite loop.
 			// Intended to immediately update automated units at the end of a turn, as in "Automation turns test - Histories6 turn 112 BC-2380.CivBeyondSwordSave".
 			if (!newMessages && oldCycleSelectionCounter == mCycleSelectionCounter)
-				if (activePlayer.isTurnActive())
+				if (activePlayer.isTurnActive() || game.getGameState() == GAMESTATE_OVER)
 					if (hasWaitingPopupsOrDiplo() || isFocusedWidget() || mCurrentPopup || isEndTurnMessage() || hasReadyNonAutomatedUnit())
 						break;
 

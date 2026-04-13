@@ -89,6 +89,7 @@ namespace cvbot
 		virtual bool tryWake(CommandUnitGroup group) = 0;
 		virtual bool trySkipTurn(CommandUnitGroup group) = 0;
 		virtual bool tryCancelOrders(CommandUnitGroup group) = 0; // All orders
+		virtual bool tryAutomate(CommandUnitGroup group, EAutomation automation) = 0; // Does not interrupt automation if it's that same automation.
 		virtual bool tryStopAutomation(CommandUnitGroup group) = 0;
 		virtual bool tryDelete(EUnitId unit) = 0;
 		virtual bool tryGift(EUnitId unitId) = 0;
@@ -101,6 +102,8 @@ namespace cvbot
 		virtual bool canChangeReligion() const = 0;
 		virtual bool canChangeCivicsTo(std::span<const ECivic>) const = 0;
 		virtual bool canChangeStateReligionTo(std::optional<EReligion>) const = 0;
+		virtual bool tryChangeCivicsTo(std::span<const ECivic>) const = 0;
+		virtual bool tryChangeStateReligionTo(std::optional<EReligion>) const = 0;
 		// Input is ratio. Only flexible commerce is considered, and result is rounded to 10% increments, as in UI.
 		virtual void adjustSliders(std::array<int, ECommerce::Num> ratio) = 0;
 		// If tech can't be researched, research is set to None.

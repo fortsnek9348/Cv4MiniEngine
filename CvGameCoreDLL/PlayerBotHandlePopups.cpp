@@ -30,15 +30,13 @@ namespace
 	struct PlayerBotDiplomacyScreen : CvDiplomacyScreen
 	{
 		using CvDiplomacyScreen::CvDiplomacyScreen;
-
-		virtual ~PlayerBotDiplomacyScreen() noexcept override
-		{
-			gGlobals.setDiplomacyScreen(nullptr);
-		}
 	};
 
 	void handleDiplo(CvPlayerAI& player, IBot& bot, std::unique_ptr<CvDiploParameters> diploParams)
 	{
+		static int nesting = 0;
+		assert(nesting++ == 0);
+
 		PlayerBotDiplomacyScreen diploScreen{ std::move(diploParams) };
 		gGlobals.setDiplomacyScreen(&diploScreen);
 
@@ -165,10 +163,15 @@ namespace
 				bot.handleDiploWarDeclaration(game, static_cast<ETeam>(them.getTeam()));
 				choiceName = "USER_DIPLOCOMMENT_WAR_RESPONSE";
 			}
-			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_FIRST_CONTACT") || aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_NO_VASSAL"))
+			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_FIRST_CONTACT")
+				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_NO_VASSAL"))
 			{
 				bot.handleDiploFirstContact(game, aiPlayerI);
 				choiceName = "USER_DIPLOCOMMENT_PEACE";
+			}
+			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_PEACE"))
+			{
+				choiceName = "USER_DIPLOCOMMENT_EXIT";
 			}
 			else
 				throw BotFailure("Unhandled diplo.");
@@ -192,6 +195,8 @@ namespace
 			
 			controller.onClickUserComment(static_cast<DiploCommentTypes>(choice.type), choice.data1, choice.data2);
 		}
+
+		--nesting;
 	}
 
 	PopupReturn makePopupReturnButtonClicked(int groupId, int value)
