@@ -25,12 +25,20 @@
 #include "CyPlot.h"
 #include "CyUnit.h"
 #include "CvEventReporter.h"
-
 #include "CvDLLInterfaceIFaceBase.h"
 #include "CvDLLEntityIFaceBase.h"
 #include "CvDLLEngineIFaceBase.h"
 #include "CvDLLFAStarIFaceBase.h"
 #include "CvDLLPythonIFaceBase.h"
+#include "CvMessageControl.h"
+
+#if ENABLE_PLAYER_BOT
+#include "PlayerBotGameInterface.h"
+#include "PlayerBotUtil.h"
+#include <PlayerBotGameBinding/IPlayerBot.h>
+#include <PlayerBotGameBinding/IPlayerBotPlugin.h>
+#endif
+
 
 //#undef ENABLE_GAMECOREDLL_ENHANCEMENTS
 
@@ -747,11 +755,30 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 
 	m_eventsTriggered.removeAll();
 
+#if ENABLE_PLAYER_BOT
+	m_playerBot.reset();
+	m_playerBotFinishTurn = -1;
+#endif
+
 	if (!bConstructorCall)
 	{
 		AI_reset(false);
 	}
 }
+
+#if ENABLE_PLAYER_BOT
+void CvPlayer::createPlayerBot(const cvbot::IPlayerBotPlugin& plugin)
+{
+	if (!cvbot::checkAPI())
+		throw cvbot::BotFailure("Mod is not compatible with the bot API built into this CvGameCoreDLL.");
+	m_playerBot = plugin.createBot(cvbot::BotInit::getInstance());
+}
+void CvPlayer::setPlayerBotEndTurn(int turn)
+{
+	if (m_playerBot)
+		m_playerBotFinishTurn = turn;
+}
+#endif
 
 
 //////////////////////////////////////
@@ -10763,6 +10790,38 @@ void CvPlayer::setCommercePercent(CommerceTypes eIndex, int iNewValue)
 	}
 }
 
+#if ENABLE_PLAYER_BOT
+void CvPlayer::setCommercePercents(std::array<int, NUM_COMMERCE_TYPES> values)
+{
+	bool changed = false;
+	int sum = 0;
+	for (int i = 0; i < NUM_COMMERCE_TYPES; ++i)
+	{
+		values[i] = range(values[i], 0, 100);
+		changed |= m_aiCommercePercent[i] != values[i];
+		m_aiCommercePercent[i] = values[i];
+		sum += values[i];
+	}
+
+	FAssert(100 == sum);
+
+	if (changed)
+	{
+		updateCommerce();
+
+		AI_makeAssignWorkDirty();
+
+		if (getTeam() == GC.getGameINLINE().getActiveTeam())
+		{
+			gDLL->getInterfaceIFace()->setDirty(GameData_DIRTY_BIT, true);
+			gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
+			gDLL->getInterfaceIFace()->setDirty(CityScreen_DIRTY_BIT, true);
+			gDLL->getInterfaceIFace()->setDirty(Financial_Screen_DIRTY_BIT, true);
+		}
+	}
+}
+#endif
+
 
 void CvPlayer::changeCommercePercent(CommerceTypes eIndex, int iChange)								
 {
@@ -16849,11 +16908,19 @@ void CvPlayer::createGreatPeople(UnitTypes eGreatPersonUnit, bool bIncrementThre
 			if (pPlot->isRevealed(GET_PLAYER((PlayerTypes)iI).getTeam(), false))
 			{
 				gDLL->getInterfaceIFace()->addMessage(((PlayerTypes)iI), false, GC.getEVENT_MESSAGE_TIME(), szReplayMessage, "AS2D_UNIT_GREATPEOPLE", MESSAGE_TYPE_MAJOR_EVENT, pGreatPeopleUnit->getButton(), (ColorTypes)GC.getInfoTypeForString("COLOR_UNIT_TEXT"), iX, iY, true, true);
+
+#if ENABLE_PLAYER_BOT
+				GET_PLAYER((PlayerTypes)iI).sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage{ .optPlayer = static_cast<cvbot::EPlayer>(getID()), .unitType = static_cast<cvbot::EUnitType>(eGreatPersonUnit) });
+#endif
 			}
 			else
 			{
 				CvWString szMessage = gDLL->getText("TXT_KEY_MISC_GP_BORN_SOMEWHERE", pGreatPeopleUnit->getName().GetCString());
 				gDLL->getInterfaceIFace()->addMessage(((PlayerTypes)iI), false, GC.getEVENT_MESSAGE_TIME(), szMessage, "AS2D_UNIT_GREATPEOPLE", MESSAGE_TYPE_MAJOR_EVENT, nullptr, (ColorTypes)GC.getInfoTypeForString("COLOR_UNIT_TEXT"));
+
+#if ENABLE_PLAYER_BOT
+				GET_PLAYER((PlayerTypes)iI).sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage{ .optPlayer = static_cast<cvbot::EPlayer>(NO_PLAYER), .unitType = static_cast<cvbot::EUnitType>(eGreatPersonUnit) });
+#endif
 			}
 		}
 	}
@@ -21853,3 +21920,42 @@ bool CvPlayer::hasSpaceshipArrived() const
 
 	return false;
 }
+
+#if ENABLE_PLAYER_BOT
+void CvPlayer::runPlayerBot()
+{
+	CvGame& game = GC.getGameINLINE();
+	if (m_playerBot && game.getGameTurn() < m_playerBotFinishTurn)
+	{
+		handleUIForPlayerBot();
+		m_playerBot->run(cvbot::Game::getInstance());
+		if (!m_listDiplomacy.empty() || !m_listPopups.empty())
+			throw cvbot::BotFailure("Unexpected diplo/popups after running bot.");
+		//game.doControl(CONTROL_FORCEENDTURN);
+		// Send the message directly to bypass modifier keys check...
+		CvMessageControl::getInstance().sendTurnComplete();
+	}
+
+}
+
+void CvPlayer::sendTurnMessageToPlayerBot(cvbot::UnitKilledTurnMessage msg)
+{
+	if (m_playerBot)
+		m_playerBot->onTurnMessage(msg);
+}
+void CvPlayer::sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage msg)
+{
+	if (m_playerBot)
+		m_playerBot->onTurnMessage(msg);
+}
+void CvPlayer::handleUIForPlayerBot()
+{
+	if (m_playerBot)
+		cvbot::handlePopups(static_cast<CvPlayerAI&>(*this), *m_playerBot);
+}
+DllExportForInterface bool CvPlayer::isPlayerBotRunning() const
+{
+	CvGame& game = GC.getGameINLINE();
+	return m_playerBot && game.getGameTurn() < m_playerBotFinishTurn;
+}
+#endif

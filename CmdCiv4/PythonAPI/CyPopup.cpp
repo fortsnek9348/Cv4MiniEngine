@@ -2,6 +2,9 @@
 #include "../CvInterface.h"
 #include "../PythonPopup.h"
 
+#include <CvGlobals.h>
+#include <CvPlayerAI.h>
+
 void CyPopup::registerWithPython(const pybind11::module& m)
 {
 #define R(x) def(#x, &CyPopup::x)

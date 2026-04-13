@@ -1,77 +1,38 @@
-#include "CvDiplomacyScreen.h"
-#include "CvDiplomacyScreenUI.h"
-#include "DLLInterface/MyCvDLLPython.h"
-#include "CvTranslator.h"
+#include "CvDiplomacyController.h"
 #include "CLinkListIterator.h"
-#include "DLLInterface/MyCvDLLUtility.h"
-#include "DLLMessageQueue.h"
-#include "CvButtonPopup.h"
-#include "Common.h"
-#include "CvInterface.h"
+#include "CvDiploParameters.h"
+#include "CvDLLPythonIFaceBase.h"
+#include "CvDLLUtilityIFaceBase.h"
+#include "CvGameAI.h"
+#include "CvGameCoreUtils.h"
+#include "CvGlobals.h"
+#include "CvPlayerAI.h"
+#include "CvPopupInfo.h"
+#include "CvTeamAI.h"
+#include "CyArgsList.h"
 
-#include <CvDLLButtonPopup.h>
-#include <CvDiploParameters.h>
-#include <CvGlobals.h>
-#include <CvGameCoreUtils.h>
-#include <CvGameAI.h>
-#include <CvPlayerAI.h>
-#include <CvGameTextMgr.h>
-#include <CyArgsList.h>
-#include <CvMessageData.h>
-#include <CvTeamAI.h>
-#include <CvDLLWidgetData.h>
-
-#include <HeckTextUI/Window.h>
-
+#include <algorithm>
 #include <ranges>
 
-static std::wstring getTradeItemLabel(PlayerTypes ownerPlayerI, PlayerTypes otherPlayerI, TradeData item, bool isOffer, bool isShowCurrent)
-{
-	if (isOffer)
-		std::swap(ownerPlayerI, otherPlayerI); // WEIRD!
-
-	CvString icon;
-	CvWString label;
-	if (!GET_PLAYER(ownerPlayerI).getItemTradeString(otherPlayerI, isOffer, isShowCurrent, item, label, icon))
-		label = L"[UNKNOWN]";
-	return label;
-}
-
-CvDiplomacyScreen::CvDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams)
-	: CvGInterfaceScreen("Diplomacy Screen", cvengine::ECvScreen::DIPLOMACY_SCREEN)
-	, mDiploParams(std::move(diploParams))
-	, mUI(std::make_shared<CvDiplomacyScreenUI>())
+CvDiplomacyController::CvDiplomacyController(std::unique_ptr<CvDiploParameters> diploParams)
+	: mDiploParams(std::move(diploParams))
 	, mSides{ {
 		Side{.playerI = mDiploParams->getWhoTalkingTo(), .teamI = GET_PLAYER(mDiploParams->getWhoTalkingTo()).getTeam() },
 		Side{.playerI = GC.getGame().getActivePlayer(), .teamI = GC.getGame().getActiveTeam() },
 	} }
 {
-	getTuiRoot()->addChild(mUI);
-	getTuiRoot()->setLayout(std::make_unique<hecktui::FillLayout>());
-
-	gGlobals.setDiplomacyScreen(this);
-
-	startDiplo(false);
 }
 
-void CvDiplomacyScreen::startDiplo(bool isRegreet)
+void CvDiplomacyController::startDiplo(bool isRegreet)
 {
-	mUI->setLeaderheadTooltip({
-		.m_iData1 = mSides[kSideAI].playerI,
-		.m_iData2 = mSides[kSideActive].playerI,
-		.m_bOption = false,
-		.m_eWidgetType = WIDGET_LEADERHEAD,
-		});
-
 	CvPlayerAI& aiPlayer = GET_PLAYER(mSides[kSideAI].playerI);
 
 	mCurrentAIDiploComment = NO_DIPLOCOMMENT;
 
-	
 	if (!isRegreet)
 	{
 		mCurrentAIDiploComment = mDiploParams->getDiploComment();
-		
+
 		if (mCurrentAIDiploComment == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_JOIN_WAR"))
 		{
 			// Check if we can actually declare war.
@@ -99,8 +60,9 @@ void CvDiplomacyScreen::startDiplo(bool isRegreet)
 				{
 					if (GET_PLAYER(mSides[side].playerI).canTradeItem(mSides[1 - side].playerI, item, false))
 					{
-						if (mSides[side].addToOffer(item))
-							mUI->addOfferTradeItem(side, item, getTradeItemLabel(mSides[side].playerI, mSides[1 - side].playerI, item, true, false));
+						(void)mSides[side].addToOffer(item);
+						//if (mSides[side].addToOffer(item))
+						//	mUI->addOfferTradeItem(side, item, getTradeItemLabel(mSides[side].playerI, mSides[1 - side].playerI, item, true, false));
 					}
 					else
 						return false;
@@ -109,12 +71,12 @@ void CvDiplomacyScreen::startDiplo(bool isRegreet)
 				};
 			const bool canOffer = tryLoadOffer(kSideActive, mDiploParams->getOurOfferList())
 				&& tryLoadOffer(kSideAI, mDiploParams->getTheirOfferList());
-			
+
 
 			if (canOffer && dealToEndWar()) // If this is a wartime offer from the AI, then check we can end the war.
 			{
 				updateTradeInventories();
-				updateTradeInventoriesUI();
+				//updateTradeInventoriesUI();
 			}
 			else
 			{
@@ -126,7 +88,7 @@ void CvDiplomacyScreen::startDiplo(bool isRegreet)
 	}
 
 	DiploEventTypes diploEvent = mDiploParams->getAIContact() ? DIPLOEVENT_AI_CONTACT : DIPLOEVENT_CONTACT;
-	
+
 	// Not sure what happens if AI sends diplo request when also refuses to talk...
 	// UPDATE: Okay, load "Axolotl7 BC-0320 Cancel deals from AI" and press next turn.
 	//         Napoleon will greet you and immediately demand you to cancel deals afterwards.
@@ -146,7 +108,7 @@ void CvDiplomacyScreen::startDiplo(bool isRegreet)
 			diploEvent = DIPLOEVENT_FAILED_CONTACT;
 		}
 	}
-	
+
 	{
 		CyArgsList args;
 		args.add(static_cast<int>(mCurrentAIDiploComment));
@@ -162,32 +124,34 @@ void CvDiplomacyScreen::startDiplo(bool isRegreet)
 				std::abort();
 			}
 		}
-		(void)MyCvDLLPython().callFunction(PYDiplomacyModule, "beginDiplomacy", args.makeFunctionArgs());
+		gGlobals.getDLLIFace()->getPythonIFace()->callFunction(PYDiplomacyModule, "beginDiplomacy", args.makeFunctionArgs());
 	}
 
 	if (!isRegreet)
 		sendDiploEvent(diploEvent, -1, -1);
 }
 
-void CvDiplomacyScreen::addUserComment(DiploCommentTypes eComment, int iData1, int iData2,
+void CvDiplomacyController::addUserComment(DiploCommentTypes eComment, int iData1, int iData2,
 	const std::wstring& szString, const std::vector<std::wstring>& txtArgs)
 {
 	const std::vector<CvDLLUtilityIFaceBase::TextArg> formatTextArgs(std::from_range, txtArgs);
-	mUI->addUserComment(eComment, iData1, iData2, MyCvDLLUtility::getInstance().getTextGeneric(szString, formatTextArgs));
+	//mUI->addUserComment(eComment, iData1, iData2, MyCvDLLUtility::getInstance().getTextGeneric(szString, formatTextArgs));
+	mUserComments.emplace_back(eComment, iData1, iData2, gGlobals.getDLLIFace()->getTextGeneric(szString, formatTextArgs));
 }
-bool CvDiplomacyScreen::isWarDiplo() const
+bool CvDiplomacyController::isWarDiplo() const
 {
 	return ::atWar(mSides[kSideAI].teamI, mSides[kSideActive].teamI);
 }
-void CvDiplomacyScreen::clearUserComments()
+void CvDiplomacyController::clearUserComments()
 {
-	mUI->clearUserComments();
+	mUserComments.clear();
 }
-void CvDiplomacyScreen::endDiplomacy()
+void CvDiplomacyController::endDiplomacy()
 {
-	setWantClose(true);
+	assert(!mPendingPopup);
+	mEndDiplomacy = true;
 }
-bool CvDiplomacyScreen::counterPropose()
+bool CvDiplomacyController::counterPropose()
 {
 	CLinkList<TradeData> counters[2];
 	if (GET_PLAYER(mSides[kSideAI].playerI).AI_counterPropose(
@@ -204,42 +168,47 @@ bool CvDiplomacyScreen::counterPropose()
 		{
 			for (const TradeData item : viewCLinkList(counters[i]))
 			{
-				if (mSides[i].addToOffer(item))
-					mUI->addOfferTradeItem(i, item, getTradeItemLabel(mSides[i].playerI, mSides[1 - i].playerI, item, true, false));
+				//if (mSides[i].addToOffer(item))
+				//	mUI->addOfferTradeItem(i, item, getTradeItemLabel(mSides[i].playerI, mSides[1 - i].playerI, item, true, false));
+				(void)mSides[i].addToOffer(item);
 
 				// AI_counterPropose ignores dual requirement
 				// My Game turn 248 AD-1690 incomplete peace treaty.CivBeyondSwordSave
 				if (CvDeal::isDual(item.m_eItemType))
 				{
 					const int j = 1 - i;
-					if (mSides[j].addToOffer(item))
-						mUI->addOfferTradeItem(j, item, getTradeItemLabel(mSides[j].playerI, mSides[1 - j].playerI, item, true, false));
+					//if (mSides[j].addToOffer(item))
+					//	mUI->addOfferTradeItem(j, item, getTradeItemLabel(mSides[j].playerI, mSides[1 - j].playerI, item, true, false));
+					(void)mSides[j].addToOffer(item);
 				}
 			}
 		}
 		updateTradeInventories();
-		updateTradeInventoriesUI();
+		//updateTradeInventoriesUI();
 		mIsOfferFromAI = true;
 		return true;
 	}
 	else
 		return false;
 }
-void CvDiplomacyScreen::declareWar()
+void CvDiplomacyController::declareWar()
 {
-	auto info = std::make_unique<CvPopupInfo>(BUTTONPOPUP_DECLAREWARMOVE, mSides[kSideAI].playerI, INT_MIN, INT_MIN, 1, false, false);
-	auto popup = std::make_unique<CvButtonPopup>(std::move(info));
-	CvButtonPopup::launch(std::move(popup));
+	//auto info = std::make_unique<CvPopupInfo>(BUTTONPOPUP_DECLAREWARMOVE, mSides[kSideAI].playerI, INT_MIN, INT_MIN, 1, false, false);
+	//auto popup = std::make_unique<CvButtonPopup>(std::move(info));
+	//CvButtonPopup::launch(std::move(popup));
+
+	//GET_PLAYER(mSides[kSideActive].playerI).addPopup(info.release(), true);
+
+	assert(!mPendingPopup);
+	mPendingPopup = std::make_unique<CvPopupInfo>(BUTTONPOPUP_DECLAREWARMOVE, mSides[kSideAI].playerI, INT_MIN, INT_MIN, 1, false, false);
 }
-void CvDiplomacyScreen::sendDiploEvent(DiploEventTypes iDiploEvent, int iData1, int iData2)
+void CvDiplomacyController::sendDiploEvent(DiploEventTypes iDiploEvent, int iData1, int iData2)
 {
 	// TODO: Is this all that happens? Check when USER_DIPLOCOMMENT_ASK.
 	GET_PLAYER(mSides[kSideAI].playerI).handleDiploEvent(iDiploEvent, mSides[kSideActive].playerI, iData1, iData2);
-	// Update UI after cancelling deals.
-	CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::DiploEvent);
 }
 
-bool CvDiplomacyScreen::hasAnnualDeal() const
+bool CvDiplomacyController::hasAnnualDeal() const
 {
 	// Logs show that the engine does go through all deals.
 	std::array<PlayerTypes, 2> diploPlayerList{ mSides[0].playerI, mSides[1].playerI };
@@ -262,20 +231,20 @@ bool CvDiplomacyScreen::hasAnnualDeal() const
 					return true;
 		}
 	}
-	
+
 	return false;
 }
-void CvDiplomacyScreen::implementDeal()
+void CvDiplomacyController::implementDeal()
 {
 	gGlobals.getGame().implementDeal(mSides[kSideActive].playerI, mSides[kSideAI].playerI, &mSides[kSideActive].offer, &mSides[kSideAI].offer, false);
-	CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Deal);
+	//CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Deal);
 
 }
-bool CvDiplomacyScreen::isAIOffer() const
+bool CvDiplomacyController::isAIOffer() const
 {
 	return mIsOfferFromAI;
 }
-bool CvDiplomacyScreen::offerDeal()
+bool CvDiplomacyController::offerDeal()
 {
 	if (GET_PLAYER(mSides[kSideAI].playerI).AI_considerOffer(mSides[kSideActive].playerI, &mSides[kSideActive].offer, &mSides[kSideAI].offer, 1))
 	{
@@ -285,15 +254,15 @@ bool CvDiplomacyScreen::offerDeal()
 	else
 		return false;
 }
-bool CvDiplomacyScreen::isOurOfferEmpty() const
+bool CvDiplomacyController::isOurOfferEmpty() const
 {
 	return mSides[kSideActive].offer.getLength() <= 0;
 }
-bool CvDiplomacyScreen::isTheirOfferEmpty() const
+bool CvDiplomacyController::isTheirOfferEmpty() const
 {
 	return mSides[kSideAI].offer.getLength() <= 0;
 }
-void CvDiplomacyScreen::performHeadAction(LeaderheadAction eAction)
+void CvDiplomacyController::performHeadAction(LeaderheadAction eAction)
 {
 	static constexpr std::array kLabels = std::to_array<std::wstring_view>({
 		L"greeting",
@@ -306,29 +275,30 @@ void CvDiplomacyScreen::performHeadAction(LeaderheadAction eAction)
 		L"agree",
 		});
 
-	mUI->setLeaderheadText(L'[' + std::wstring(GET_PLAYER(mSides[kSideAI].playerI).getName()) + L"'s " + kLabels.at(eAction) + L" face]");
+	mLeaderHeadText = L'[' + std::wstring(GET_PLAYER(mSides[kSideAI].playerI).getName()) + L"'s " + kLabels.at(eAction) + L" face]";
 }
-void CvDiplomacyScreen::setAIComment(DiploCommentTypes iComment)
+void CvDiplomacyController::setAIComment(DiploCommentTypes iComment)
 {
 	mCurrentAIDiploComment = iComment;
 	gGlobals.getGame().handleDiplomacySetAIComment(iComment);
 }
-void CvDiplomacyScreen::setIsAIOffer(bool bOffer)
+void CvDiplomacyController::setIsAIOffer(bool bOffer)
 {
 	mIsOfferFromAI = bOffer;
 }
-void CvDiplomacyScreen::setAIString(std::wstring text)
+void CvDiplomacyController::setAIString(std::wstring text)
 {
-	mUI->setAICommentText(std::move(text));
+	//mUI->setAICommentText(std::move(text));
+	mAICommentText = std::move(text);
 }
-void CvDiplomacyScreen::setShowAllTrade(bool bShow)
+void CvDiplomacyController::setShowAllTrade(bool bShow)
 {
 	mIsShowAllTrade = bShow;
 
-	mUI->setInventoriesVisible(bShow);
+	//mUI->setInventoriesVisible(bShow);
 }
 
-void CvDiplomacyScreen::startTrade(bool bRenegotiate)
+void CvDiplomacyController::startTrade(bool bRenegotiate)
 {
 	if (mIsTradeUIActive)
 		return;
@@ -347,7 +317,7 @@ void CvDiplomacyScreen::startTrade(bool bRenegotiate)
 		GET_PLAYER(mSides[i].playerI).buildTradeTable(mSides[1 - i].playerI, mSides[i].inventory);
 	}
 
-	
+
 
 	mIsTradeUIActive = true;
 	//mIsShowAllTrade = !bRenegotiate;
@@ -400,32 +370,10 @@ void CvDiplomacyScreen::startTrade(bool bRenegotiate)
 	}
 
 	updateTradeInventories();
-
-	const bool isShowCurrent = !mIsShowAllTrade;
-
-	// "isShowCurrent" is for when showing current deals only, not deal renegotiation.
-	const auto getTradeItemLabels = [isShowCurrent](PlayerTypes ownerPlayerI, PlayerTypes otherPlayerI, const CLinkList<TradeData>& items, bool isOffer) {
-		return std::vector<std::wstring>(std::from_range, viewCLinkList(items) | std::views::transform([&](TradeData item) {
-			return getTradeItemLabel(ownerPlayerI, otherPlayerI, item, isOffer, isShowCurrent);
-			}));
-		};
-
-	mUI->startTrade();
-
-	for (int i = 0; i < 2; ++i)
-	{
-		auto& us = mSides[i];
-		auto& them = mSides[1 - i];
-		mUI->setTradeInventory(i, us.inventory, getTradeItemLabels(us.playerI, them.playerI, us.inventory, false));
-		mUI->setTradeOffer(i, us.offer, getTradeItemLabels(us.playerI, them.playerI, us.offer, true), mSides[i].dealIds);
-	}
-
-	updateTradeInventoriesUI();
 }
 
-void CvDiplomacyScreen::endTrade()
+void CvDiplomacyController::endTrade()
 {
-	mUI->endTrade();
 	mIsTradeUIActive = false;
 	for (auto& side : mSides)
 	{
@@ -435,41 +383,73 @@ void CvDiplomacyScreen::endTrade()
 	}
 }
 
-bool CvDiplomacyScreen::isTheirOfferAVassalTribute()
+bool CvDiplomacyController::isTheirOfferAVassalTribute()
 {
 	// The diplo text changes to "Time for your tribute" when specifically demanding resources only.
 	return isOurOfferEmpty() && CvDeal::isVassalTributeDeal(&mSides[kSideAI].offer);
 }
 
-void CvDiplomacyScreen::regreet()
+void CvDiplomacyController::regreet()
 {
 	endTrade();
 	startDiplo(true);
 }
 
-bool CvDiplomacyScreen::isDiplomacyActive() const
+bool CvDiplomacyController::isDiplomacyActive() const
 {
 	return true;
 }
 
-PlayerTypes CvDiplomacyScreen::getDiplomacyAIPlayer() const
+PlayerTypes CvDiplomacyController::getDiplomacyAIPlayer() const
 {
 	return mSides[kSideAI].playerI;
 }
 
-void CvDiplomacyScreen::onClickUserComment(DiploCommentTypes eComment, int iData1, int iData2)
+std::wstring_view CvDiplomacyController::getLeaderHeadText() const
+{
+	return mLeaderHeadText;
+}
+
+std::wstring_view CvDiplomacyController::getAICommentText() const
+{
+	return mAICommentText;
+}
+
+DiploCommentTypes CvDiplomacyController::getAICommentType() const
+{
+	return mCurrentAIDiploComment;
+}
+
+std::span<const CvDiplomacyController::UserComment> CvDiplomacyController::getUserComments() const
+{
+	return mUserComments;
+}
+
+const CvDiplomacyController::Side& CvDiplomacyController::getSide(ESide i) const
+{
+	return mSides[i];
+}
+
+void CvDiplomacyController::onClickUserComment(DiploCommentTypes eComment, int iData1, int iData2)
 {
 	CyArgsList args;
 	args.add(static_cast<int>(eComment));
 	args.add(iData1);
 	args.add(iData2);
-	(void)MyCvDLLPython().callFunction(PYDiplomacyModule, "handleUserResponse", args.makeFunctionArgs());
+	gGlobals.getDLLIFace()->getPythonIFace()->callFunction(PYDiplomacyModule, "handleUserResponse", args.makeFunctionArgs());
 }
 
-static TradeData* findMatchingTradeItem(CLinkList<TradeData>& list, TradeData query)
+const TradeData* CvDiplomacyController::Side::findMatchingTradeItem(const CLinkList<TradeData>& list, TradeData query)
 {
 	for (TradeData& item : viewCLinkList(list))
-		if (CvDiplomacyScreenUI::isMatchingTradeItem(item, query))
+		if (CvDeal::isMatchingTradeItem(item, query))
+			return &item;
+	return nullptr;
+}
+TradeData* CvDiplomacyController::Side::findMatchingTradeItem(CLinkList<TradeData>& list, TradeData query)
+{
+	for (TradeData& item : viewCLinkList(list))
+		if (CvDeal::isMatchingTradeItem(item, query))
 			return &item;
 	return nullptr;
 }
@@ -479,7 +459,7 @@ static bool hasDualDenial(PlayerTypes playerA, PlayerTypes playerB, TradeData it
 	return GET_PLAYER(playerA).getTradeDenial(playerB, item) != NO_DENIAL || GET_PLAYER(playerB).getTradeDenial(playerA, item) != NO_DENIAL;
 }
 
-void CvDiplomacyScreen::onClickTradeItem(TradeData item, bool isOffer, bool isAIPlayer, int dealId)
+CvDiplomacyController::EOfferResult CvDiplomacyController::onClickTradeItem(TradeData item, bool isOffer, bool isAIPlayer, int dealId)
 {
 	const int sideI = !isAIPlayer;
 	const int otherSideI = isAIPlayer;
@@ -488,83 +468,57 @@ void CvDiplomacyScreen::onClickTradeItem(TradeData item, bool isOffer, bool isAI
 
 	if (isOffer && dealId >= 0)
 	{
-		auto info = std::make_unique<CvPopupInfo>(ButtonPopupTypes::BUTTONPOPUP_DEAL_CANCELED, dealId, -1, -1, 0, true);
-		auto popup = std::make_unique<CvButtonPopup>(std::move(info));
-		CvButtonPopup::launch(std::move(popup));
+		//auto info = std::make_unique<CvPopupInfo>(ButtonPopupTypes::BUTTONPOPUP_DEAL_CANCELED, dealId, -1, -1, 0, true);
+		//auto popup = std::make_unique<CvButtonPopup>(std::move(info));
+		//CvButtonPopup::launch(std::move(popup));
+
+		//GET_PLAYER(mSides[kSideActive].playerI).addPopup(info.release(), true);
+		assert(!mPendingPopup);
+		mPendingPopup = std::make_unique<CvPopupInfo>(ButtonPopupTypes::BUTTONPOPUP_DEAL_CANCELED, dealId, -1, -1, 0, true);
 	}
-	else if (TradeData* const invItem = findMatchingTradeItem(side.inventory, item))
+	else if (TradeData* const invItem = Side::findMatchingTradeItem(side.inventory, item))
 	{
 		const bool isAddingToOffer = !isOffer;
 
 		if (isAddingToOffer)
 		{
-			if (!CvDeal::isEndWar(invItem->m_eItemType))
-			{
-				if (!dealToEndWar())
-					return;
-			}
-
 			if (isWarDiplo())
 			{
 				const bool side0Gifting = mSides[0].hasOfferIgnoringPeaceTreaty() || (sideI == 0 && invItem->m_eItemType != CvDeal::getPeaceItem());
 				const bool side1Gifting = mSides[1].hasOfferIgnoringPeaceTreaty() || (sideI == 1 && invItem->m_eItemType != CvDeal::getPeaceItem());
 				if (side0Gifting && side1Gifting)
-				{
-					showPeaceDealError();
-					return;
-				}
+					return EOfferResult::OnlyOneSideMayOfferItems;
+			}
+
+			if (!CvDeal::isEndWar(invItem->m_eItemType))
+			{
+				if (!dealToEndWar())
+					return EOfferResult::CantEndWar;
 			}
 
 			TradeData offerItem = *invItem;
 			if (CvDeal::isGold(offerItem.m_eItemType))
 			{
-				const bool isGpt = CvDeal::getGoldPerTurnItem() == offerItem.m_eItemType;
-				const int max = isGpt
-					? GET_PLAYER(mSides[sideI].playerI).AI_maxGoldPerTurnTrade(mSides[otherSideI].playerI)
-					: GET_PLAYER(mSides[sideI].playerI).AI_maxGoldTrade(mSides[otherSideI].playerI);
-
-				auto popup = std::make_unique<InternalPopup>();
-				popup->headerString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_TRADE_TITLE_GOLD", {});
-				popup->bodyString = MyCvDLLUtility::getInstance().getTextGeneric(
-					isAIPlayer
-					? isGpt ? L"TXT_KEY_TRADE_GPT_FROM_THEM" : L"TXT_KEY_TRADE_GOLD_FROM_THEM"
-					: isGpt ? L"TXT_KEY_TRADE_GPT_TO_OFFER" : L"TXT_KEY_TRADE_GOLD_TO_OFFER",
-					{});
-				popup->controls.push_back(CvPopup::Control{
-					.type = CvPopup::EControlType::SpinBox,
-					.text = std::to_wstring(max),
-					.spinBoxMax = max,
-					});
-				popup->controls.push_back(CvPopup::Control{
-					.type = CvPopup::EControlType::Button,
-					.text = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OK", {}),
-					});
-				popup->optEnterSubmitBtnId = 0;
-				popup->enableEscCancel = true;
-				const std::optional<PopupReturn> result = InternalPopup::launchModal(std::move(popup));
-				if (!result)
-					return;
-				const int n = result->getCurrentSpinBoxValue();
-				if (n <= 0)
-					return;
-				offerItem.m_iData = n;
+				// Caller should have filled this in.
+				offerItem.m_iData = item.m_iData;
+				assert(offerItem.m_iData > 0);
 			}
 			else if (CvDeal::isDual(offerItem.m_eItemType))
 			{
 				if (hasDualDenial(side.playerI, otherSide.playerI, offerItem))
-					return;
+					return EOfferResult::DualFailure;
 
 				// We need the other guy to offer it too.
-				TradeData* const otherGuyInvItem = findMatchingTradeItem(otherSide.inventory, item);
+				TradeData* const otherGuyInvItem = Side::findMatchingTradeItem(otherSide.inventory, item);
 				if (!otherGuyInvItem)
-					return; // ???
+					return EOfferResult::DualFailure;
 
 				if (!otherGuyInvItem->m_bOffering)
 				{
 					otherGuyInvItem->m_bOffering = true;
 					if (otherSide.addToOffer(*otherGuyInvItem))
 					{
-						mUI->addOfferTradeItem(otherSideI, *otherGuyInvItem, getTradeItemLabel(otherSide.playerI, side.playerI, *otherGuyInvItem, true, false));
+						//mUI->addOfferTradeItem(otherSideI, *otherGuyInvItem, getTradeItemLabel(otherSide.playerI, side.playerI, *otherGuyInvItem, true, false));
 						mIsOfferFromAI = false;
 					}
 				}
@@ -572,7 +526,7 @@ void CvDiplomacyScreen::onClickTradeItem(TradeData item, bool isOffer, bool isAI
 
 			if (side.addToOffer(offerItem))
 			{
-				mUI->addOfferTradeItem(sideI, offerItem, getTradeItemLabel(side.playerI, otherSide.playerI, offerItem, true, false));
+				//mUI->addOfferTradeItem(sideI, offerItem, getTradeItemLabel(side.playerI, otherSide.playerI, offerItem, true, false));
 				mIsOfferFromAI = false;
 			}
 		}
@@ -580,105 +534,73 @@ void CvDiplomacyScreen::onClickTradeItem(TradeData item, bool isOffer, bool isAI
 		{
 			if (CvDeal::isDual(invItem->m_eItemType))
 			{
-				if (TradeData* const otherGuyInvItem = findMatchingTradeItem(otherSide.inventory, item))
+				if (TradeData* const otherGuyInvItem = Side::findMatchingTradeItem(otherSide.inventory, item))
 					otherGuyInvItem->m_bOffering = false;
 				if (otherSide.removeFromOffer(*invItem))
 					mIsOfferFromAI = false;
-				mUI->removeOfferTradeItem(otherSideI, *invItem);
+				//mUI->removeOfferTradeItem(otherSideI, *invItem);
 			}
 
 			if (side.removeFromOffer(*invItem))
 				mIsOfferFromAI = false;
-			mUI->removeOfferTradeItem(sideI, *invItem);
+			//mUI->removeOfferTradeItem(sideI, *invItem);
+
+			if (isWarDiplo())
+			{
+				// If gifting items, ensure there's a peace deal.
+				const bool side0Gifting = mSides[0].hasOfferIgnoringPeaceTreaty();
+				const bool side1Gifting = mSides[1].hasOfferIgnoringPeaceTreaty();
+				if (side0Gifting || side1Gifting)
+				{
+					// Reset to cease fire.
+					mSides[0].clearOffer();
+					mSides[1].clearOffer();
+					// This is the message that BTS displays.
+					return EOfferResult::OnlyOneSideMayOfferItems;
+				}
+			}
 		}
 
 		updateTradeInventories();
-		updateTradeInventoriesUI();
+		//updateTradeInventoriesUI();
 		refreshDiplo();
 	}
+
+	return EOfferResult::Success;
 }
 
-bool CvDiplomacyScreen::isTradeScreenActive() const
+bool CvDiplomacyController::isTradeScreenActive() const
 {
 	return mIsTradeUIActive;
 }
 
-const CvDiploParameters& CvDiplomacyScreen::getDiploParams() const
+bool CvDiplomacyController::isShowAllTrade() const
+{
+	return mIsShowAllTrade;
+}
+
+bool CvDiplomacyController::isEndDiplomacy() const
+{
+	return mEndDiplomacy;
+}
+
+const CvDiploParameters& CvDiplomacyController::getDiploParams() const
 {
 	return *mDiploParams;
 }
 
-
-
-void CvDiplomacyScreen::rebuildPythonScreen()
+std::unique_ptr<CvPopupInfo> CvDiplomacyController::popPendingPopup()
 {
+	return std::move(mPendingPopup);
 }
 
-void CvDiplomacyScreen::updateFromGameState(hecktui::Window& wnd)
-{
-	if (mUI)
-		mUI->updateFromGameState(*this);
-	
-	CvWString text;
-	CvGameTextMgr::GetInstance().getTradeScreenHeader(text, mSides[kSideAI].playerI, mSides[kSideActive].playerI, true);
-	wnd.setWindowTitle(std::move(text));
-}
 
-std::shared_ptr<hecktui::Window> CvDiplomacyScreen::createTuiWindow(bool passInput) const
-{
-	const hecktui::WindowConfig config{
-		.isDefaultFocus = passInput,
-		.isFullscreen = false,
-		.isModal = true,
-		.canClose = false,
-		.borderStyle = hecktui::EBorderStyle::Rounded,
-	};
-
-	struct ScreenWindow : hecktui::Window
-	{
-		bool isPassInput = false;
-		EAutoSizeBehaviour autoSizeBehaviour{};
-
-		using hecktui::Window::Window;
-
-		virtual void positionWindowInScene(heck::ivec2 sceneDim) override
-		{
-			if (getWindowConfig().isFullscreen)
-				return Window::positionWindowInScene(sceneDim);
-
-			// TODO: CvAppUI has similar code. Deduplicate.
-			if (!wasMoved() && !wasResized())
-			{
-				//const heck::ivec2 measurement = getLayoutSizeInfo().preferred;
-
-				const int widthFraction = gGlobals.getDiplomacyScreen()->isTradeScreenActive() ? 90 : 50;
-				const int heightFraction = 90;
-
-				const heck::ivec2 size = (heck::ivec2(widthFraction, heightFraction) * sceneDim + 50) / 100;
-
-				const heck::ivec2 position = (sceneDim - size) / 2;
-
-				setRect(heck::iaabb2{
-					.min = position,
-					.max = position + size,
-					}.intersection(heck::iaabb2{ .max = sceneDim }.shrunk({ 1, 1 })));
-			}
-		}
-	};
-
-	auto wnd = std::make_shared<ScreenWindow>(L" ", config);
-	wnd->isPassInput = passInput;
-	wnd->autoSizeBehaviour = EAutoSizeBehaviour::GrowOnly;
-	wnd->setClientArea(getTuiRoot());
-	return wnd;
-}
-
-bool CvDiplomacyScreen::Side::addToOffer(TradeData item)
+bool CvDiplomacyController::Side::addToOffer(TradeData item)
 {
 	// Mark as offered.
 	for (TradeData& invItem : viewCLinkList(inventory))
 	{
-		if (CvDiplomacyScreenUI::isMatchingTradeItem(invItem, item))
+		if (CvDeal::isMatchingTradeItem(invItem, item))
 		{
 			invItem.m_bOffering = true;
 			break;
@@ -686,7 +608,7 @@ bool CvDiplomacyScreen::Side::addToOffer(TradeData item)
 	}
 
 	// Add to offer list if not already in it.
-	if (!std::ranges::any_of(viewCLinkList(offer), std::bind_back(CvDiplomacyScreenUI::isMatchingTradeItem, item)))
+	if (!std::ranges::any_of(viewCLinkList(offer), std::bind_back(CvDeal::isMatchingTradeItem, item)))
 	{
 		offer.insertAtEnd(item);
 		return true;
@@ -695,18 +617,18 @@ bool CvDiplomacyScreen::Side::addToOffer(TradeData item)
 		return false;
 }
 
-bool CvDiplomacyScreen::Side::removeFromOffer(TradeData item)
+bool CvDiplomacyController::Side::removeFromOffer(TradeData item)
 {
 	for (TradeData& invItem : viewCLinkList(inventory))
 	{
-		if (CvDiplomacyScreenUI::isMatchingTradeItem(invItem, item))
+		if (CvDeal::isMatchingTradeItem(invItem, item))
 		{
 			invItem.m_bOffering = false;
 			break;
 		}
 	}
 
-	if (auto* const node = std::ranges::find_if(viewCLinkList(offer), std::bind_back(CvDiplomacyScreenUI::isMatchingTradeItem, item)).node)
+	if (auto* const node = std::ranges::find_if(viewCLinkList(offer), std::bind_back(CvDeal::isMatchingTradeItem, item)).node)
 	{
 		offer.deleteNode(node);
 		return true;
@@ -715,21 +637,29 @@ bool CvDiplomacyScreen::Side::removeFromOffer(TradeData item)
 		return false;
 }
 
-bool CvDiplomacyScreen::Side::hasOfferIgnoringPeaceTreaty() const
+void CvDiplomacyController::Side::clearOffer()
+{
+	for (TradeData& invItem : viewCLinkList(inventory))
+		invItem.m_bOffering = false;
+	
+	offer.clear();
+}
+
+bool CvDiplomacyController::Side::hasOfferIgnoringPeaceTreaty() const
 {
 	return !std::ranges::empty(viewCLinkList(offer) | std::views::filter([](TradeData item) { return item.m_eItemType != CvDeal::getPeaceItem(); }));
 }
 
-bool CvDiplomacyScreen::canOffer(ESide sideI, TradeData item) const
+bool CvDiplomacyController::canOffer(ESide sideI, TradeData item) const
 {
 	const auto view = viewCLinkList(mSides[sideI].inventory);
-	const auto it = std::ranges::find_if(view, std::bind_back(CvDiplomacyScreenUI::isMatchingTradeItem, item));
+	const auto it = std::ranges::find_if(view, std::bind_back(CvDeal::isMatchingTradeItem, item));
 	if (it != view.end())
 		return !it->m_bHidden && GET_PLAYER(mSides[sideI].playerI).getTradeDenial(mSides[1 - sideI].playerI, item) == NO_DENIAL;
 	return false;
 }
 
-bool CvDiplomacyScreen::dealToEndWar()
+bool CvDiplomacyController::dealToEndWar()
 {
 	// If not at war, then we don't need to do anything.
 	if (!isWarDiplo())
@@ -742,7 +672,7 @@ bool CvDiplomacyScreen::dealToEndWar()
 		for (const TradeData& item : viewCLinkList(side.offer))
 			if (CvDeal::isEndWar(item.m_eItemType))
 				return true;
-	
+
 	// Need to add peace to the offer.
 
 	const TradeData defPeaceItem{
@@ -756,62 +686,26 @@ bool CvDiplomacyScreen::dealToEndWar()
 	if (canOffer(kSideAI, defPeaceItem) && canOffer(kSideActive, defPeaceItem))
 	{
 		for (int i = 0; i < 2; ++i)
-			if (mSides[i].addToOffer(defPeaceItem))
-				mUI->addOfferTradeItem(i, defPeaceItem, getTradeItemLabel(mSides[i].playerI, mSides[1 - i].playerI, defPeaceItem, true, false));
+		{
+			//if (mSides[i].addToOffer(defPeaceItem))
+			//	mUI->addOfferTradeItem(i, defPeaceItem, getTradeItemLabel(mSides[i].playerI, mSides[1 - i].playerI, defPeaceItem, true, false));
+			(void)mSides[i].addToOffer(defPeaceItem);
+		}
 		return true;
 	}
 
 	return false;
 }
 
-void CvDiplomacyScreen::refreshDiplo()
+void CvDiplomacyController::refreshDiplo()
 {
 	CyArgsList args;
 	args.add(static_cast<int>(mCurrentAIDiploComment));
-	(void)MyCvDLLPython().callFunction(PYDiplomacyModule, "refresh", args.makeFunctionArgs());
+	gGlobals.getDLLIFace()->getPythonIFace()->callFunction(PYDiplomacyModule, "refresh", args.makeFunctionArgs());
 }
 
-void CvDiplomacyScreen::showPeaceDealError()
-{
-	auto popup = std::make_unique<InternalPopup>();
-	popup->bodyString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_PEACE_ERROR", {});
-	popup->controls.push_back(CvPopup::Control{
-		.type = CvPopup::EControlType::Button,
-		.text = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OK", {}),
-	});
-	popup->optEnterSubmitBtnId = 0;
-	popup->enableEscCancel = true;
-	(void)InternalPopup::launchModal(std::move(popup));
-}
-
-void CvDiplomacyScreen::updateTradeInventories()
+void CvDiplomacyController::updateTradeInventories()
 {
 	for (int i = 0; i < 2; ++i)
 		GET_PLAYER(mSides[i].playerI).updateTradeList(mSides[1 - i].playerI, mSides[i].inventory, mSides[i].offer, mSides[1 - i].offer);
-}
-
-void CvDiplomacyScreen::updateTradeInventoriesUI()
-{
-	for (int i = 0; i < 2; ++i)
-	{
-		auto& us = mSides[i];
-		auto& them = mSides[1 - i];
-
-		//GET_PLAYER(us.playerI).updateTradeList(them.playerI, us.inventory, us.offer, them.offer);
-		mUI->updateTradeInventory(i, { std::from_range, viewCLinkList(us.inventory) | std::views::transform([&](TradeData item) {
-			return CvDiplomacyScreenUI::DynamicTradeProps{
-				.denial = GET_PLAYER(us.playerI).getTradeDenial(them.playerI, item) != NO_DENIAL,
-				.hidden = item.m_bHidden || item.m_bOffering,
-			};
-			}) });
-	}
-
-	const TradeData peaceItem{ .m_eItemType = CvDeal::getPeaceItem(), .m_iData = -1, .m_bOffering{}, .m_bHidden{} };
-	mUI->setCeaseFireVisible(isWarDiplo() && (!findMatchingTradeItem(mSides[0].offer, peaceItem) || !findMatchingTradeItem(mSides[1].offer, peaceItem)));
-}
-
-CvDiplomacyScreen::~CvDiplomacyScreen()
-{
-	assert(gGlobals.getDiplomacyScreen() == this);
-	gGlobals.setDiplomacyScreen(nullptr);
 }

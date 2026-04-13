@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\CommonStuff\DynamicLib.h" />
     <ClInclude Include="inc\CommonStuff\aabb.h" />
     <ClInclude Include="inc\CommonStuff\adj.h" />
     <ClInclude Include="inc\CommonStuff\Array2D.h" />
@@ -63,6 +64,7 @@
     <ClInclude Include="UserMarks.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DynamicLibrary.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="StringConversion.cpp" />
     <ClCompile Include="StatisticsRegistry.cpp" />

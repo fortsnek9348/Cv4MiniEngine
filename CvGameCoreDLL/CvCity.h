@@ -205,9 +205,9 @@ public:
 	int totalBadBuildingHealth() const;														// Exposed to Python
 	int goodHealth() const;																				// Exposed to Python
 	int badHealth(bool bNoAngry = false, int iExtra = 0) const;		// Exposed to Python
-	DllExportForInterface int healthRate(bool bNoAngry = false, int iExtra = 0) const;	// Exposed to Python
+	int healthRate(bool bNoAngry = false, int iExtra = 0) const;	// Exposed to Python
 	int foodConsumption(bool bNoAngry = false, int iExtra = 0) const;				// Exposed to Python
-	DllExportForInterface int foodDifference(bool bBottom = true) const;								// Exposed to Python
+	int foodDifference(bool bBottom = true) const;								// Exposed to Python
 	int growthThreshold() const;																	// Exposed to Python
 
 	int productionLeft() const;																							// Exposed to Python

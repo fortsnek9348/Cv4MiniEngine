@@ -8,8 +8,12 @@
 #include "LinkedList.h"
 #include "CvTalkingHeadMessage.h"
 #include "FFreeListTrashArray.h"
+
+#include "PlayerBotEnablement.h"
+
 #include <list>
 #include <unordered_map>
+#include <memory>
 
 #ifdef ENABLE_GAMECOREDLL_ENHANCEMENTS
 #include <unordered_set>
@@ -40,6 +44,16 @@ namespace GiganticMapsOptimisationsLib
 }
 #endif
 
+#if ENABLE_PLAYER_BOT
+namespace cvbot
+{
+	class IBot;
+	class IPlayerBotPlugin;
+	struct UnitKilledTurnMessage;
+	struct GreatPersonTurnMessage;
+}
+#endif
+
 class CvPlayer
 {
 public:
@@ -49,6 +63,11 @@ public:
 	DllExport void init(PlayerTypes eID);
 	DllExport void setupGraphical();
 	DllExport void reset(PlayerTypes eID = NO_PLAYER, bool bConstructorCall = false);
+
+#if ENABLE_PLAYER_BOT
+	DllExportForInterface void createPlayerBot(const cvbot::IPlayerBotPlugin& plugin);
+	void setPlayerBotEndTurn(int turn);
+#endif
 
 protected:
 
@@ -700,6 +719,10 @@ public:
 
 	DllExportForInterface int getCommercePercent(CommerceTypes eIndex) const;																								// Exposed to Python
 	void setCommercePercent(CommerceTypes eIndex, int iNewValue);																// Exposed to Python
+#if ENABLE_PLAYER_BOT && _USRDLL
+	// New function to allow setting commerce without normalisation.
+	void setCommercePercents(std::array<int, NUM_COMMERCE_TYPES> values);
+#endif
 	DllExport void changeCommercePercent(CommerceTypes eIndex, int iChange);										// Exposed to Python
 
 	int getCommerceRate(CommerceTypes eIndex) const;																									// Exposed to Python
@@ -1004,6 +1027,15 @@ public:
 	DllExport const CvArtInfoUnit* getUnitArtInfo(UnitTypes eUnit, int iMeshGroup = 0) const;
 	DllExport bool hasSpaceshipArrived() const;
 
+#if ENABLE_PLAYER_BOT
+	void runPlayerBot();
+	void sendTurnMessageToPlayerBot(cvbot::UnitKilledTurnMessage msg);
+	void sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage msg);
+	void handleUIForPlayerBot();
+	// Returns true iff there is a player bot and we haven't reached its end turn yet.
+	DllExportForInterface bool isPlayerBotRunning() const;
+#endif
+
 	virtual void AI_init() = 0;
 	virtual void AI_reset(bool bConstructor) = 0;
 	virtual void AI_doTurnPre() = 0;
@@ -1285,6 +1317,11 @@ protected:
 	CvTurnScoreMap m_mapPowerHistory;
 	CvTurnScoreMap m_mapCultureHistory;
 	CvTurnScoreMap m_mapEspionageHistory;
+
+#if ENABLE_PLAYER_BOT
+	std::unique_ptr<cvbot::IBot> m_playerBot;
+	int m_playerBotFinishTurn;
+#endif
 
 	void doGold();
 	void doResearch();

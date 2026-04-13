@@ -4,11 +4,9 @@
 #include "CvString.h"
 #include "LinkedList.h"
 #include "CvPlotGroup.h"
-#include <bitset>
 
-#if ENABLE_GAMECOREDLL_ENHANCEMENTS
+#include <bitset>
 #include <optional>
-#endif
 
 #ifdef _WIN32
 #pragma warning( disable: 4251 )		// needs to have dll-interface to be used by clients of class
@@ -80,8 +78,8 @@ public:
 	bool isSamePlotGroup(PlayerTypes ePlayer, const CvPlot* plot) const;
 	// If owners are different or NO_PLAYER, then returns false.
 	//bool isSameOwnerPlotGroup(const CvPlot* plot) const;
-	std::optional<int> tryGetPlotGroupId(PlayerTypes ePlayer) const;
 #endif
+	DllExportForInterface std::optional<int> tryGetPlotGroupId(PlayerTypes ePlayer) const;
 	bool isConnectedTo( const CvCity* pCity) const;																												// Exposed to Python
 	bool isConnectedToCapital(PlayerTypes ePlayer = NO_PLAYER) const;																			// Exposed to Python
 	int getPlotGroupConnectedBonus(PlayerTypes ePlayer, BonusTypes eBonus) const;													// Exposed to Python

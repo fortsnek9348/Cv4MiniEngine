@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI_Defines.h" />
+    <ClInclude Include="CLinkListIterator.h" />
     <ClInclude Include="CommonConfig.h" />
     <ClInclude Include="CommonDLLOnly.h" />
     <ClInclude Include="CommonShared.h" />
@@ -29,6 +30,8 @@
     <ClInclude Include="CvCityAI.h" />
     <ClInclude Include="CvDeal.h" />
     <ClInclude Include="CvDefines.h" />
+    <ClInclude Include="CvDiplomacyController.h" />
+    <ClInclude Include="CvDiplomacyScreen.h" />
     <ClInclude Include="CvDiploParameters.h" />
     <ClInclude Include="CvDLLButtonPopup.h" />
     <ClInclude Include="CvDLLEngineIFaceBase.h" />
@@ -114,6 +117,7 @@
     <ClInclude Include="FInputDevice.h" />
     <ClInclude Include="FProfiler.h" />
     <ClInclude Include="FVariableSystem.h" />
+    <ClInclude Include="GeneratePlayerBotHeader.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate_ConflictMap.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate_DryRunGroupState.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate_DryRunUnitState.h" />
@@ -148,6 +152,9 @@
     <ClInclude Include="GiganticMapsOptimisationsLib\VersionedBitmap2D.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\WholeMapSimpleDijkstra.h" />
     <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="PlayerBotEnablement.h" />
+    <ClInclude Include="PlayerBotGameInterface.h" />
+    <ClInclude Include="PlayerBotUtil.h" />
     <ClInclude Include="XYCoords.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +165,8 @@
     <ClCompile Include="CvCity.cpp" />
     <ClCompile Include="CvCityAI.cpp" />
     <ClCompile Include="CvDeal.cpp" />
+    <ClCompile Include="CvDiplomacyController.cpp" />
+    <ClCompile Include="CvDiplomacyScreen.cpp" />
     <ClCompile Include="CvDiploParameters.cpp" />
     <ClCompile Include="CvDLLButtonPopup.cpp" />
     <ClCompile Include="CvDLLEntity.cpp" />
@@ -258,6 +267,7 @@
     <ClCompile Include="CyUnitInterface1.cpp" />
     <ClCompile Include="FAssert.cpp" />
     <ClCompile Include="FDialogTemplate.cpp" />
+    <ClCompile Include="GeneratePlayerBotHeader.cpp" />
     <ClCompile Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate.cpp" />
     <ClCompile Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate_Apply.cpp" />
     <ClCompile Include="GiganticMapsOptimisationsLib\AIParallelUnitUpdate_DryRunGroupState.cpp" />
@@ -298,6 +308,9 @@
     <ClCompile Include="GiganticMapsOptimisationsLib\VectorisedPathStep.cpp" />
     <ClCompile Include="GiganticMapsOptimisationsLib\VersionedBitmap2D.cpp" />
     <ClCompile Include="GiganticMapsOptimisationsLib\WholeMapSimpleDijkstra.cpp" />
+    <ClCompile Include="PlayerBotCheckAPI.cpp" />
+    <ClCompile Include="PlayerBotGameInterface.cpp" />
+    <ClCompile Include="PlayerBotHandlePopups.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FVariableSystem.inl" />
@@ -305,6 +318,9 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonStuff\CommonStuff.vcxproj">
       <Project>{1fb2b809-6581-444e-a356-19cf91b975d2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\PlayerBotGameBinding\PlayerBotGameBinding.vcxproj">
+      <Project>{a9ecece7-c47f-4d49-b04f-7403864bc6a2}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">

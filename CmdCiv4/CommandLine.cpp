@@ -20,8 +20,23 @@ using namespace cvengine;
 
 static constexpr const char* kHelp = R"(Usage: Cv4MiniEngine [options] [save filename]
 Options:
-    -mod <name of mod>     Load the specified mod. Ignored when loading a save.
+	-mod <name of mod>
+		Load the specified mod. Ignored when loading a save.
+	-generate_player_bot_game_binding <dir>
+		Dump game defs to C++ headers for player bots.
+	-autostart
+		Automatically start a new custom game using the current settings in
+		the INI.
+	-bot <path to DLL/so>
+		Use the specified bot.
+		Press end-turn button with Alt down to handle the next turn.
+	-bot_autorun
+		When in-game, automatically run the bot until victory or bot error.
 )";
+
+//	-bot_headless
+//		When combined with -start_custom_game and -bot_autorun, run in headless
+//		mode with no UI.
 
 namespace
 {
@@ -97,6 +112,27 @@ AppStartupConfig cvengine::parseCommandLine(int argc, const char * const * argv)
 		else
 			throw CmdLineException("Missing mod name.");
 	}
+
+	if (tryConsumeOpt(L"-generate_player_bot_game_binding"))
+	{
+		if (const std::optional<std::wstring_view> path = tryConsumeString())
+			config.generatePlayerBotGameDefsDir = *path;
+		else
+			throw CmdLineException("Missing path.");
+	}
+
+	config.isAutostart = tryConsumeOpt(L"-autostart");
+
+	if (tryConsumeOpt(L"-bot"))
+	{
+		if (const std::optional<std::wstring_view> path = tryConsumeString())
+			config.botPath = *path;
+		else
+			throw CmdLineException("Missing path.");
+	}
+
+	config.isBotAutorun = tryConsumeOpt(L"-bot_autorun");
+	//config.isBotHeadless = tryConsumeOpt(L"-bot_headless");
 
 	if (const std::optional<std::wstring_view> save = tryConsumeString())
 		config.save = *save;

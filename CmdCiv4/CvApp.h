@@ -2,6 +2,7 @@
 
 #include "MyFFile.h"
 #include "AudioSystem.h"
+#include "CommandLine.h"
 
 #include <vector>
 #include <filesystem>
@@ -11,6 +12,11 @@ namespace hecktui
 	class Window;
 	struct ModifierKeyState;
 	class Element;
+}
+
+namespace cvengine
+{
+	class CvVFS;
 }
 
 class ICvAppUI
@@ -122,10 +128,9 @@ private:
 	std::filesystem::path mPath;
 };
 
-namespace cvengine
+namespace cvbot
 {
-	class CvVFS;
-	struct AppStartupConfig;
+	class IPlayerBotPlugin;
 }
 
 class CvApp
@@ -141,6 +146,10 @@ public:
 	void redirectLoggingOutput();
 
 	const cvengine::CvVFS& getVFS() const;
+
+	const cvengine::AppStartupConfig& getCommandLineConfig() const;
+
+	const cvbot::IPlayerBotPlugin* getPlayerBotPlugin() const;
 
 	void startUI();
 	ICvAppUI& getUI() noexcept;
@@ -175,6 +184,8 @@ public:
 private:
 	void deferAppState(std::unique_ptr<ICvAppState>);
 
+	cvengine::AppStartupConfig mCmdLineConfig;
+
 	std::unique_ptr<cvengine::CvVFS> mVFS;
 	std::unique_ptr<ICvAppUI> mAppUI;
 	std::unique_ptr<ICvAppState> mCurrentState;
@@ -182,4 +193,6 @@ private:
 	
 
 	bool mIsShiftClickHackEnabled = false;
+	
+	const cvbot::IPlayerBotPlugin* mPlayerBotPlugin = nullptr;
 };

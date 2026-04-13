@@ -225,10 +225,7 @@
     <ClCompile Include="CvVFS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CvDiplomacyScreen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvDiplomacyScreenUI.cpp">
+    <ClCompile Include="CvTUIDiplomacyScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TuiFileBrowser.cpp">
@@ -374,9 +371,6 @@
     <ClInclude Include="PythonScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CLinkListIterator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Minimap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -446,10 +440,7 @@
     <ClInclude Include="CvVFS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CvDiplomacyScreen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvDiplomacyScreenUI.h">
+    <ClInclude Include="CvTUIDiplomacyScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TuiFileBrowser.h">

@@ -8,6 +8,7 @@
 //#include "CvEnums.h"
 #include "CvPopupInfo.h"
 #include "CvPopupReturn.h"
+#include "PlayerBotEnablement.h"
 
 class CvPopup;
 class CvDLLButtonPopup
@@ -23,6 +24,10 @@ public:
 	DllExport virtual void OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, CvPopupInfo &info);
 	DllExport virtual void OnAltExecute(CvPopup& popup, const PopupReturn& popupReturn, CvPopupInfo &info);
 	DllExport virtual void OnFocus(CvPopup* pPopup, CvPopupInfo &info);
+#if ENABLE_PLAYER_BOT
+	// fortsnek: New function. Returns false if popup should be cancelled.
+	bool OnHeadlessFocus(CvPopupInfo& info);
+#endif
 
 	DllExport bool launchButtonPopup(CvPopup* pPopup, CvPopupInfo &info);
 

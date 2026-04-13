@@ -980,16 +980,20 @@ bool CvPlot::isSameOwnerPlotGroup(const CvPlot* plot) const
 		return false;
 }
 */
+#endif
+
 std::optional<int> CvPlot::tryGetPlotGroupId(PlayerTypes ePlayer) const
 {
+#if ENABLE_GAMECOREDLL_ENHANCEMENTS
 	if (gGlobals.enhancedDLLConfig[EEnhancedDLLConfigOption::BlockwisePlotGroupSystem])
 		return GET_PLAYER(ePlayer).getPlayerTradeNetworkSystem()->tryGetPlotGroupId(*this);
-	else if (const CvPlotGroup* const group = getPlotGroup(ePlayer))
+	else
+#endif
+	if (const CvPlotGroup* const group = getPlotGroup(ePlayer))
 		return group->getID();
 	else
 		return std::nullopt;
 }
-#endif
 
 
 bool CvPlot::isConnectedTo(const CvCity* pCity) const

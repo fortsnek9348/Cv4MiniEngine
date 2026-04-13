@@ -12,7 +12,6 @@
 #include "CvPlayerAI.h"
 #include "CvRandom.h"
 #include "CvTeamAI.h"
-#include "CvGameCoreUtils.h"
 #include "CyUnit.h"
 #include "CyArgsList.h"
 #include "CyPlot.h"
@@ -29,6 +28,10 @@
 
 #ifdef ENABLE_GAMECOREDLL_ENHANCEMENTS
 #include "GiganticMapsOptimisationsLib/GameContext.h"
+#endif
+
+#if ENABLE_PLAYER_BOT
+#include <PlayerBotGameBinding/IPlayerBot.h>
 #endif
 
 
@@ -1453,6 +1456,14 @@ void CvUnit::updateCombat(bool bQuick)
 				szBuffer = gDLL->getText("TXT_KEY_MISC_YOU_UNIT_WAS_DESTROYED", pDefender->getNameKey(), getNameKey(), getVisualCivAdjective(pDefender->getTeam()));
 			}
 			gDLL->getInterfaceIFace()->addMessage(pDefender->getOwnerINLINE(), true, GC.getEVENT_MESSAGE_TIME(), szBuffer,GC.getEraInfo(GC.getGameINLINE().getCurrentEra()).getAudioUnitDefeatScript(), MESSAGE_TYPE_INFO, nullptr, (ColorTypes)GC.getInfoTypeForString("COLOR_RED"), pPlot->getX_INLINE(), pPlot->getY_INLINE());
+
+#if ENABLE_PLAYER_BOT
+			GET_PLAYER(pDefender->getOwnerINLINE()).sendTurnMessageToPlayerBot(cvbot::UnitKilledTurnMessage{
+				.visibleOwner = static_cast<cvbot::EPlayer>(getVisualOwner(pDefender->getTeam())),
+				.myUnitType = static_cast<cvbot::EUnitType>(pDefender->getUnitType()),
+				.enemyUnitType = static_cast<cvbot::EUnitType>(getUnitType()),
+				});
+#endif
 
 			// report event to Python, along with some other key state
 			CvEventReporter::getInstance().combatResult(this, pDefender);

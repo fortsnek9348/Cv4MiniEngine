@@ -65,6 +65,9 @@ public:
 	DllExport static TradeableItems getGoldItem();
 	DllExport static TradeableItems getGoldPerTurnItem();
 
+	// fortsnek: New. Moving engine diplo stuff here.
+	DllExportForInterface static bool isMatchingTradeItem(TradeData invItem, TradeData queryItem);
+
 	void read(FDataStreamBase* pStream);
 	void write(FDataStreamBase* pStream);
 

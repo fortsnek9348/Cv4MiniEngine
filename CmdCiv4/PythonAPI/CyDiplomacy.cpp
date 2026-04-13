@@ -12,10 +12,10 @@
 
 #include <pybind11/stl.h>
 
-static CvDiplomacyScreen* getDiplo()
+static CvDiplomacyController& getDiplo()
 {
 	//return CvInterface::getInstance().tryGetActiveDiplomacy();
-	return gGlobals.getDiplomacyScreen();
+	return gGlobals.getDiplomacyScreen()->getController();
 }
 
 void CyDiplomacy::registerWithPython(const pybind11::module& m)
@@ -60,49 +60,49 @@ void CyDiplomacy::registerWithPython(const pybind11::module& m)
 		;
 }
 
-void CyDiplomacy::addUserComment(DiploCommentTypes eComment, int iData1, int iData2, const std::wstring& szString, [[maybe_unused]] const std::vector<std::wstring>& txtArgs)
+void CyDiplomacy::addUserComment(DiploCommentTypes eComment, int iData1, int iData2, const std::wstring& szString, const std::vector<std::wstring>& txtArgs)
 {
-	getDiplo()->addUserComment(eComment, iData1, iData2, szString, txtArgs);
+	getDiplo().addUserComment(eComment, iData1, iData2, szString, txtArgs);
 }
 
 bool CyDiplomacy::atWar()
 {
-	return getDiplo()->isWarDiplo();
+	return getDiplo().isWarDiplo();
 }
 
 void CyDiplomacy::clearUserComments()
 {
-	getDiplo()->clearUserComments();
+	getDiplo().clearUserComments();
 }
 
 void CyDiplomacy::closeScreen()
 {
-	getDiplo()->endDiplomacy();
+	getDiplo().endDiplomacy();
 }
 
 bool CyDiplomacy::counterPropose()
 {
-	return getDiplo()->counterPropose();
+	return getDiplo().counterPropose();
 }
 
 void CyDiplomacy::declareWar()
 {
-	return getDiplo()->declareWar();
+	return getDiplo().declareWar();
 }
 
 void CyDiplomacy::diploEvent(DiploEventTypes iDiploEvent, int iData1, int iData2)
 {
-	return getDiplo()->sendDiploEvent(iDiploEvent, iData1, iData2);
+	return getDiplo().sendDiploEvent(iDiploEvent, iData1, iData2);
 }
 
 void CyDiplomacy::endTrade()
 {
-	getDiplo()->endTrade();
+	getDiplo().endTrade();
 }
 
 int CyDiplomacy::getData()
 {
-	return getDiplo()->getDiploParams().getData();
+	return getDiplo().getDiploParams().getData();
 }
 
 std::string CyDiplomacy::getOpponentCivName()
@@ -134,7 +134,7 @@ std::optional<TradeData> CyDiplomacy::getPlayerTradeOffer(int iIndex)
 {
 	// Called by BUG for various AI comments.
 	// Assuming the initial offer.
-	if (auto* const node = getDiplo()->getDiploParams().getOurOfferList().nodeNum(iIndex))
+	if (auto* const node = getDiplo().getDiploParams().getOurOfferList().nodeNum(iIndex))
 		return node->m_data;
 	else
 		return std::nullopt;
@@ -149,7 +149,7 @@ std::optional<TradeData> CyDiplomacy::getTheirTradeOffer(int iIndex)
 {
 	// Called by BUG for various AI comments.
 	// Assuming the initial offer.
-	if (auto* const node = getDiplo()->getDiploParams().getTheirOfferList().nodeNum(iIndex))
+	if (auto* const node = getDiplo().getDiploParams().getTheirOfferList().nodeNum(iIndex))
 		return node->m_data;
 	else
 		return std::nullopt;
@@ -158,22 +158,22 @@ std::optional<TradeData> CyDiplomacy::getTheirTradeOffer(int iIndex)
 // Must return int. BUG expects it.
 int CyDiplomacy::getWhoTradingWith()
 {
-	return getDiplo()->getDiploParams().getWhoTalkingTo();
+	return getDiplo().getDiploParams().getWhoTalkingTo();
 }
 
 bool CyDiplomacy::hasAnnualDeal()
 {
-	return getDiplo()->hasAnnualDeal();
+	return getDiplo().hasAnnualDeal();
 }
 
 void CyDiplomacy::implementDeal()
 {
-	getDiplo()->implementDeal();
+	getDiplo().implementDeal();
 }
 
 bool CyDiplomacy::isAIOffer()
 {
-	return getDiplo()->isAIOffer();
+	return getDiplo().isAIOffer();
 }
 
 bool CyDiplomacy::isSeparateTeams()
@@ -188,53 +188,52 @@ void CyDiplomacy::makePeace()
 
 bool CyDiplomacy::offerDeal()
 {
-	return getDiplo()->offerDeal();
+	return getDiplo().offerDeal();
 }
 
 bool CyDiplomacy::ourOfferEmpty()
 {
-	return getDiplo()->isOurOfferEmpty();
+	return getDiplo().isOurOfferEmpty();
 }
 
 void CyDiplomacy::performHeadAction(LeaderheadAction eAction)
 {
-	getDiplo()->performHeadAction(eAction);
+	getDiplo().performHeadAction(eAction);
 }
 
 void CyDiplomacy::setAIComment(int iComment)
 {
-	getDiplo()->setAIComment((DiploCommentTypes)iComment);
+	getDiplo().setAIComment((DiploCommentTypes)iComment);
 }
 
 void CyDiplomacy::setAIOffer(bool bOffer)
 {
-	getDiplo()->setIsAIOffer(bOffer);
+	getDiplo().setIsAIOffer(bOffer);
 }
 
 void CyDiplomacy::setAIString(const std::wstring& szString, const std::vector<std::wstring>& txtArgs)
 {
 	// TODO: txtArgs can come from beginPythonDiplomacy. That's the types it contains. See if these args are used anywhere.
-	//return getDiplo()->setAIString(CvTranslator().formatText(szString, std::vector<CvDLLUtilityIFaceBase::TextArg>(std::from_range, txtArgs)));
-	return getDiplo()->setAIString(MyCvDLLUtility::getInstance().getTextGeneric(szString, std::vector<CvDLLUtilityIFaceBase::TextArg>(std::from_range, txtArgs)));
+	return getDiplo().setAIString(MyCvDLLUtility::getInstance().getTextGeneric(szString, std::vector<CvDLLUtilityIFaceBase::TextArg>(std::from_range, txtArgs)));
 }
 
 void CyDiplomacy::showAllTrade(bool bShow)
 {
-	getDiplo()->setShowAllTrade(bShow);
+	getDiplo().setShowAllTrade(bShow);
 }
 
 void CyDiplomacy::startTrade(int iComment, bool bRenegotiate)
 {
-	getDiplo()->setAIComment(DiploCommentTypes(iComment));
-	getDiplo()->startTrade(bRenegotiate);
+	getDiplo().setAIComment(DiploCommentTypes(iComment));
+	getDiplo().startTrade(bRenegotiate);
 }
 
 bool CyDiplomacy::theirOfferEmpty()
 {
-	return getDiplo()->isTheirOfferEmpty();
+	return getDiplo().isTheirOfferEmpty();
 }
 
 bool CyDiplomacy::theirVassalTribute()
 {
-	return getDiplo()->isTheirOfferAVassalTribute();
+	return getDiplo().isTheirOfferAVassalTribute();
 }

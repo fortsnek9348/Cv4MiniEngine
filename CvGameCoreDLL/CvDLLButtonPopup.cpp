@@ -730,13 +730,8 @@ void CvDLLButtonPopup::OnOkClicked([[maybe_unused]] CvPopup* pPopup, PopupReturn
 	}
 }
 
-void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
+bool CvDLLButtonPopup::OnHeadlessFocus(CvPopupInfo& info)
 {
-	if (gDLL->getInterfaceIFace()->popupIsDying(pPopup))
-	{
-		return;
-	}
-
 	switch (info.getButtonPopupType())
 	{
 	case BUTTONPOPUP_CHOOSETECH:
@@ -744,7 +739,7 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 		{
 			if ((GET_PLAYER(GC.getGameINLINE().getActivePlayer()).getCurrentResearch() != NO_TECH) || (GC.getGameINLINE().getGameState() == GAMESTATE_OVER))
 			{
-				gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
+				return false;
 			}
 		}
 		break;
@@ -752,14 +747,14 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 	case BUTTONPOPUP_CHANGERELIGION:
 		if (!(GET_PLAYER(GC.getGameINLINE().getActivePlayer()).canChangeReligion()) || (GC.getGameINLINE().getGameState() == GAMESTATE_OVER))
 		{
-			gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
+			return false;
 		}
 		break;
 
 	case BUTTONPOPUP_CHOOSEPRODUCTION:
 		if (GC.getGameINLINE().getGameState() == GAMESTATE_OVER)
 		{
-			gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
+			return false;
 		}
 		else
 		{
@@ -768,8 +763,7 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 
 			if (nullptr == pCity || pCity->getOwnerINLINE() != ePlayer || pCity->isProduction())
 			{
-				gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
-				break;
+				return false;
 			}
 
 			gDLL->getInterfaceIFace()->lookAtCityOffset(pCity->getID());
@@ -778,24 +772,23 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 
 	case BUTTONPOPUP_RAZECITY:
 	case BUTTONPOPUP_DISBANDCITY:
+	{
+		PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
+		CvCity* pCity = GET_PLAYER(ePlayer).getCity(info.getData1());
+
+		if (nullptr == pCity || pCity->getOwnerINLINE() != ePlayer)
 		{
-			PlayerTypes ePlayer = GC.getGameINLINE().getActivePlayer();
-			CvCity* pCity = GET_PLAYER(ePlayer).getCity(info.getData1());
-
-			if (nullptr == pCity || pCity->getOwnerINLINE() != ePlayer)
-			{
-				gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
-				break;
-			}
-
-			gDLL->getInterfaceIFace()->lookAtCityOffset(pCity->getID());
+			return false;
 		}
-		break;
+
+		gDLL->getInterfaceIFace()->lookAtCityOffset(pCity->getID());
+	}
+	break;
 
 	case BUTTONPOPUP_CHANGECIVIC:
 		if (!(GET_PLAYER(GC.getGameINLINE().getActivePlayer()).canRevolution(nullptr)) || (GC.getGameINLINE().getGameState() == GAMESTATE_OVER))
 		{
-			gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
+			return false;
 		}
 		break;
 
@@ -816,7 +809,7 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 			gDLL->getPythonIFace()->callFunction(PYScreensModule, info.getOnFocusPythonCallback().c_str(), argsList.makeFunctionArgs(), &iResult);
 			if (0 != iResult)
 			{
-				gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
+				return false;
 			}
 		}
 		break;
@@ -825,6 +818,19 @@ void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
 	default:
 		break;
 	}
+
+	return true;
+}
+
+void CvDLLButtonPopup::OnFocus(CvPopup* pPopup, CvPopupInfo &info)
+{
+	if (gDLL->getInterfaceIFace()->popupIsDying(pPopup))
+	{
+		return;
+	}
+
+	if (!OnHeadlessFocus(info))
+		gDLL->getInterfaceIFace()->popupSetAsCancelled(pPopup);
 }
 
 // returns false if popup is not launched

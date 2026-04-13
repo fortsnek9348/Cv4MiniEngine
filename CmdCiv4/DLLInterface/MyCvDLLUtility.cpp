@@ -669,7 +669,7 @@ void MyCvDLLUtility::endDiplomacy()
 bool MyCvDLLUtility::isDiplomacy()
 {
 	if (auto* const screen = gGlobals.getDiplomacyScreen())
-		return screen->isDiplomacyActive();
+		return screen->getController().isDiplomacyActive();
 	else
 		return false;
 }
@@ -677,7 +677,7 @@ bool MyCvDLLUtility::isDiplomacy()
 int MyCvDLLUtility::getDiplomacyPlayer()
 {
 	if (auto* const screen = gGlobals.getDiplomacyScreen())
-		return screen->getDiplomacyAIPlayer();
+		return screen->getController().getDiplomacyAIPlayer();
 	else
 		std::abort();
 }

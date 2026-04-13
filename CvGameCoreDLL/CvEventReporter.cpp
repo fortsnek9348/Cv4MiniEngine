@@ -165,6 +165,10 @@ void CvEventReporter::gotoPlotSet(CvPlot *pPlot, PlayerTypes ePlayer)
 
 void CvEventReporter::cityBuilt( CvCity *pCity )
 {
+#if ENABLE_PLAYER_BOT
+	// Suppress the city naming popup if running a bot.
+	if (!(GET_PLAYER(pCity->getOwnerINLINE()).isPlayerBotRunning()))
+#endif
 	m_kPythonEventMgr.reportCityBuilt(pCity);
 	m_kStatistics.cityBuilt(pCity);
 }

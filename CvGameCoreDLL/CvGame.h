@@ -8,6 +8,8 @@
 #include "FFreeListTrashArray.h"
 #include <unordered_map>
 
+#include <memory>
+
 class CvPlot;
 class CvCity;
 class CvReplayMessage;
@@ -15,6 +17,7 @@ class CvReplayInfo;
 class CvArtInfoBuilding;
 
 typedef std::vector<const CvReplayMessage*> ReplayMessageList;
+
 
 class CvGame
 {
@@ -375,14 +378,16 @@ public:
 
 	DllExport void setVoteChosen(int iSelection, int iVoteId);
 
-	int getReligionGameTurnFounded(ReligionTypes eIndex);												// Exposed to Python
+	// fortsnek: const
+	int getReligionGameTurnFounded(ReligionTypes eIndex) const;												// Exposed to Python
 	bool isReligionFounded(ReligionTypes eIndex);																// Exposed to Python
 	void makeReligionFounded(ReligionTypes eIndex, PlayerTypes ePlayer);
 
 	bool isReligionSlotTaken(ReligionTypes eReligion) const;											// Exposed to Python
 	void setReligionSlotTaken(ReligionTypes eReligion, bool bTaken);
 
-	CvCity* getHolyCity(ReligionTypes eIndex);																	// Exposed to Python
+	// fortsnek: const
+	CvCity* getHolyCity(ReligionTypes eIndex) const;																	// Exposed to Python
 	void setHolyCity(ReligionTypes eIndex, CvCity* pNewValue, bool bAnnounce);	// Exposed to Python
 
 	int getCorporationGameTurnFounded(CorporationTypes eIndex);												// Exposed to Python

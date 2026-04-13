@@ -7,6 +7,7 @@
 
 #include <CvGameAI.h>
 #include <CvGlobals.h>
+#include <CvPlayerAI.h>
 #include <CyArgsList.h>
 
 #include <pybind11/cast.h>

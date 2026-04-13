@@ -1,6 +1,6 @@
 #pragma once
 
-#include <LinkedList.h>
+#include "LinkedList.h"
 
 template<class T>
 struct CLinkListIterator

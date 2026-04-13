@@ -12,6 +12,8 @@
 #include "CvEngine.h"
 #include "CivIni.h"
 #include "CommandLine.h"
+#include "GeneratePlayerBotHeader.h"
+#include "AppGameSetupWindow.h"
 
 #include <HeckTextUI/BasicControls.h>
 
@@ -27,6 +29,7 @@
 #include <CvTeamAI.h>
 #include <CvMap.h>
 #include <CvMapGenerator.h>
+#include <GeneratePlayerBotHeader.h>
 
 #include <CommonStuff/StringConversion.h>
 #include <CommonStuff/range.h>
@@ -765,7 +768,7 @@ void LoadGameCvAppState::onLeave(CvApp&)
 {
 }
 
-void InGameCvAppState::onEnter(CvApp&)
+void InGameCvAppState::onEnter(CvApp& app)
 {
 	LoadingScreen loadingScreen;
 	loadingScreen.update(L"TXT_KEY_INIT_SETUP_INTERFACE");
@@ -798,6 +801,12 @@ void InGameCvAppState::onEnter(CvApp&)
 	CvMap& map = gGlobals.getMap();
 	map.updateMinimapColor();
 	map.updateCenterUnit();
+
+	if (const cvbot::IPlayerBotPlugin* const botLib = app.getPlayerBotPlugin())
+	{
+		std::clog << "Creating player bot..." << std::endl;
+		GET_PLAYER(gGlobals.getGame().getActivePlayer()).createPlayerBot(*botLib);
+	}
 }
 void InGameCvAppState::onUpdate(CvApp&)
 {
@@ -862,6 +871,12 @@ int main(int argc, char* argv[])
 
 	initCommon(); // python initialised here
 
+	// -generatePlayerBotGameDefsDir "..\PlayerBotGameBinding\inc\PlayerBotGameBinding"
+	if (!appStartConfig.generatePlayerBotGameDefsDir.empty())
+	{
+		cvbot::generatePlayerBotGameBindingHeaders(std::filesystem::path(appStartConfig.generatePlayerBotGameDefsDir));
+	}
+
 	//gGlobals.getLogging() = true;
 	//gGlobals.getRandLogging() = true;
 	//gGlobals.getSynchLogging() = true;
@@ -878,7 +893,15 @@ int main(int argc, char* argv[])
 	CvApp::getInstance().startUI();
 
 	if (appStartConfig.save.empty())
-		CvApp::getInstance().deferMainMenu();
+	{
+		if (appStartConfig.isAutostart)
+		{
+			// Bit of a hack. Invoke UI and immediately destroy the UI.
+			AppGameSetupWindow{}.launch();
+		}
+		else
+			CvApp::getInstance().deferMainMenu();
+	}
 	else
 		CvApp::getInstance().deferLoadGame(appStartConfig.save);
 

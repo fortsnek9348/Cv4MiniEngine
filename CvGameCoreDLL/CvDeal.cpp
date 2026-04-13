@@ -1190,4 +1190,10 @@ TradeableItems CvDeal::getGoldPerTurnItem()
 	return TRADE_GOLD_PER_TURN;
 }
 
+bool CvDeal::isMatchingTradeItem(TradeData invItem, TradeData queryItem)
+{
+	return queryItem.m_eItemType == invItem.m_eItemType
+		// Match data, unless the data is quantity.
+		&& (CvDeal::isGold(invItem.m_eItemType) || !CvDeal::hasData(invItem.m_eItemType) || queryItem.m_iData == invItem.m_iData);
+}
 

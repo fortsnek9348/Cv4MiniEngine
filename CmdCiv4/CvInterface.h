@@ -26,6 +26,7 @@ public:
 	static CvInterface& getInstance();
 
 	CvInterface();
+
 	void uninit();
 	void reset();
 

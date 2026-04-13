@@ -8,6 +8,8 @@
 #include <CvGlobals.h>
 #include <CvDLLPythonIFaceBase.h>
 
+#include <PlayerBotGameBinding/IPlayerBotPlugin.h>
+
 namespace tui = hecktui;
 
 namespace
@@ -91,6 +93,11 @@ namespace
 			{
 				buildString += L'\n';
 				buildString += L"Mod: " + s;
+			}
+			if (const cvbot::IPlayerBotPlugin* const plugin = app.getPlayerBotPlugin())
+			{
+				buildString += L'\n';
+				buildString += L"Bot: " + plugin->getName();
 			}
 			auto lblBuildString = std::make_shared<tui::Label>(buildString);
 			lblBuildString->enableWrapping = true;

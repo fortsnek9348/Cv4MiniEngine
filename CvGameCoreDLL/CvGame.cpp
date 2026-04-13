@@ -279,6 +279,8 @@ void CvGame::init(HandicapTypes eHandicap)
 		}
 	}
 
+
+
 	AI_init();
 
 	doUpdateCacheOnTurn();
@@ -5172,7 +5174,7 @@ void CvGame::setVoteOutcome(const VoteTriggeredData& kData, PlayerVoteTypes eNew
 }
 
 
-int CvGame::getReligionGameTurnFounded(ReligionTypes eIndex)
+int CvGame::getReligionGameTurnFounded(ReligionTypes eIndex) const
 {
 	FAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	FAssertMsg(eIndex < GC.getNumReligionInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
@@ -5344,7 +5346,7 @@ void CvGame::setVoteChosen(int iSelection, int iVoteId)
 }
 
 
-CvCity* CvGame::getHolyCity(ReligionTypes eIndex)
+CvCity* CvGame::getHolyCity(ReligionTypes eIndex) const
 {
 	FAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	FAssertMsg(eIndex < GC.getNumReligionInfos(), "eIndex is expected to be within maximum bounds (invalid Index)");
@@ -6863,6 +6865,11 @@ void CvGame::updateMoves()
 						player.setAutoMoves(false);
 					}
 				}
+
+#if ENABLE_PLAYER_BOT
+				// Run the bot after any automoves so that we don't do that *after* ending the turn.
+				player.runPlayerBot();
+#endif
 			}
 		}
 	}
@@ -8069,7 +8076,7 @@ void CvGame::write(FDataStreamBase* pStream)
 {
 	int iI;
 
-	unsigned int uiFlag=1;
+	unsigned int uiFlag = 1;
 	pStream->Write(uiFlag);		// flag for expansion
 
 	pStream->Write(m_iElapsedGameTurns);

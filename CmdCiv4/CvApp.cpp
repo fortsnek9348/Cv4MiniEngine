@@ -7,7 +7,6 @@
 #include "CvEngine.h"
 #include "AppMainMenusState.h"
 #include "CivIni.h"
-#include "CvVFS.h"
 #include "CommandLine.h"
 
 #include <CvGlobals.h>
@@ -19,8 +18,11 @@
 #include <CvEventReporter.h>
 #include <CyArgsList.h>
 
+#include <PlayerBotGameBinding/IPlayerBotPlugin.h>
+
 #include <CommonStuff/System.h>
 #include <CommonStuff/range.h>
+#include <CommonStuff/DynamicLib.h>
 
 #include <iostream>
 #include <chrono>
@@ -40,6 +42,8 @@ CvApp::CvApp()
 
 void CvApp::start(const AppStartupConfig& config)
 {
+	mCmdLineConfig = config;
+
 	std::clog << "User config directory: " << getUserConfigDir() << std::endl;
 	std::clog << "User data directory: " << getUserDataDir() << std::endl;
 	std::clog << "User cache directory: " << getUserCacheDir() << std::endl;
@@ -107,6 +111,17 @@ void CvApp::start(const AppStartupConfig& config)
 	saveCivilizationIniIfChanged();
 
 	audioSystem->loadXmlDefs();
+
+	// Load player bot DLL.
+	if (!config.botPath.empty())
+	{
+		heck::DynamicLibrary lib(config.botPath.c_str());
+
+		mPlayerBotPlugin = &reinterpret_cast<const cvbot::IPlayerBotPlugin&(*)()>(lib.resolve("getPlayerBotPlugin"))();
+
+		if (mPlayerBotPlugin->getModName() != MyCvDLLUtility::getInstance().getModName(false))
+			throw std::runtime_error("Bot requires mod '" + heck::convertWideToUtf8(mPlayerBotPlugin->getModName()) + "'.");
+	}
 }
 
 CvApp::~CvApp()
@@ -127,6 +142,15 @@ const cvengine::CvVFS& CvApp::getVFS() const
 	return *mVFS;
 }
 
+const cvengine::AppStartupConfig& CvApp::getCommandLineConfig() const
+{
+	return mCmdLineConfig;
+}
+
+const cvbot::IPlayerBotPlugin* CvApp::getPlayerBotPlugin() const
+{
+	return mPlayerBotPlugin;
+}
 
 ICvAppUI& CvApp::getUI() noexcept
 {

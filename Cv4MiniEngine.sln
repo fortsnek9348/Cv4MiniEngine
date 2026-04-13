@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.34814.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11612.150
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CvGameCoreDLL", "CvGameCoreDLL\CvGameCoreDLL.vcxproj", "{DE380E50-8B7D-4A03-A80E-DD1D1756169E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4MiniEngine", "CmdCiv4\CmdCiv4.vcxproj", "{6526489D-9F61-4B3E-B32C-2170FD147D5E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8} = {87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeckTextUI", "HeckConsoleUI\HeckConsoleUI.vcxproj", "{5B038B55-7B29-4474-9BDD-F386450096A2}"
 EndProject
@@ -27,6 +30,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FAStar", "FAStar\FAStar.vcxproj", "{C1731C9E-FBB0-4CEF-A379-9199627ACB53}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HeckTUIInputTest", "HeckTUIInputTest\HeckTUIInputTest.vcxproj", "{AB4552BC-7083-4489-B9DB-876FF5529AF8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FortsneksTestBot", "FortsneksTestBot\FortsneksTestBot.vcxproj", "{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlayerBotGameBinding", "PlayerBotGameBinding\PlayerBotGameBinding.vcxproj", "{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +105,22 @@ Global
 		{AB4552BC-7083-4489-B9DB-876FF5529AF8}.ReleaseEnhanced|x64.Build.0 = Release|x64
 		{AB4552BC-7083-4489-B9DB-876FF5529AF8}.ReleaseStrict|x64.ActiveCfg = Release|x64
 		{AB4552BC-7083-4489-B9DB-876FF5529AF8}.ReleaseStrict|x64.Build.0 = Release|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.DebugEnhanced|x64.ActiveCfg = Debug|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.DebugEnhanced|x64.Build.0 = Debug|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.DebugStrict|x64.ActiveCfg = Debug|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.DebugStrict|x64.Build.0 = Debug|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.ReleaseEnhanced|x64.ActiveCfg = Release|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.ReleaseEnhanced|x64.Build.0 = Release|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.ReleaseStrict|x64.ActiveCfg = Release|x64
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}.ReleaseStrict|x64.Build.0 = Release|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.DebugEnhanced|x64.ActiveCfg = Debug|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.DebugEnhanced|x64.Build.0 = Debug|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.DebugStrict|x64.ActiveCfg = Debug|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.DebugStrict|x64.Build.0 = Debug|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseEnhanced|x64.ActiveCfg = Release|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseEnhanced|x64.Build.0 = Release|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseStrict|x64.ActiveCfg = Release|x64
+		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseStrict|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

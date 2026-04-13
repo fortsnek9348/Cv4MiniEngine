@@ -1,10 +1,8 @@
 #include "CvInterface.h"
-
-#include "CLinkListIterator.h"
 #include "Common.h"
 #include "CvApp.h"
 #include "CvButtonPopup.h"
-#include "CvDiplomacyScreen.h"
+#include "CvTUIDiplomacyScreen.h"
 #include "CvGInterfaceScreen.h"
 #include "CvPopup.h"
 #include "CvTranslator.h"
@@ -22,6 +20,7 @@
 //#include "CvGDebugMenu.h"
 #include "CvEngine.h"
 
+#include <CLinkListIterator.h>
 #include <CvCity.h>
 #include <CvDLLButtonPopup.h>
 #include <CvDLLInterfaceIFaceBase.h>
@@ -38,8 +37,8 @@
 #include <CvUnit.h>
 #include <CyArgsList.h>
 #include <CvMessageData.h>
-#include <FAStarNode.h>
 #include <CvDiploParameters.h>
+#include <FAStarNode.h>
 
 #include <HeckTextUI/UIScene.h>
 #include <HeckTextUI/Window.h>
@@ -81,7 +80,6 @@ void CvInterface::reset()
 	mInterfaceDirtyBits = {};
 	mInterfaceDirtyBits.flip();
 }
-
 
 void CvInterface::startMainInterface()
 {
@@ -398,11 +396,11 @@ void CvInterface::updatePopups()
 			while (CvDiploParameters* const diploParams = player.popFrontDiplomacy())
 			{
 				// Taking ownership of diplo params.
-				if (auto diploScreen = std::make_unique<CvDiplomacyScreen>(std::unique_ptr<CvDiploParameters>(diploParams)))
+				if (auto diploScreenUI = std::make_unique<CvTUIDiplomacyScreen>(std::unique_ptr<CvDiploParameters>(diploParams)))
 				{
-					if (!diploScreen->wantClose())
+					if (!diploScreenUI->wantClose())
 					{
-						diploEntry.screen = std::move(diploScreen);
+						diploEntry.screen = std::move(diploScreenUI);
 						showScreen(cvengine::ECvScreen::DIPLOMACY_SCREEN, POPUPSTATE_IMMEDIATE, false);
 					}
 					break;
@@ -862,7 +860,7 @@ bool CvInterface::launchPopup(std::unique_ptr<CvPopup> popup, bool bCreateOK, Po
 	//	popup->controls.insert(popup->controls.begin(), CvPopup::Control{ .type = CvPopup::EControlType::Label, .text = popup->bodyString });
 	if (bCreateOK)
 	{
-		popup->controls.push_back({ .type = CvPopup::EControlType::Separator,.sepSize = 1 });
+		popup->controls.push_back({ .type = CvPopup::EControlType::Separator, .sepSize = 1 });
 		popup->controls.push_back({
 			.type = CvPopup::EControlType::Button,
 			.text = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OK", {}),
