@@ -22,12 +22,7 @@ namespace cvbot
 	struct i16vec2;
 	struct ProductionChoice;
 	struct CityBuildChoice;
-
-	class BotFailure : public std::runtime_error
-	{
-	public:
-		using std::runtime_error::runtime_error;
-	};
+	struct GlobalInfoData;
 
 	// To be used to build up a knowledge database only. Not for playing the current game.
 	class IAllKnowingGameInterface
@@ -46,6 +41,8 @@ namespace cvbot
 		virtual std::ostream& getLoggingStream() const = 0;
 
 		virtual GameSetup getGameSetup() const = 0;
+
+		virtual GlobalInfoData buildGlobalInfoData() const = 0;
 
 		// Use this to build up map knowledge.
 		virtual const IAllKnowingGameInterface& getAllKnowingGameInterface() const = 0;
@@ -80,8 +77,9 @@ namespace cvbot
 
 		/// Unit commands
 		virtual bool canStartMission(CommandUnitGroup group, EMission mission, int data1, int data2) const = 0;
-		// This will clear the mission queue, check if the mission can start, then push the mission.
-		virtual bool pushMission(CommandUnitGroup group, EMission mission, int data1, int data2) = 0;
+		virtual i16vec2 getUnitCoord(EUnitId id) const = 0;
+		// Clears mission queue, checks if mission can start, then starts it.
+		virtual bool startMission(CommandUnitGroup group, EMission mission, int data1, int data2) = 0;
 		virtual std::vector<EPromotion> getAvailablePromotions(EUnitId unit) const = 0;
 		virtual bool tryPromote(EUnitId unit, EPromotion promotion) = 0;
 
@@ -89,7 +87,8 @@ namespace cvbot
 		virtual bool tryWake(CommandUnitGroup group) = 0;
 		virtual bool trySkipTurn(CommandUnitGroup group) = 0;
 		virtual bool tryCancelOrders(CommandUnitGroup group) = 0; // All orders
-		virtual bool tryAutomate(CommandUnitGroup group, EAutomation automation) = 0; // Does not interrupt automation if it's that same automation.
+		virtual EAutomation getAutomation(CommandUnitGroup group) const = 0;
+		virtual bool tryAutomate(CommandUnitGroup group, EAutomation automation) = 0; // Does not interrupt automation if it's the same automation.
 		virtual bool tryStopAutomation(CommandUnitGroup group) = 0;
 		virtual bool tryDelete(EUnitId unit) = 0;
 		virtual bool tryGift(EUnitId unitId) = 0;
@@ -100,12 +99,13 @@ namespace cvbot
 		// Civ commands
 		virtual bool canChangeCivics() const = 0;
 		virtual bool canChangeReligion() const = 0;
-		virtual bool canChangeCivicsTo(std::span<const ECivic>) const = 0;
+		virtual bool canChangeCivicTo(ECivic) const = 0;
 		virtual bool canChangeStateReligionTo(std::optional<EReligion>) const = 0;
 		virtual bool tryChangeCivicsTo(std::span<const ECivic>) const = 0;
 		virtual bool tryChangeStateReligionTo(std::optional<EReligion>) const = 0;
 		// Input is ratio. Only flexible commerce is considered, and result is rounded to 10% increments, as in UI.
 		virtual void adjustSliders(std::array<int, ECommerce::Num> ratio) = 0;
+		virtual std::array<int, ECommerce::Num> getCivCommerceRates() const = 0;
 		// If tech can't be researched, research is set to None.
 		virtual void changeResearch(ETech tech) = 0;
 		

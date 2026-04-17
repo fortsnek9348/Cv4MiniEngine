@@ -169,7 +169,8 @@ namespace
 				bot.handleDiploFirstContact(game, aiPlayerI);
 				choiceName = "USER_DIPLOCOMMENT_PEACE";
 			}
-			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_PEACE"))
+			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_PEACE")
+				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_THANKS"))
 			{
 				choiceName = "USER_DIPLOCOMMENT_EXIT";
 			}

@@ -1611,6 +1611,26 @@ namespace cvbot::enums
 		};
 	};
 	
+	namespace LeaderTrait
+	{
+		enum Enum : std::int8_t
+		{
+			None = -1,
+			Philosophical,
+			Aggressive,
+			Spiritual,
+			Expansive,
+			Industrious,
+			Creative,
+			Financial,
+			Organized,
+			Charismatic,
+			Protective,
+			Imperialist,
+			Num,
+		};
+	};
+	
 }
 
 namespace cvbot

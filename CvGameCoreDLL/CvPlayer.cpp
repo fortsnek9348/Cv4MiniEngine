@@ -37,6 +37,7 @@
 #include "PlayerBotUtil.h"
 #include <PlayerBotGameBinding/IPlayerBot.h>
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
+#include <PlayerBotGameBinding/GameStructs.h>
 #endif
 
 
@@ -757,7 +758,8 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 
 #if ENABLE_PLAYER_BOT
 	m_playerBot.reset();
-	m_playerBotFinishTurn = -1;
+	m_playerBotFinalTurn = -1;
+	m_playerBotTurnLastRan = -1;
 #endif
 
 	if (!bConstructorCall)
@@ -773,10 +775,10 @@ void CvPlayer::createPlayerBot(const cvbot::IPlayerBotPlugin& plugin)
 		throw cvbot::BotFailure("Mod is not compatible with the bot API built into this CvGameCoreDLL.");
 	m_playerBot = plugin.createBot(cvbot::BotInit::getInstance());
 }
-void CvPlayer::setPlayerBotEndTurn(int turn)
+void CvPlayer::setPlayerBotToRunNextTurn()
 {
 	if (m_playerBot)
-		m_playerBotFinishTurn = turn;
+		m_playerBotFinalTurn = gGlobals.getGameINLINE().getGameTurn() + 1;
 }
 #endif
 
@@ -21924,17 +21926,16 @@ bool CvPlayer::hasSpaceshipArrived() const
 #if ENABLE_PLAYER_BOT
 void CvPlayer::runPlayerBot()
 {
-	CvGame& game = GC.getGameINLINE();
-	if (m_playerBot && game.getGameTurn() < m_playerBotFinishTurn)
+	const int turn = gGlobals.getGameINLINE().getGameTurn();
+	if (m_playerBot && m_playerBotTurnLastRan < turn && turn <= m_playerBotFinalTurn)
 	{
 		handleUIForPlayerBot();
 		m_playerBot->run(cvbot::Game::getInstance());
 		if (!m_listDiplomacy.empty() || !m_listPopups.empty())
 			throw cvbot::BotFailure("Unexpected diplo/popups after running bot.");
-
-		if (game.getGameTurn() + 1 < m_playerBotFinishTurn)
+		m_playerBotTurnLastRan = turn;
+		if (turn < m_playerBotFinalTurn)
 		{
-			//game.doControl(CONTROL_FORCEENDTURN);
 			// Send the message directly to bypass modifier keys check...
 			CvMessageControl::getInstance().sendTurnComplete();
 		}
@@ -21952,15 +21953,31 @@ void CvPlayer::sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage msg)
 	if (m_playerBot)
 		m_playerBot->onTurnMessage(msg);
 }
+void CvPlayer::sendVictoryToBot(TeamTypes winningTeam, VictoryTypes victoryType)
+{
+	if (m_playerBot)
+		m_playerBot->onVictory(cvbot::Game::getInstance(), static_cast<cvbot::ETeam>(winningTeam), static_cast<cvbot::EVictory>(victoryType));
+}
+void CvPlayer::sendDefeatToBot()
+{
+	if (m_playerBot)
+		m_playerBot->onDefeated(cvbot::Game::getInstance());
+}
 void CvPlayer::handleUIForPlayerBot()
 {
 	if (m_playerBot)
 		cvbot::handlePopups(static_cast<CvPlayerAI&>(*this), *m_playerBot);
 }
-DllExportForInterface bool CvPlayer::isPlayerBotRunning() const
+DllExportForInterface bool CvPlayer::isPlayerBotConsumingUI() const
 {
-	// TODO: Because the last turn is not ended, this is true until the user ends turns manually. This should probably be fixed.
-	CvGame& game = GC.getGameINLINE();
-	return m_playerBot && game.getGameTurn() < m_playerBotFinishTurn;
+	const int turn = gGlobals.getGameINLINE().getGameTurn();
+	return turn <= m_playerBotFinalTurn;
+}
+std::wstring CvPlayer::getPlayerBotPlotDebugInfo(const CvPlot& plot) const
+{
+	if (m_playerBot)
+		return heck::convertUtf8ToWide(m_playerBot->buildPlotDebugString(cvbot::Game::getInstance(), { plot.getX_INLINE(), plot.getY_INLINE() }));
+	else
+		return {};
 }
 #endif

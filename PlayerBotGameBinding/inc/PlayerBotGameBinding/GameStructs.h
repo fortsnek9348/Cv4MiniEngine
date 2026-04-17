@@ -11,21 +11,61 @@
 
 namespace cvbot
 {
-	struct ivec2
+	struct i16vec2;
+
+	struct [[nodiscard]] ivec2
 	{
 		int x{};
 		int y{};
+
+		friend int dot(ivec2 a, ivec2 b)
+		{
+			return a.x * b.x + a.y * b.y;
+		}
+
+
+		int lengthSq() const
+		{
+			return dot(*this, *this);
+		}
+		
 
 		friend ivec2 operator+(ivec2 a, ivec2 b)
 		{
 			return { a.x + b.x, a.y + b.y };
 		}
+
+		friend ivec2 operator-(ivec2 a, ivec2 b)
+		{
+			return { a.x - b.x, a.y - b.y };
+		}
+
+		// For coord sorting.
+		friend bool operator<(ivec2 a, ivec2 b)
+		{
+			return a.y < b.y || (a.y == b.y && a.x < b.x);
+		}
+
+		constexpr explicit operator i16vec2() const;
+
+		friend bool operator==(ivec2, ivec2) = default;
 	};
 
-	struct i16vec2
+	// This is for storage in packed structs and arrays. Use ivec2 for math.
+	struct [[nodiscard]] i16vec2
 	{
 		int16_t x{};
 		int16_t y{};
+
+		friend bool operator==(i16vec2 a, i16vec2 b) = default;
+
+		// For coord sorting.
+		friend bool operator<(i16vec2 a, i16vec2 b)
+		{
+			return a.y < b.y || (a.y == b.y && a.x < b.x);
+		}
+
+		friend std::strong_ordering operator<=>(i16vec2, i16vec2) = default;
 
 		operator ivec2() const
 		{
@@ -33,7 +73,12 @@ namespace cvbot
 		}
 	};
 
-	struct iaabb2
+	constexpr ivec2::operator i16vec2() const
+	{
+		return { static_cast<int16_t>(x), static_cast<int16_t>(y) };
+	}
+
+	struct [[nodiscard]] iaabb2
 	{
 		ivec2 min{};
 		ivec2 max{}; // exclusive
@@ -52,25 +97,46 @@ namespace cvbot
 	struct MapGeometry
 	{
 		ivec2 dim{};
-		bool wrapX{};
-		bool wrapY{};
+		bool isWrapX{};
+		bool isWrapY{};
+
+		int wrapX(int x) const
+		{
+			if (isWrapX)
+			{
+				while (x < 0)
+					x += dim.x;
+				while (x >= dim.x)
+					x -= dim.x;
+			}
+			return x;
+		}
+
+		int wrapY(int y) const
+		{
+			if (isWrapY)
+			{
+				while (y < 0)
+					y += dim.y;
+				while (y >= dim.y)
+					y -= dim.y;
+			}
+			return y;
+		}
 
 		ivec2 wrap(ivec2 coord) const
 		{
-			if (wrapX)
-			{
-				while (coord.x < 0)
-					coord.x += dim.x;
-				while (coord.x >= dim.x)
-					coord.x -= dim.x;
-			}
-			if (wrapY)
-			{
-				while (coord.y < 0)
-					coord.y += dim.y;
-				while (coord.y >= dim.y)
-					coord.y -= dim.y;
-			}
+			return { wrapX(coord.x), wrapY(coord.y) };
+		}
+
+		std::optional<ivec2> resolve(ivec2 coord) const
+		{
+			coord.x = wrapX(coord.x);
+			coord.y = wrapY(coord.y);
+			if (!isWrapX && unsigned(coord.x) >= unsigned(dim.x))
+				return std::nullopt;
+			if (!isWrapY && unsigned(coord.y) >= unsigned(dim.y))
+				return std::nullopt;
 			return coord;
 		}
 	};
@@ -88,13 +154,16 @@ namespace cvbot
 		EUnitId id{}; // -1 for other players
 		EPlayer owner{}; // Visual owner, so, barbs for rival privateers
 		i16vec2 coord{};
-		EUnitType type{};
+		//EUnitType type{};
+		// Storing the class may be more useful to bots.
+		EUnitClass klass{};
 		uint8_t exp{}; // Clamped. 0 for other players.
 		uint8_t strength{}; // Rounded, clamped. 0 for non-combat.
 		uint8_t maxStrength{};
 		uint16_t remMoves{}; // 0 for other players. 0 when that event makes your unit immobile for one turn.
 		// Divide by kMoveDenominator to get move "count".
 		uint16_t maxMoves{};
+		uint8_t numFortifyTurns{};
 		std::bitset<kAPIMaxPromotions> promotions{};
 	};
 
@@ -109,19 +178,23 @@ namespace cvbot
 		bool isVisible : 1 = false;
 		bool hasMyUnits : 1 = false;
 		bool hasOtherVisibleUnits : 1 = false; // You can't see enemy spies, etc.
+		bool hasEnemyUnit : 1 = false;
 		bool hasRevealedCity : 1 = false;
 		bool isRiverside : 1 = false;
 		bool isLake : 1 = false;
 		std::array<int8_t, EYield::Num> yields{}; // Visible yields
 	};
 
-	struct ProductionChoice : std::variant<std::monostate, EUnitType, EBuildingType, EProcess, EProject>
+	//struct ProductionChoice : std::variant<std::monostate, EUnitType, EBuildingType, EProcess, EProject>
+	struct ProductionChoice : std::variant<std::monostate, EUnitClass, EBuildingClass, EProcess, EProject>
 	{
-		using std::variant<std::monostate, EUnitType, EBuildingType, EProcess, EProject>::variant;
+		using std::variant<std::monostate, EUnitClass, EBuildingClass, EProcess, EProject>::variant;
+		friend bool operator==(ProductionChoice, ProductionChoice) = default;
 	};
 
 	struct City
 	{
+		// TODO: Knowing the coordinate lets you know where you are in the world before Calendar. Before circumnavigation, maybe coordinates should be randomised?
 		i16vec2 coord{};
 		EPlayer owner{};
 		bool isCapital = false;
@@ -167,7 +240,7 @@ namespace cvbot
 			int espionageUnhealthinessCounter{};
 
 			// Derived. Store these anyway for debug checking.
-			int happyiness = 0;
+			int happiness = 0;
 			int healthiness = 0;
 
 			// Right
@@ -256,6 +329,7 @@ namespace cvbot
 		ETeam team{};
 		std::wstring_view name;
 		int score{};
+		ELeaderhead leader{};
 
 		std::optional<int> optNumCities{}; // If known.
 		int numRevealedCities{}; // Like in BUG
@@ -328,6 +402,7 @@ namespace cvbot
 		EGameSpeed speed{};
 		EWorldSize worldSize{};
 		EHandicap handicap{};
+		int firstTurnOfBarbMilitarySpawns = 0;
 	};
 
 	struct GlobalDemographicsStat
@@ -374,6 +449,7 @@ namespace cvbot
 
 		std::vector<ReligionInfo> foundedReligions{};
 
+		int numAliveCivPlayers = 0;
 		bool hasCircumnavigated = false;
 
 		// TODO: Handle turn message?

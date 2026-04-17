@@ -33,6 +33,8 @@ namespace cvbot
 		// You should give all units orders.
 		virtual void run(IGame& game) = 0;
 
+		virtual std::string buildPlotDebugString(const IGame& game, ivec2 coord) const = 0;
+
 		// Return your choice.
 		//virtual DiploChoice handleDiplo(const IGame& game, EPlayer themI, EDiploComment aiComment, std::span<const DiploChoice> choices,
 		//	const TradeList& fromThem, const TradeList& fromMe) = 0;
@@ -74,13 +76,18 @@ namespace cvbot
 			Disband,
 		};
 
-		virtual ECityCaptureChoice handleCityAcquireChoice(const IGame& game, i16vec2 coord) = 0;
+		virtual ECityAcquireChoice handleCityAcquireChoice(const IGame& game, i16vec2 coord) = 0;
 
 		virtual void onTurnMessage(UnitKilledTurnMessage) = 0;
 		virtual void onTurnMessage(GreatPersonTurnMessage) = 0;
 
-		// Bot stops here. Save the game, write out logs, do whatever you need to do.
+		// Save the game, write out logs, do whatever you need to do.
+		// Bot may continue running if not headless.
 		virtual void onVictory(const IGame& game, ETeam winningTeam, EVictory victoryType) = 0;
+
+		// Save the game, write out logs, do whatever you need to do.
+		// Bot stops here.
+		virtual void onDefeated(const IGame& game) = 0;
 
 		virtual ~IBot() = default;
 	};

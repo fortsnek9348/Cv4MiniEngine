@@ -36,10 +36,18 @@
     <ClInclude Include="inc\PlayerBotGameBinding\IPlayerBotPlugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\PlayerBotGameBinding\Infos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="inc\PlayerBotGameBinding\PlayerBotPluginImpl.inl">
       <Filter>Header Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DLLDefs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -25,6 +25,7 @@
     <ClInclude Include="inc\CommonStuff\IntegerTypeUtil.h" />
     <ClInclude Include="inc\CommonStuff\MapGeometry.h" />
     <ClInclude Include="inc\CommonStuff\NoCopy.h" />
+    <ClInclude Include="inc\CommonStuff\RangeTransformUtil.h" />
     <ClInclude Include="inc\CommonStuff\StatisticsRegistry.h" />
     <ClInclude Include="inc\CommonStuff\StringConversion.h" />
     <ClInclude Include="inc\CommonStuff\System.h" />

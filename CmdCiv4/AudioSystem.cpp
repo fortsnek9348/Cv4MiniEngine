@@ -27,10 +27,10 @@ using heck::range;
 using namespace cvengine;
 
 static constexpr bool kEnable = true;
-//static constexpr float kWorldSoundscapeVolume = 70.0f;
-//static constexpr float kCityScreenSoundscapeVolume = 90.0f;
-static constexpr float kWorldSoundscapeVolume = 100.0f;
-static constexpr float kCityScreenSoundscapeVolume = 100.0f;
+static constexpr float kWorldSoundscapeVolume = 70.0f;
+static constexpr float kCityScreenSoundscapeVolume = 80.0f;
+//static constexpr float kWorldSoundscapeVolume = 100.0f;
+//static constexpr float kCityScreenSoundscapeVolume = 100.0f;
 static constexpr int kDefaultSimultaneouslyStartedSoundLimit = 1;
 
 namespace

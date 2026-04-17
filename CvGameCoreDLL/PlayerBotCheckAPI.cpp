@@ -29,6 +29,9 @@ bool cvbot::checkAPI()
 		&& MAX_CIV_TEAMS == MAX_TEAMS - 1
 		&& inRangeEnum<EPlayer>(kMaxPlayers - 1)
 		&& inRangeEnum<ETeam>(kMaxTeams - 1)
+		&& BARBARIAN_PLAYER == kBarbarianPlayer
+		&& BARBARIAN_TEAM == kBarbarianTeam
+		&& gGlobals.getMOVE_DENOMINATOR() == kMoveDenominator
 		&& gGlobals.getNumPromotionInfos() <= kAPIMaxPromotions
 		&& NUM_PLOT_TYPES == std::to_underlying(EPlotType::Num)
 		&& NUM_ACTIVITY_TYPES == std::to_underlying(EActivity::Num)
@@ -37,6 +40,7 @@ bool cvbot::checkAPI()
 		&& NUM_YIELD_TYPES == std::to_underlying(EYield::Num)
 		&& NUM_COMMERCE_TYPES == std::to_underlying(ECommerce::Num)
 		&& NUM_ATTITUDE_TYPES == std::to_underlying(EAttitude::Num)
+		&& NUM_DOMAIN_TYPES == std::to_underlying(EDomain::Num)
 		&& NUM_CITY_PLOTS == kNumCityWorkPlots
 		&& gGlobals.getNumImprovementInfos() <= kMaxEnum<EImprovement>
 		&& gGlobals.getNumFeatureInfos() <= kMaxEnum<EFeature>

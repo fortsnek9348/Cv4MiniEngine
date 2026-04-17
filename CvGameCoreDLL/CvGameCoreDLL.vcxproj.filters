@@ -872,6 +872,9 @@
     <ClCompile Include="CvDiplomacyScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerBotInit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="FVariableSystem.inl">

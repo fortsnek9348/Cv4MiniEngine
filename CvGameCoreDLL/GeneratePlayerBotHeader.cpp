@@ -133,6 +133,7 @@ void cvbot::generatePlayerBotGameBindingHeaders(const std::filesystem::path& dir
 	generator.emitEnum("CultureLevel", "CULTURELEVEL", &CvGlobals::getCultureLevelInfo, gGlobals.getNumCultureLevelInfos());
 	generator.emitEnum("Victory", "VICTORY", &CvGlobals::getVictoryInfo, gGlobals.getNumVictoryInfos());
 	generator.emitEnum("Project", "PROJECT", &CvGlobals::getProjectInfo, gGlobals.getNumProjectInfos());
+	generator.emitEnum("LeaderTrait", "TRAIT", &CvGlobals::getTraitInfo, gGlobals.getNumTraitInfos());
 	
 
 	//generator.emitHardCodedEmum("Yield", std::to_array<std::string_view>({

@@ -311,6 +311,7 @@
     <ClCompile Include="PlayerBotCheckAPI.cpp" />
     <ClCompile Include="PlayerBotGameInterface.cpp" />
     <ClCompile Include="PlayerBotHandlePopups.cpp" />
+    <ClCompile Include="PlayerBotInit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FVariableSystem.inl" />

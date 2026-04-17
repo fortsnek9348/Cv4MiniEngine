@@ -16,7 +16,6 @@
 #include "CvPlayerAI.h"
 #include "CvTeamAI.h"
 #include "CvInfos.h"
-#include "CvInitCore.h"
 #include "CvDLLUtilityIFaceBase.h"
 #include "CvDLLEngineIFaceBase.h"
 
@@ -30,22 +29,28 @@
 
 using namespace cvbot;
 
-static constinit BotInit gBotInitInstance;
+
 static constinit AllKnowingGameInterface gAllKnowingGameInterfaceInstance;
 static constinit Game gGameInstance;
 
-static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes activeTeam)
+static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes activeTeam, bool allKnowing)
 {
-	const bool allKnowing = activeTeam == NO_TEAM;
+	const TeamTypes activeTeamIfRestricted = allKnowing ? activeTeam : NO_TEAM;
 	const bool isRevealed = plot.isRevealed(activeTeam, false);
 	bool hasMyUnits = false;
 	bool hasOtherUnits = false;
+	bool hasEnemyUnits = false;
 
 	for (auto* node = plot.headUnitNode(); node; node = plot.nextUnitNode(node))
 	{
 		const CvUnit& unit = *::getUnit(node->m_data);
 		hasMyUnits |= unit.getOwner() == activePlayer;
-		hasOtherUnits |= unit.getOwner() != activePlayer && !unit.isInvisible(activeTeam, false);
+		if (plot.isVisible(activeTeam, false) || allKnowing)
+		{
+			const bool isOtherUnit = unit.getOwner() != activePlayer && (allKnowing || !unit.isInvisible(activeTeam, false));
+			hasOtherUnits |= isOtherUnit;
+			hasEnemyUnits |= isOtherUnit && ::atWar(activeTeam, GET_PLAYER(unit.getCombatOwner(activeTeam, &plot)).getTeam());
+		}
 	}
 
 	if (allKnowing || isRevealed)
@@ -56,10 +61,11 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 			.improvement = static_cast<EImprovement>(allKnowing ? plot.getImprovementType() : plot.getRevealedImprovementType(activeTeam, false)),
 			.feature = static_cast<EFeature>(plot.getFeatureType()),
 			.terrain = static_cast<ETerrain>(plot.getTerrainType()),
-			.bonus = static_cast<EBonus>(plot.getBonusType()),
+			.bonus = static_cast<EBonus>(plot.getBonusType(activeTeamIfRestricted)),
 			.isVisible = plot.isVisible(activeTeam, false),
-			.hasMyUnits = hasOtherUnits,
+			.hasMyUnits = hasMyUnits,
 			.hasOtherVisibleUnits = hasOtherUnits,
+			.hasEnemyUnit = hasEnemyUnits,
 			.hasRevealedCity = plot.getPlotCity() && (allKnowing ? true : plot.getPlotCity()->isRevealed(activeTeam, false)),
 			.isRiverside = plot.isRiverSide(),
 			.isLake = plot.isLake(),
@@ -78,8 +84,8 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 			.improvement = static_cast<EImprovement>(NO_IMPROVEMENT),
 			.feature = static_cast<EFeature>(NO_FEATURE),
 			.terrain = static_cast<ETerrain>(NO_TERRAIN),
-			.bonus = static_cast<EBonus>(plot.getBonusType()),
-			.isVisible = plot.isVisible(activeTeam, false),
+			.bonus = static_cast<EBonus>(NO_BONUS),
+			.isVisible = false,
 			.hasMyUnits = hasOtherUnits,
 			.hasOtherVisibleUnits = false,
 			.hasRevealedCity = false,
@@ -90,28 +96,17 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 	}
 }
 
-static MapGeometry getMapGeometry()
-{
-	CvMap& map = gGlobals.getMap();
-	return {
-		.dim{ map.getGridWidth(), map.getGridHeight() },
-		.wrapX = map.isWrapX(),
-		.wrapY = map.isWrapY(),
-	};
-}
-
 static void getPlots(ivec2 origin, Span2D<Plot> out, bool allKnowing)
 {
 	const int h = out.extent(0);
 	const int w = out.extent(1);
-	const MapGeometry geom = getMapGeometry();
 	const CvMap& map = gGlobals.getMap();
 	const PlayerTypes playerI = allKnowing ? NO_PLAYER : gGlobals.getGame().getActivePlayer();
-	const TeamTypes teamI = allKnowing ? NO_TEAM : GET_PLAYER(playerI).getTeam();
+	const TeamTypes teamI = GET_PLAYER(playerI).getTeam();
 
 	for (int y = 0; y < h; ++y)
 		for (int x = 0; x < w; ++x)
-			out[y, x] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI);
+			out[y, x] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI, allKnowing);
 }
 
 static Unit convert(const CvUnit& unit, bool allKnowing)
@@ -137,12 +132,14 @@ static Unit convert(const CvUnit& unit, bool allKnowing)
 			static_cast<int16_t>(unit.getX()),
 			static_cast<int16_t>(unit.getY()),
 			},
-		.type = static_cast<EUnitType>(unit.getUnitType()),
+		//.type = static_cast<EUnitType>(unit.getUnitType()),
+		.klass = static_cast<EUnitClass>(unit.getUnitClassType()),
 		.exp = static_cast<uint8_t>(std::clamp<int>(allKnowing || isOurs ? unit.getExperience() : 0, 0, UINT8_MAX)),
 		.strength = static_cast<uint8_t>(std::clamp<int>(strength, 0, UINT8_MAX)),
 		.maxStrength = static_cast<uint8_t>(std::clamp<int>(baseStrength, 0, UINT8_MAX)),
 		.remMoves = static_cast<uint16_t>(std::clamp<int>(canMove ? unit.movesLeft() : 0, 0, UINT16_MAX)),
 		.maxMoves = static_cast<uint16_t>(std::clamp<int>(unit.baseMoves() * gGlobals.getMOVE_DENOMINATOR(), 0, UINT16_MAX)),
+		.numFortifyTurns = static_cast<uint8_t>(unit.getFortifyTurns()), // clamped to 5 by the game
 		.promotions = promotions,
 	};
 }
@@ -202,7 +199,6 @@ static bool isUnitVisible(const CvUnit& unit)
 
 static std::vector<Unit> getUnits(const iaabb2& rect, bool allKnowing)
 {
-	const MapGeometry geom = getMapGeometry();
 	const CvMap& map = gGlobals.getMap();
 
 	std::vector<Unit> out;
@@ -584,7 +580,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 	}
 
 	// Logic from CvInfoScreen.
-	if (activeTeam.isGoldTrading() || otherTeam.isGoldTrading())
+	if ((activeTeam.isGoldTrading() || otherTeam.isGoldTrading()) && otherPlayerI != activePlayer.getID())
 		out.tradeAdvisorData.maxTradeGold = otherPlayer.AI_maxGoldTrade(activePlayer.getID());
 
 	{
@@ -716,10 +712,10 @@ static City convert(const CvCity& city, bool allKnowing)
 		default:
 			break;
 		case ORDER_TRAIN:
-			info.productionChoice = static_cast<EUnitType>(order.iData1);
+			info.productionChoice = static_cast<EUnitClass>(gGlobals.getUnitInfo()[order.iData1]->getUnitClassType());
 			break;
 		case ORDER_CONSTRUCT:
-			info.productionChoice = static_cast<EBuildingType>(order.iData1);
+			info.productionChoice = static_cast<EBuildingClass>(gGlobals.getBuildingInfo()[order.iData1]->getBuildingClassType());
 			break;
 		case ORDER_CREATE:
 			info.productionChoice = static_cast<EProject>(order.iData1);
@@ -741,6 +737,9 @@ static City convert(const CvCity& city, bool allKnowing)
 		info.extraHealth = city.getExtraHealth();
 		info.espionageUnhealthinessCounter = city.getEspionageHealthCounter();
 
+		info.happiness = city.happyLevel() - city.unhappyLevel();
+		info.healthiness = city.healthRate(false, 0);
+
 		// Right
 		for (const int i : heck::range(gGlobals.getNumBonusInfos()))
 			if (city.hasBonus(static_cast<BonusTypes>(i)))
@@ -750,6 +749,11 @@ static City convert(const CvCity& city, bool allKnowing)
 	}
 
 	return out;
+}
+
+const AllKnowingGameInterface& AllKnowingGameInterface::getInstance()
+{
+	return gAllKnowingGameInterfaceInstance;
 }
 
 void AllKnowingGameInterface::getPlots(ivec2 origin, Span2D<Plot> out) const
@@ -777,40 +781,7 @@ std::vector<std::optional<Player>> AllKnowingGameInterface::getPlayers() const
 	return players;
 }
 
-///
 
-BotInit& BotInit::getInstance()
-{
-	return gBotInitInstance;
-}
-
-std::ostream& BotInit::getLoggingStream() const
-{
-	return std::clog;
-}
-
-GameSetup BotInit::getGameSetup() const
-{
-	std::bitset<EGameOption::Num> options{};
-	for (const auto opt : heck::range<GameOptionTypes>(NUM_GAMEOPTION_TYPES))
-		options[opt] = gGlobals.getGame().isOption(opt);
-
-	return GameSetup{
-		.mapGeometry = getMapGeometry(),
-		.options = options,
-		.activePlayerI = static_cast<EPlayer>(gGlobals.getGame().getActivePlayer()),
-		.modName = gGlobals.getDLLIFace()->getModName(false),
-		.mapScriptName = gGlobals.getInitCore().getMapScriptName(),
-		.speed = static_cast<EGameSpeed>(gGlobals.getGame().getGameSpeedType()),
-		.worldSize = static_cast<EWorldSize>(gGlobals.getMap().getWorldSize()),
-		.handicap = static_cast<EHandicap>(gGlobals.getGame().getHandicapType()),
-	};
-}
-
-const IAllKnowingGameInterface& BotInit::getAllKnowingGameInterface() const
-{
-	return gAllKnowingGameInterfaceInstance;
-}
 
 ///
 
@@ -947,6 +918,7 @@ GlobalInfo Game::getGlobalInfo() const
 		}
 	}
 	
+	info.numAliveCivPlayers = gGlobals.getGameINLINE().countCivPlayersAlive();
 	info.hasCircumnavigated = gGlobals.getGame().isCircumnavigated();
 
 	return info;
@@ -1172,7 +1144,13 @@ bool Game::canStartMission(CommandUnitGroup group, EMission mission, int data1, 
 		return false;
 }
 
-bool Game::pushMission(CommandUnitGroup group, EMission mission, int data1, int data2)
+i16vec2 Game::getUnitCoord(EUnitId id) const
+{
+	const CvUnit& unit = *GET_PLAYER(gGlobals.getGameINLINE().getActivePlayer()).getUnit(static_cast<int>(id));
+	return static_cast<i16vec2>(cvbot::ivec2(unit.getX_INLINE(), unit.getY_INLINE()));
+}
+
+bool Game::startMission(CommandUnitGroup group, EMission mission, int data1, int data2)
 {
 	if (CvSelectionGroup* const missionGroup = regroup(group))
 	{
@@ -1229,7 +1207,7 @@ bool Game::tryWake(CommandUnitGroup group)
 
 bool Game::trySkipTurn(CommandUnitGroup group)
 {
-	return pushMission(group, EMission::Skip, -1, -1);
+	return startMission(group, EMission::Skip, -1, -1);
 }
 
 bool Game::tryCancelOrders(CommandUnitGroup group)
@@ -1243,6 +1221,13 @@ bool Game::tryCancelOrders(CommandUnitGroup group)
 		}
 	}
 	return false;
+}
+
+EAutomation Game::getAutomation(CommandUnitGroup group) const
+{
+	if (CvSelectionGroup* const missionGroup = regroup(group))
+		return static_cast<EAutomation>(missionGroup->getAutomateType());
+	return EAutomation::None;
 }
 
 bool Game::tryAutomate(CommandUnitGroup group, EAutomation automation)
@@ -1339,14 +1324,9 @@ bool Game::canChangeReligion() const
 	return GET_PLAYER(gGlobals.getGame().getActivePlayer()).canConvert(NO_RELIGION);
 }
 
-bool Game::canChangeCivicsTo(std::span<const ECivic> civics) const
+bool Game::canChangeCivicTo(ECivic c) const
 {
-	if (civics.size() != gGlobals.getNumCivicOptionInfos())
-		throw BotFailure("Wrong number of civics.");
-
-	return GET_PLAYER(gGlobals.getGame().getActivePlayer()).canRevolution(
-		(civics | std::views::transform([](int i) { return static_cast<CivicTypes>(i); }) | std::ranges::to<std::vector>()).data()
-	);
+	return GET_PLAYER(gGlobals.getGame().getActivePlayer()).canDoCivics(static_cast<CivicTypes>(c));
 }
 
 bool Game::canChangeStateReligionTo(std::optional<EReligion> religion) const
@@ -1356,12 +1336,15 @@ bool Game::canChangeStateReligionTo(std::optional<EReligion> religion) const
 
 bool Game::tryChangeCivicsTo(std::span<const ECivic> civics) const
 {
-	if (canChangeCivicsTo(civics))
+	if (!std::ranges::all_of(civics, std::bind_front(std::mem_fn(&Game::canChangeCivicTo), std::ref(*this))))
+		return false;
+
+	auto dllCivics = civics | std::views::transform([](int i) { return static_cast<CivicTypes>(i); }) | std::ranges::to<std::vector>();
+	CvPlayerAI& player = GET_PLAYER(gGlobals.getGame().getActivePlayer());
+
+	if (player.canRevolution(dllCivics.data()))
 	{
-		GET_PLAYER(gGlobals.getGame().getActivePlayer()).revolution(
-			(civics | std::views::transform([](int i) { return static_cast<CivicTypes>(i); }) | std::ranges::to<std::vector>()).data(),
-			true
-		);
+		player.revolution(dllCivics.data(), true);
 		return true;
 	}
 	else
@@ -1419,6 +1402,16 @@ void Game::adjustSliders(std::array<int, ECommerce::Num> ratio)
 	// Using new function to set percentages without further normalisation.
 	player.setCommercePercents(ratio);
 }
+
+std::array<int, ECommerce::Num> Game::getCivCommerceRates() const
+{
+	const CvPlayer& player = GET_PLAYER(gGlobals.getGame().getActivePlayer());
+	std::array<int, ECommerce::Num> out{};
+	for (int i = 0; i < NUM_COMMERCE_TYPES; ++i)
+		out[i] = player.getCommerceRate(static_cast<CommerceTypes>(i));
+	return out;
+}
+
 void Game::changeResearch(ETech tech)
 {
 	CvPlayer& player = GET_PLAYER(gGlobals.getGame().getActivePlayer());
@@ -1468,6 +1461,7 @@ bool Game::tryChangeProduction(i16vec2 coord, ProductionChoice choice)
 {
 	struct Visitor
 	{
+		const CvCivilizationInfo& civ;
 		CvCity& city;
 
 		bool operator()(std::monostate) const
@@ -1475,8 +1469,9 @@ bool Game::tryChangeProduction(i16vec2 coord, ProductionChoice choice)
 			return true;
 		}
 
-		bool operator()(EBuildingType type) const
+		bool operator()(EBuildingClass klass) const
 		{
+			const int type = civ.getCivilizationBuildings(klass);
 			if (city.canConstruct(static_cast<BuildingTypes>(type)))
 			{
 				city.pushOrder(ORDER_CONSTRUCT, type, -1, false, false, false);
@@ -1486,8 +1481,9 @@ bool Game::tryChangeProduction(i16vec2 coord, ProductionChoice choice)
 				return false;
 		}
 
-		bool operator()(EUnitType type) const
+		bool operator()(EUnitClass klass) const
 		{
+			const int type = civ.getCivilizationUnits(klass);
 			if (city.canTrain(static_cast<UnitTypes>(type)))
 			{
 				city.pushOrder(ORDER_TRAIN, type, -1, false, false, false);
@@ -1521,7 +1517,7 @@ bool Game::tryChangeProduction(i16vec2 coord, ProductionChoice choice)
 	};
 
 	CvCity& city = accessActivePlayerCity(coord);
-	Visitor visitor{ city };
+	Visitor visitor{ gGlobals.getCivilizationInfo(GET_PLAYER(city.getOwnerINLINE()).getCivilizationType()), city };
 	visitor.city.clearOrderQueue();
 	return std::visit(visitor, choice);
 }
@@ -1560,11 +1556,11 @@ std::vector<CityBuildChoice> Game::getCityProductionChoices(i16vec2 coord) const
 
 	for (const auto i : heck::range(gGlobals.getNumUnitClassInfos()))
 		if (const auto type = static_cast<UnitTypes>(civInfo.getCivilizationUnits(i)); city.canTrain(type))
-			out.push_back({ ProductionChoice(static_cast<EUnitType>(type)), city.getProductionNeeded(type) });
+			out.push_back({ ProductionChoice(static_cast<EUnitClass>(i)), city.getProductionNeeded(type) });
 
 	for (const auto i : heck::range(gGlobals.getNumBuildingClassInfos()))
 		if (const auto type = static_cast<BuildingTypes>(civInfo.getCivilizationBuildings(i)); city.canConstruct(type))
-			out.push_back({ ProductionChoice(static_cast<EBuildingType>(type)), city.getProductionNeeded(type) });
+			out.push_back({ ProductionChoice(static_cast<EBuildingClass>(i)), city.getProductionNeeded(type) });
 
 	for (const auto i : heck::range<ProjectTypes>(gGlobals.getNumProjectInfos()))
 		if (city.canCreate(i))

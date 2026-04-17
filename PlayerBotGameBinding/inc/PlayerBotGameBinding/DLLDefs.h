@@ -2,6 +2,7 @@
 
 #include <array>
 #include <mdspan>
+#include <stdexcept>
 
 namespace cvbot
 {
@@ -18,11 +19,19 @@ namespace cvbot
 	enum EPlayer : std::int8_t;
 	enum ETeam : std::int8_t;
 	enum class EUnitId : int;
+	enum ELeaderhead : int;
 
 	using CommandUnitGroup = std::span<const EUnitId>;
 
 	inline constexpr auto kNoPlayer = static_cast<EPlayer>(-1);
 	inline constexpr auto kNoTeam = static_cast<ETeam>(-1);
+
+	inline constexpr auto kBarbarianPlayer = static_cast<EPlayer>(kMaxCivPlayers);
+	inline constexpr auto kBarbarianTeam = static_cast<ETeam>(kMaxCivTeams);
+
+	inline constexpr int kMoveDenominator = 60;
+
+	//inline constexpr int kMaxFortifyTurns = 5;
 
 	enum class EPlotType : int8_t
 	{
@@ -197,6 +206,19 @@ namespace cvbot
 				Num,
 			};
 		}
+
+		namespace Domain
+		{
+			enum Enum : std::int8_t
+			{
+				None = -1,
+				Sea,
+				Air,
+				Land,
+				Immobile,
+				Num,
+			};
+		}
 	}
 
 	using EGameOption = enums::GameOption::Enum;
@@ -204,6 +226,7 @@ namespace cvbot
 	using ECommerce = enums::Commerce::Enum;
 	using EAttitudeModifier = enums::AttitudeModifier::Enum;
 	using EAttitude = enums::Attitude::Enum;
+	using EDomain = enums::Domain::Enum;
 
 	inline constexpr int kNumCityWorkPlots = 21;
 
@@ -213,4 +236,10 @@ namespace cvbot
 
 	template<class T>
 	using Span2D = std::mdspan<T, std::dextents<int, 2>>;
+
+	class BotFailure : public std::runtime_error
+	{
+	public:
+		using std::runtime_error::runtime_error;
+	};
 }

@@ -189,6 +189,9 @@ void CvInterface::processEvents()
 			//if (activePlayer.isTurnActive() && activePlayer.isHuman() && !activePlayer.hasReadyUnit(true) && !activePlayer.isAutoMoves())
 			//	activePlayer.AI_unitUpdate();
 
+			// Process messages now. Player bot wants this after alt-clicking end turn button, so that the turn is ended before the bot is invoked.
+			(void)DLLMessageQueue::getInstance().execute();
+
 			game.update();
 
 			updateSelectionList();

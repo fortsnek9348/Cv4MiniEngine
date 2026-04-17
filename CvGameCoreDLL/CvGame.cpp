@@ -8267,10 +8267,12 @@ void CvGame::showEndGameSequence()
 				if ((getWinner() != NO_TEAM) && (getVictory() != NO_VICTORY))
 				{
 					pInfo->setText(gDLL->getText("TXT_KEY_GAME_WON", GET_TEAM(getWinner()).getName().GetCString(), GC.getVictoryInfo(getVictory()).getTextKeyWide()).c_str());
+					player.sendVictoryToBot(getWinner(), getVictory());
 				}
 				else
 				{
 					pInfo->setText(gDLL->getText("TXT_KEY_MISC_DEFEAT").c_str());
+					player.sendDefeatToBot();
 				}
 				player.addPopup(pInfo);
 			}

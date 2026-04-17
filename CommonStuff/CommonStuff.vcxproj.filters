@@ -168,6 +168,9 @@
     <ClInclude Include="inc\CommonStuff\DynamicLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\CommonStuff\RangeTransformUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PPM.cpp">

@@ -31,6 +31,7 @@ namespace cvbot::enums
 	namespace CultureLevel { enum Enum : std::int8_t; }
 	namespace Victory { enum Enum : std::int8_t; }
 	namespace Project { enum Enum : std::int8_t; }
+	namespace LeaderTrait { enum Enum : std::int8_t; }
 }
 
 namespace cvbot
@@ -60,4 +61,5 @@ namespace cvbot
 	using ECultureLevel = enums::CultureLevel::Enum;
 	using EVictory = enums::Victory::Enum;
 	using EProject = enums::Project::Enum;
+	using ELeaderTrait = enums::LeaderTrait::Enum;
 }

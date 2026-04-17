@@ -13,6 +13,8 @@ namespace cvbot
 	class AllKnowingGameInterface : public IAllKnowingGameInterface
 	{
 	public:
+		static const AllKnowingGameInterface& getInstance();
+
 		virtual void getPlots(ivec2 origin, Span2D<Plot> out) const override;
 		virtual std::vector<Unit> getUnits(iaabb2 rect) const override;
 		virtual std::vector<std::optional<Player>> getPlayers() const override;
@@ -27,6 +29,8 @@ namespace cvbot
 		virtual std::ostream& getLoggingStream() const override;
 
 		virtual GameSetup getGameSetup() const override;
+
+		virtual GlobalInfoData buildGlobalInfoData() const override;
 
 		// Use this to build up map knowledge.
 		virtual const IAllKnowingGameInterface& getAllKnowingGameInterface() const override;
@@ -59,7 +63,9 @@ namespace cvbot
 
 		// Unit commands
 		virtual bool canStartMission(CommandUnitGroup group, EMission mission, int data1, int data2) const override;
-		virtual bool pushMission(CommandUnitGroup group, EMission mission, int data1, int data2) override;
+		virtual i16vec2 getUnitCoord(EUnitId id) const override;
+		virtual bool startMission(CommandUnitGroup group, EMission mission, int data1, int data2) override;
+		
 		virtual std::vector<EPromotion> getAvailablePromotions(EUnitId unit) const override;
 		virtual bool tryPromote(EUnitId unit, EPromotion promotion) override;
 
@@ -67,6 +73,7 @@ namespace cvbot
 		virtual bool tryWake(CommandUnitGroup group) override;
 		virtual bool trySkipTurn(CommandUnitGroup group) override;
 		virtual bool tryCancelOrders(CommandUnitGroup group) override; // All orders
+		virtual EAutomation getAutomation(CommandUnitGroup group) const override;
 		virtual bool tryAutomate(CommandUnitGroup group, EAutomation automation) override;
 		virtual bool tryStopAutomation(CommandUnitGroup group) override;
 		virtual bool tryDelete(EUnitId unit) override;
@@ -78,12 +85,13 @@ namespace cvbot
 		// Civ commands
 		virtual bool canChangeCivics() const override;
 		virtual bool canChangeReligion() const override;
-		virtual bool canChangeCivicsTo(std::span<const ECivic>) const override;
+		virtual bool canChangeCivicTo(ECivic) const override;
 		virtual bool canChangeStateReligionTo(std::optional<EReligion>) const override;
 		virtual bool tryChangeCivicsTo(std::span<const ECivic>) const override;
 		virtual bool tryChangeStateReligionTo(std::optional<EReligion>) const override;
 		// Only flexible sliders are set, and gold is ignored.
 		virtual void adjustSliders(std::array<int, ECommerce::Num> percents) override;
+		virtual std::array<int, ECommerce::Num> getCivCommerceRates() const override;
 		// If tech can't be researched, research is set to None.
 		virtual void changeResearch(ETech tech) override;
 

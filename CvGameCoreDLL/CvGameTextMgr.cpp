@@ -2366,6 +2366,18 @@ void CvGameTextMgr::setPlotHelp(CvWStringBuffer& szString, CvPlot* pPlot)
 	}
 	else if (!bShift && bAlt && (gDLL->getChtLvl() > 0))
 	{
+#if ENABLE_PLAYER_BOT
+		{
+			const CvPlayer& player = GET_PLAYER(gGlobals.getGameINLINE().getActivePlayer());
+			const std::wstring botDebugInfo = player.getPlayerBotPlotDebugInfo(*pPlot);
+			if (!botDebugInfo.empty())
+			{
+				szString.append(botDebugInfo);
+				return;
+			}
+
+		}
+#endif
 	    if (pPlot->isOwned())
 	    {
             szTempBuffer.Format(L"\nThis player has %d area cities", pPlot->area()->getCitiesPerPlayer(pPlot->getOwnerINLINE()));

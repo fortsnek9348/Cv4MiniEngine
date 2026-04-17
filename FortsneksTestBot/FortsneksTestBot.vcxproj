@@ -78,11 +78,22 @@
   <ItemGroup>
     <ClCompile Include="Bot.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="MilitaryAdvisor.cpp" />
+    <ClCompile Include="Pathing.cpp" />
+    <ClCompile Include="SettlingAdvisor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CommonStuff\CommonStuff.vcxproj">
+      <Project>{1fb2b809-6581-444e-a356-19cf91b975d2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\PlayerBotGameBinding\PlayerBotGameBinding.vcxproj">
       <Project>{a9ecece7-c47f-4d49-b04f-7403864bc6a2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MilitaryAdvisor.h" />
+    <ClInclude Include="Pathing.h" />
+    <ClInclude Include="SettlingAdvisor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

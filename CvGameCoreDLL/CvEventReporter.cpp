@@ -98,7 +98,7 @@ void CvEventReporter::beginGameTurn(int iGameTurn)
 {
 #if ENABLE_PLAYER_BOT
 	// Suppress the top civs popup if running a bot.
-	if (!(GET_PLAYER(gGlobals.getGameINLINE().getActivePlayer()).isPlayerBotRunning()))
+	if (!(GET_PLAYER(gGlobals.getGameINLINE().getActivePlayer()).isPlayerBotConsumingUI()))
 #endif
 	m_kPythonEventMgr.reportBeginGameTurn(iGameTurn);
 }
@@ -172,7 +172,7 @@ void CvEventReporter::cityBuilt( CvCity *pCity )
 {
 #if ENABLE_PLAYER_BOT
 	// Suppress the city naming popup if running a bot.
-	if (!(GET_PLAYER(pCity->getOwnerINLINE()).isPlayerBotRunning()))
+	if (!(GET_PLAYER(pCity->getOwnerINLINE()).isPlayerBotConsumingUI()))
 #endif
 	m_kPythonEventMgr.reportCityBuilt(pCity);
 	m_kStatistics.cityBuilt(pCity);

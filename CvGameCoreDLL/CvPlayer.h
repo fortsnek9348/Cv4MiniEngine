@@ -66,7 +66,7 @@ public:
 
 #if ENABLE_PLAYER_BOT
 	DllExportForInterface void createPlayerBot(const cvbot::IPlayerBotPlugin& plugin);
-	void setPlayerBotEndTurn(int turn);
+	void setPlayerBotToRunNextTurn();
 #endif
 
 protected:
@@ -1031,9 +1031,12 @@ public:
 	void runPlayerBot();
 	void sendTurnMessageToPlayerBot(cvbot::UnitKilledTurnMessage msg);
 	void sendTurnMessageToPlayerBot(cvbot::GreatPersonTurnMessage msg);
+	void sendVictoryToBot(TeamTypes winningTeam, VictoryTypes victoryType);
+	void sendDefeatToBot();
 	void handleUIForPlayerBot();
 	// Returns true iff there is a player bot and we haven't reached its end turn yet.
-	DllExportForInterface bool isPlayerBotRunning() const;
+	DllExportForInterface bool isPlayerBotConsumingUI() const;
+	std::wstring getPlayerBotPlotDebugInfo(const CvPlot& plot) const;
 #endif
 
 	virtual void AI_init() = 0;
@@ -1320,7 +1323,8 @@ protected:
 
 #if ENABLE_PLAYER_BOT
 	std::unique_ptr<cvbot::IBot> m_playerBot;
-	int m_playerBotFinishTurn;
+	int m_playerBotFinalTurn;
+	int m_playerBotTurnLastRan;
 #endif
 
 	void doGold();
