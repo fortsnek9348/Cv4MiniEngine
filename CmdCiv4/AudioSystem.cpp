@@ -555,11 +555,11 @@ namespace
 			setLooping(true);
 		}
 		ScriptSoundStream(ScriptSoundStream&&) = delete;
-		// SFML doesn't wait for audio thread currently. And we don't need this anyway.
 		ScriptSoundStream& operator=(ScriptSoundStream&&) = delete;
 		~ScriptSoundStream()
 		{
-			// SFML doesn't wait for the audio thread.
+			// SFML should wait for the audio thread here (https://github.com/SFML/SFML/blame/master/src/SFML/Audio/SoundStream.cpp#L316)
+			// Do this before `fadeSamplesBuffer` gets destroyed.
 			stop();
 		}
 
@@ -714,15 +714,17 @@ namespace
 				if (fadeStateSamples < fadeOutDurationSamples)
 				{
 					// Okay, good, this makes the race condition easy to reproduce.
-					sf::sleep(sf::milliseconds(5));
+					// The race condition happens with an old build of SFML (aef34af5568c410f971be0fc53175f131127afde), even when calling `stop` in the dtor.
+					//sf::sleep(sf::milliseconds(5));
+
 					const size_t n = std::min<size_t>({ size_t(fadeOutDurationSamples - fadeStateSamples), (size_t)fadeResolutionSamples, bufSamplesRemaining.size() / numChannels });
 					std::ranges::copy(bufSamplesRemaining.subspan(0, n * numChannels), fadeSamplesBuffer.begin());
 					for (size_t i = 0; i < n; ++i)
 					{
 						for (int j = 0; j < numChannels; ++j)
 						{
-							// TODO: A race condition happens that crashes here.
-							//       A soundstream is destroyed just as we're finishing a fade out, but SFML/miniaudio should wait until the audio thread is finished?
+							// FIXED: A race condition happened that crashes here.
+							//        A soundstream was destroyed just as we're finishing a fade out, but SFML/miniaudio should wait until the audio thread is finished?
 							auto& y = fadeSamplesBuffer[i * numChannels + j];
 							y = int16_t(int64_t(int64_t(y) * (fadeOutDurationSamples - (fadeStateSamples + i)) + fadeOutDurationSamples / 2)
 								/ int64_t(fadeOutDurationSamples));
@@ -952,11 +954,12 @@ struct AudioSystem::Internals
 			playingSounds.pop_front();
 		}
 
-		for (auto it = deactivatedSoundscapes.begin(); it != deactivatedSoundscapes.end(); )
-			if (it->second.isGarbage())
-				it = deactivatedSoundscapes.erase(it);
-			else
-				++it;
+		// Why did I leave this in...
+		//for (auto it = deactivatedSoundscapes.begin(); it != deactivatedSoundscapes.end(); )
+		//	if (it->second.isGarbage())
+		//		it = deactivatedSoundscapes.erase(it);
+		//	else
+		//		++it;
 		
 
 		//while (deactivatedSoundscapes.size() > 10)

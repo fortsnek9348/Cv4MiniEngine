@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="UserMacros">
-    <SFML_DIR>D:\Lib\SFML 3 (aef34af5568c410f971be0fc53175f131127afde)</SFML_DIR>
+    <SFML_DIR>D:\Lib\SFML-3.1.0</SFML_DIR>
     <NFD_DIR>D:\Lib\nativefiledialog-extended-1.2.1</NFD_DIR>
     <ZLIB_DIR>D:\Lib\zlib-1.3.1\install</ZLIB_DIR>
     <PYBIND11_DIR>D:\Lib\pybind11-2.9.2</PYBIND11_DIR>
@@ -10,6 +10,9 @@
     <S3TC_DXT_DIR>D:\Lib\s3tc-dxt-decompression-master</S3TC_DXT_DIR>
     <PUGIXML_DIR>D:\Lib\pugixml-1.15\Install</PUGIXML_DIR>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile />
+  </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="SFML_DIR">
       <Value>$(SFML_DIR)</Value>
