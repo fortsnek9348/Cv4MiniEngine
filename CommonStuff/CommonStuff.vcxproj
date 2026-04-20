@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DynamicLibrary.cpp" />
+    <ClCompile Include="StaticAsserts.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="StringConversion.cpp" />
     <ClCompile Include="StatisticsRegistry.cpp" />

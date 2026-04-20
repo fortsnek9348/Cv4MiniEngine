@@ -6,6 +6,8 @@
 #include "CvDLLUtilityIFaceBase.h"
 #include "CvInitCore.h"
 #include "CvPlayerAI.h"
+#include "CvTeamAI.h"
+#include "CvGameCoreUtils.h"
 
 #include <PlayerBotGameBinding/GameStructs.h>
 #include <PlayerBotGameBinding/Infos.h>
@@ -66,14 +68,18 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 {
 	const CvGame& game = gGlobals.getGameINLINE();
 	const CvPlayer& activePlayer = GET_PLAYER(game.getActivePlayer());
+	const CvTeam& activeTeam = GET_TEAM(activePlayer.getTeam());
 	const auto& activeCiv = gGlobals.getCivilizationInfo(activePlayer.getCivilizationType());
 	
 	GlobalInfoData infos;
 
 	infos.civs.resize(gGlobals.getNumCivilizationInfos());
-	for ([[maybe_unused]] const auto i : heck::range<CivilizationTypes>(infos.civs.size()))
+	for (const auto i : heck::range<CivilizationTypes>(infos.civs.size()))
 	{
-		;
+		const CvCivilizationInfo& info = gGlobals.getCivilizationInfo(i);
+		for (const auto tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
+			if (info.isCivilizationFreeTechs(tech))
+				infos.civs[i].freeTechs.push_back(static_cast<ETech>(tech));
 	}
 
 	infos.leaders.resize(gGlobals.getNumLeaderHeadInfos());
@@ -97,6 +103,7 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 		infos.buildingClasses[i] = {
 			.activeType = static_cast<EBuildingType>(activeCiv.getCivilizationBuildings(i)),
 			.defaultType = static_cast<EBuildingType>(gGlobals.getBuildingClassInfo(i).getDefaultBuildingIndex()),
+			.isWorldWonder = ::isWorldWonderClass(i),
 		};
 	}
 	
@@ -152,6 +159,126 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 			.cityDefenceModifier = info.getCityDefenseModifier(),
 		};
 	}
+
+	infos.techs.resize(gGlobals.getNumTechInfos());
+	for (const auto i : heck::range<TechTypes>(infos.techs.size()))
+	{
+		const auto& info = gGlobals.getTechInfo(i);
+		infos.techs[i] = {
+			.researchCost = activeTeam.getResearchCost(i),
+			.tradeRoutes = info.getTradeRoutes(),
+			.featureProductionModifier = info.getFeatureProductionModifier(),
+			.workerSpeedModifier = info.getWorkerSpeedModifier(),
+			.health = info.getHealth(),
+			.happiness = info.getHappiness(),
+			.firstFreeTechs = info.getFirstFreeTechs(),
+			.powerValue = info.getPowerValue(),
+			.isRepeat                   /**/ = info.isRepeat(),
+			.isTrade                    /**/ = info.isTrade(),
+			.isDisable                  /**/ = info.isDisable(),
+			.isGoodyTech                /**/ = info.isGoodyTech(),
+			.isExtraWaterSeeFrom        /**/ = info.isExtraWaterSeeFrom(),
+			.isMapCentering             /**/ = info.isMapCentering(),
+			.isMapVisible               /**/ = info.isMapVisible(),
+			.isMapTrading               /**/ = info.isMapTrading(),
+			.isTechTrading              /**/ = info.isTechTrading(),
+			.isGoldTrading              /**/ = info.isGoldTrading(),
+			.isOpenBordersTrading       /**/ = info.isOpenBordersTrading(),
+			.isDefensivePactTrading     /**/ = info.isDefensivePactTrading(),
+			.isPermanentAllianceTrading /**/ = info.isPermanentAllianceTrading(),
+			.isVassalStateTrading       /**/ = info.isVassalStateTrading(),
+			.isBridgeBuilding           /**/ = info.isBridgeBuilding(),
+			.isIrrigation               /**/ = info.isIrrigation(),
+			.isIgnoreIrrigation         /**/ = info.isIgnoreIrrigation(),
+			.isWaterWork                /**/ = info.isWaterWork(),
+			.isRiverTrade               /**/ = info.isRiverTrade(),
+			.firstFreeUnitClass = static_cast<EUnitClass>(info.getFirstFreeUnitClass()),
+		};
+
+		for (int j = 0; j < NUM_DOMAIN_TYPES; ++j)
+			infos.techs[i].domainExtraMoves[j] = static_cast<int8_t>(info.getDomainExtraMoves(j));
+
+		for (int j = 0; j < gGlobals.getNUM_OR_TECH_PREREQS(); j++)
+			if (TechTypes ePrereq = static_cast<TechTypes>(info.getPrereqOrTechs(j)); ePrereq != NO_TECH)
+				infos.techs[i].prereqOrTechs.push_back(static_cast<ETech>(ePrereq));
+	
+		for (int j = 0; j < gGlobals.getNUM_AND_TECH_PREREQS(); j++)
+			if (TechTypes ePrereq = static_cast<TechTypes>(info.getPrereqAndTechs(j)); ePrereq != NO_TECH)
+				infos.techs[i].prereqAndTechs.push_back(static_cast<ETech>(ePrereq));
+
+		for (int j = 0; j < NUM_COMMERCE_TYPES; ++j)
+			infos.techs[i].isCommerceFlexible[j] = info.isCommerceFlexible(j);
+
+		for (int j = 0; j < gGlobals.getNumTerrainInfos(); ++j)
+			if (info.isTerrainTrade(j))
+				infos.techs[i].terrainTrades.push_back(static_cast<ETerrain>(j));
+	}
+
+	for (const auto i : heck::range<UnitTypes>(infos.units.size()))
+	{
+		const auto& info = gGlobals.getUnitInfo(i);
+
+		if (info.getPrereqAndTech() != NO_TECH)
+			infos.units[i].requiredTechs.push_back(static_cast<ETech>(info.getPrereqAndTech()));
+
+		for (int j = 0; j < gGlobals.getNUM_UNIT_AND_TECH_PREREQS(); j++)
+			if (info.getPrereqAndTechs(j) != NO_TECH)
+				infos.units[i].requiredTechs.push_back(static_cast<ETech>(info.getPrereqAndTechs(j)));
+
+		for (const ETech tech : infos.units[i].requiredTechs)
+			infos.techs[tech].unitsPotentiallyUnlocked.push_back(static_cast<EUnitType>(i));
+	}
+	for (const auto i : heck::range<BuildTypes>(gGlobals.getNumBuildInfos()))
+	{
+		const auto& info = gGlobals.getBuildInfo(i);
+		if (info.getTechPrereq() != NO_TECH)
+			infos.techs[info.getTechPrereq()].buildActionsUnlocked.push_back(static_cast<EBuild>(i));
+	}
+
+	for (const auto i : heck::range<ReligionTypes>(gGlobals.getNumReligionInfos()))
+	{
+		if (!GC.getGameINLINE().isReligionSlotTaken(i))
+		{
+			const TechTypes tech = static_cast<TechTypes>(GC.getReligionInfo(i).getTechPrereq());
+			if (tech != NO_TECH)
+				infos.techs[tech].isIfFirstThenFoundReligion = true;
+		}
+	}
+
+	for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
+	{
+		if (activePlayer.getTechFreeUnit(tech) != NO_UNIT)
+			infos.techs[tech].isIfFirstThenSpawnsGreatPerson = true;
+		if (gGlobals.getTechInfo(tech).getFirstFreeTechs() > 0)
+			infos.techs[tech].isIfFirstThenGetFreeTech = true;
+		
+		infos.techs[tech].hasFirstToResearchBonus = infos.techs[tech].isIfFirstThenFoundReligion
+			|| infos.techs[tech].isIfFirstThenSpawnsGreatPerson
+			|| infos.techs[tech].isIfFirstThenGetFreeTech;
+	}
+
+	const CvHandicapInfo& handicapInfo = gGlobals.getHandicapInfo(game.getHandicapType());
+	const CvGameSpeedInfo& speedInfo = gGlobals.getGameSpeedInfo(game.getGameSpeedType());
+
+	infos.speedInfo = {
+		.researchPercent = speedInfo.getResearchPercent(),
+	};
+
+	for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
+	{
+		if (handicapInfo.isFreeTechs(tech))
+			infos.handicap.freeTechs.push_back(static_cast<ETech>(tech));
+		if (handicapInfo.isAIFreeTechs(tech))
+			infos.handicap.freeAITechs.push_back(static_cast<ETech>(tech));
+	}
+
+	infos.handicap.firstMilitaryBarbCreationTurn = handicapInfo.getBarbarianCreationTurnsElapsed() * speedInfo.getBarbPercent() / 100;
+
+	infos.techCostTotalKnownTeamModifier = gGlobals.getDefineINT("TECH_COST_TOTAL_KNOWN_TEAM_MODIFIER");
+	infos.techCostKnownPrereqModifier = gGlobals.getDefineINT("TECH_COST_KNOWN_PREREQ_MODIFIER");
+	infos.baseResearchRate = gGlobals.getDefineINT("BASE_RESEARCH_RATE");
+	infos.percentAngerDivisor = gGlobals.getPERCENT_ANGER_DIVISOR();
+	
 
 	return infos;
 }

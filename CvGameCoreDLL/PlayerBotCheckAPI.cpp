@@ -29,8 +29,8 @@ bool cvbot::checkAPI()
 		&& MAX_CIV_TEAMS == MAX_TEAMS - 1
 		&& inRangeEnum<EPlayer>(kMaxPlayers - 1)
 		&& inRangeEnum<ETeam>(kMaxTeams - 1)
-		&& BARBARIAN_PLAYER == kBarbarianPlayer
-		&& BARBARIAN_TEAM == kBarbarianTeam
+		&& BARBARIAN_PLAYER == std::to_underlying(kBarbarianPlayer)
+		&& BARBARIAN_TEAM == std::to_underlying(kBarbarianTeam)
 		&& gGlobals.getMOVE_DENOMINATOR() == kMoveDenominator
 		&& gGlobals.getNumPromotionInfos() <= kAPIMaxPromotions
 		&& NUM_PLOT_TYPES == std::to_underlying(EPlotType::Num)

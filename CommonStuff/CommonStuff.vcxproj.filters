@@ -206,6 +206,9 @@
     <ClCompile Include="DynamicLibrary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StaticAsserts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis" />

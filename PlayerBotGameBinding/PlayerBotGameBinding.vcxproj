@@ -80,6 +80,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="inc\PlayerBotGameBinding\Common.h" />
+    <ClInclude Include="inc\PlayerBotGameBinding\EnumStrings.h" />
     <ClInclude Include="inc\PlayerBotGameBinding\GameStructs.h" />
     <ClInclude Include="inc\PlayerBotGameBinding\DLLDefs.h" />
     <ClInclude Include="inc\PlayerBotGameBinding\EnumDefs.h" />
@@ -94,6 +96,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLLDefs.cpp" />
+    <ClCompile Include="EnumStrings.cpp" />
+    <ClCompile Include="GameStructs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

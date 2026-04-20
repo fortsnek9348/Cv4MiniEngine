@@ -18,6 +18,7 @@ namespace cvbot
 		virtual void getPlots(ivec2 origin, Span2D<Plot> out) const override;
 		virtual std::vector<Unit> getUnits(iaabb2 rect) const override;
 		virtual std::vector<std::optional<Player>> getPlayers() const override;
+		virtual int getNumAliveMetTeamsKnowTech(ETech) const override;
 	};
 
 	class BotInit : public IBotInit

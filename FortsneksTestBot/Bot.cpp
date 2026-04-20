@@ -1,6 +1,7 @@
 #include "Pathing.h"
 #include "SettlingAdvisor.h"
 #include "MilitaryAdvisor.h"
+#include "ResearchAdvisor.h"
 
 #include <PlayerBotGameBinding/IPlayerBot.h>
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
@@ -19,6 +20,16 @@
 #include <sstream>
 
 using namespace cvbot;
+
+// TODO: Detect changes in plot rival culture and prioritise cultural bonuses accordingly.
+// TODO: Use great people. And evaluate whether it's better to join or construct academy. And dump artists in border cities.
+// TODO: Produce research if we've got plenty of GPT.
+// TODO: City production valuation.
+// TODO: War.
+// TODO: Pick different civics. Go for emancipation if beneficial.
+// TODO: Abstract city simulation.
+// TODO: Abstract empire simulation.
+// TODO: Abstract game simulation.
 
 static constexpr EBuildingClass kCityBuildingOrder[]{
 	EBuildingClass::Granary,
@@ -58,6 +69,7 @@ public:
 
 	mybot::SettlingAdvisor settlingAdvisor;
 	mybot::MilitaryAdvisor militaryAdvisor;
+	mybot::ResearchAdvisor researchAdvisor;
 	
 	explicit MyBot(const IBotInit& init)
 		: log(init.getLoggingStream())
@@ -133,6 +145,9 @@ public:
 				//NoGoForCoastalUnits /**/ = 1 << 5,
 			}
 
+
+		
+
 		std::vector<ivec2> myCityCoords(std::from_range, myCities | std::views::transform(&City::coord));
 		cityDistanceField = mybot::computeMultipleSourceDistanceField({ setup.mapGeometry, pathingMap.view() }, mybot::EDistanceMetric::Step, myCityCoords);
 		pathLengthField = mybot::computeMultipleSourcePathLengthField({ setup.mapGeometry, pathingMap.view() },
@@ -143,6 +158,7 @@ public:
 
 		const CivState civState = game.getCivState();
 
+		
 		const int settlingDemand = settlingAdvisor.getSettlerDemand();
 		
 		const size_t desiredNumWorkers = myCities.size() * 3 / 2;
@@ -217,6 +233,7 @@ public:
 			None,
 			NothingBetterToDo,
 			Buildings,
+			Project,
 			Worker,
 			Settler,
 			AntiBarb,
@@ -280,7 +297,11 @@ public:
 							&& c != EBuildingClass::Palace;
 						}) | std::ranges::to<std::vector>();
 					const auto units = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EUnitClass>(c); }) | std::ranges::to<std::vector>();
+					// Gotta build the Apollo Program somehow.
+					const auto projects = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EProject>(c); }) | std::ranges::to<std::vector>();
 
+					if (!projects.empty())
+						tryProduce(projects[0], EProductionPriority::Project);
 					if (!buildings.empty())
 						tryProduce(buildings[0], EProductionPriority::Buildings);
 					tryProduce(EProcess::Wealth, EProductionPriority::NothingBetterToDo);
@@ -320,22 +341,34 @@ public:
 
 		//const std::vector<std::optional<Player>> players = game.getRevealedPlayers();
 		
+		const cvbot::ETech techChoice = researchAdvisor.update(
+			civState,
+			players,
+			map.view(),
+			myCities,
+			militaryAdvisor.barbsThreatTurn,
+			globalInfo,
+			infos,
+			game
+		);
 
-		if (!civState.optCurrentResearch)
-		{
-			std::vector<ptrdiff_t> choices = civState.techs | std::views::enumerate
-				| std::views::filter([](const std::pair<ptrdiff_t, TechState>& x) { return x.second.canResearch && x.first != ETech::DivineRight; })
-				| std::views::keys | std::ranges::to<std::vector>();
+		game.changeResearch(techChoice);
 
-			std::ranges::stable_sort(choices, std::less(), [&](ptrdiff_t x) {
-				return civState.techs[x].cost - civState.techs[x].progress;
-				});
-
-			if (!choices.empty())
-			{
-				game.changeResearch(static_cast<ETech>(choices[0]));
-			}
-		}
+		//if (!civState.optCurrentResearch)
+		//{
+		//	std::vector<ptrdiff_t> choices = civState.techs | std::views::enumerate
+		//		| std::views::filter([](const std::pair<ptrdiff_t, TechState>& x) { return x.second.canResearch && x.first != ETech::DivineRight; })
+		//		| std::views::keys | std::ranges::to<std::vector>();
+		//
+		//	std::ranges::stable_sort(choices, std::less(), [&](ptrdiff_t x) {
+		//		return civState.techs[x].cost - civState.techs[x].progress;
+		//		});
+		//
+		//	if (!choices.empty())
+		//	{
+		//		game.changeResearch(static_cast<ETech>(choices[0]));
+		//	}
+		//}
 
 		auto civics = civState.civics;
 		if (game.canChangeCivicTo(ECivic::HereditaryRule))

@@ -21,6 +21,7 @@
 
 #include <PlayerBotGameBinding/GameStructs.h>
 
+#include <CommonStuff/div.h>
 #include <CommonStuff/range.h>
 
 #include <algorithm>
@@ -32,6 +33,16 @@ using namespace cvbot;
 
 static constinit AllKnowingGameInterface gAllKnowingGameInterfaceInstance;
 static constinit Game gGameInstance;
+
+template<std::integral T, class U>
+static T clampCast(U value)
+{
+	if (std::cmp_less(value, std::numeric_limits<T>::min()))
+		return std::numeric_limits<T>::min();
+	if (std::cmp_greater(value, std::numeric_limits<T>::max()))
+		return std::numeric_limits<T>::max();
+	return static_cast<T>(value);
+}
 
 static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes activeTeam, bool allKnowing)
 {
@@ -98,15 +109,13 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 
 static void getPlots(ivec2 origin, Span2D<Plot> out, bool allKnowing)
 {
-	const int h = out.extent(0);
-	const int w = out.extent(1);
 	const CvMap& map = gGlobals.getMap();
 	const PlayerTypes playerI = allKnowing ? NO_PLAYER : gGlobals.getGame().getActivePlayer();
 	const TeamTypes teamI = GET_PLAYER(playerI).getTeam();
 
-	for (int y = 0; y < h; ++y)
-		for (int x = 0; x < w; ++x)
-			out[y, x] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI, allKnowing);
+	for (int y = 0; y < out.dim.y; ++y)
+		for (int x = 0; x < out.dim.x; ++x)
+			out[{ x, y }] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI, allKnowing);
 }
 
 static Unit convert(const CvUnit& unit, bool allKnowing)
@@ -502,6 +511,8 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 	out.team = static_cast<ETeam>(otherPlayer.getTeam());
 	out.name = otherPlayer.getName();
 	out.score = otherPlayer.calculateScore(); // calls python
+	out.civ = static_cast<cvbot::ECivlisation>(otherPlayer.getCivilizationType());
+	out.leader = static_cast<cvbot::ELeaderhead>(otherPlayer.getLeaderType());
 	out.optIsWarPreping = isWHEOOH(otherPlayerI, gGlobals.getGame().getActivePlayer());
 	// As in BUG, if we can see the player's city list, show the exact number, otherwise, count up revealed cities.
 	if (canSeeAllCities(otherPlayer))
@@ -582,6 +593,8 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 	// Logic from CvInfoScreen.
 	if ((activeTeam.isGoldTrading() || otherTeam.isGoldTrading()) && otherPlayerI != activePlayer.getID())
 		out.tradeAdvisorData.maxTradeGold = otherPlayer.AI_maxGoldTrade(activePlayer.getID());
+
+	out.tradeAdvisorData.isTechnologyTradingAllowed = activeTeam.isTechTrading() || otherTeam.isTechTrading();
 
 	{
 		CvPlayerAI& us = GET_PLAYER(gGlobals.getGame().getActivePlayer());
@@ -674,6 +687,8 @@ static City convert(const CvCity& city, bool allKnowing)
 		.owner = static_cast<EPlayer>(city.getOwnerINLINE()),
 		.isCapital = city.isCapital(),
 		.isGovernmentCenter = city.isGovernmentCenter(),
+		.isCoastal = city.isCoastal(gGlobals.getBuildingInfo(static_cast<BuildingTypes>(gGlobals.getInfoTypeForString("BUILDING_LIGHTHOUSE"))).getMinAreaSize()),
+		.isOccupation = city.isOccupation(),
 		.pop = city.getPopulation(),
 		.defence = city.getDefenseModifier(false),
 		.defenceIgnoringBuildings = city.getDefenseModifier(true),
@@ -725,14 +740,51 @@ static City convert(const CvCity& city, bool allKnowing)
 			break;
 		}
 
+		for (int i = 0; i < NUM_YIELD_TYPES; ++i)
+			info.yieldRates[i] = city.getYieldRate(static_cast<YieldTypes>(i));
+		for (int i = 0; i < NUM_COMMERCE_TYPES; ++i)
+		{
+			info.productionToCommerceModifiers[i] = city.getProductionToCommerceModifier(static_cast<CommerceTypes>(i));
+			info.commerceRateModifiers[i] = city.getTotalCommerceRateModifier(static_cast<CommerceTypes>(i));
+		}
+
 		info.extraHappiness = city.getExtraHappiness();
 		info.extraHappyTimer = city.getHappinessTimer();
 		for (const int i : heck::range(MAX_PLAYERS))
 			info.plotCultureValues[i] = city.getCulture(static_cast<PlayerTypes>(i));
+
+		int totalPercentAnger = 0;
+		int oldAnger = 0;
+		int newAnger = 0;
+		const auto calcAngerContribution = [&, mod = gGlobals.getPERCENT_ANGER_DIVISOR()](int percentAnger) {
+			totalPercentAnger += percentAnger;
+			newAnger = totalPercentAnger * city.getPopulation() / mod;
+			const int contribution = newAnger - oldAnger;
+			oldAnger = newAnger;
+			return clampCast<int8_t>(contribution);
+			};
+		
+		info.percentAngerContributions = { {
+			calcAngerContribution(city.getOvercrowdingPercentAnger()),
+			calcAngerContribution(city.getNoMilitaryPercentAnger()),
+			calcAngerContribution(city.getCulturePercentAnger()),
+			calcAngerContribution(city.getReligionPercentAnger()),
+			calcAngerContribution(city.getHurryPercentAnger()),
+			calcAngerContribution(city.getConscriptPercentAnger()),
+			calcAngerContribution(city.getDefyResolutionPercentAnger()),
+			calcAngerContribution(city.getWarWearinessPercentAnger()),
+			calcAngerContribution(GET_PLAYER(city.getOwnerINLINE()).getCivicPercentAnger(static_cast<CivicTypes>(gGlobals.getInfoTypeForString("CIVIC_EMANCIPATION")))),
+		} };
+
+		info.defyResolutionAngerTimer = clampCast<int8_t>(city.getDefyResolutionAngerTimer());
+		info.vassalUnhappiness = clampCast<int8_t>(city.getVassalUnhappiness());
+		info.espionageUnhappinessCounter = clampCast<int8_t>(city.getEspionageHappinessCounter());
 		info.hurryAngerTimer = city.getHurryAngerTimer();
 		info.conscriptAngerTimer = city.getConscriptAngerTimer();
-		info.defyResolutionAngerTimer = city.getDefyResolutionAngerTimer();
-		info.espionageUnhappinessCounter = city.getEspionageHappinessCounter();
+
+		if (!city.isNoUnhappiness())
+			assert(city.unhappyLevel() == std::ranges::fold_left(info.percentAngerContributions, 0, std::plus()) + info.vassalUnhappiness + info.espionageUnhappinessCounter);
+
 		info.freshWaterHealth = city.getFreshWaterGoodHealth() - city.getFreshWaterBadHealth();
 		info.extraHealth = city.getExtraHealth();
 		info.espionageUnhealthinessCounter = city.getEspionageHealthCounter();
@@ -781,7 +833,26 @@ std::vector<std::optional<Player>> AllKnowingGameInterface::getPlayers() const
 	return players;
 }
 
+int AllKnowingGameInterface::getNumAliveMetTeamsKnowTech(ETech tech) const
+{
+	const CvTeam& activeTeam = GET_TEAM(gGlobals.getGame().getActiveTeam());
+	int n = 0;
+	for (int iI = 0; iI < MAX_CIV_TEAMS; iI++)
+	{
+		if (GET_TEAM((TeamTypes)iI).isAlive())
+		{
+			if (activeTeam.isHasMet((TeamTypes)iI))
+			{
+				if (GET_TEAM((TeamTypes)iI).isHasTech(static_cast<TechTypes>(tech)))
+				{
+					n++;
+				}
+			}
+		}
+	}
 
+	return n;
+}
 
 ///
 
@@ -813,11 +884,18 @@ GlobalInfo Game::getGlobalInfo() const
 {
 	GlobalInfo info{};
 
-	const CvPlayer& activePlayer = GET_PLAYER(gGlobals.getGame().getActivePlayer());
-	const TeamTypes activeTeamI = gGlobals.getGame().getActiveTeam();
+	CvGame& game = gGlobals.getGameINLINE();
+
+	const CvPlayer& activePlayer = GET_PLAYER(game.getActivePlayer());
+	const TeamTypes activeTeamI = game.getActiveTeam();
 	const CvTeam& activeTeam = GET_TEAM(activeTeamI);
 
 	const std::vector<BuildingTypes> wonderBuildings = getWorldWonderBuildingTypes();
+
+	info.activePlayerI = static_cast<EPlayer>(activePlayer.getID());
+	info.activeTeamI = static_cast<ETeam>(activeTeamI);
+
+	info.projects.resize(gGlobals.getNumProjectInfos());
 
 	for (const auto playerI : heck::range<PlayerTypes>(kMaxPlayers))
 	{
@@ -830,10 +908,12 @@ GlobalInfo Game::getGlobalInfo() const
 		int itIndex{};
 		for (const CvCity* city = player.firstCity(&itIndex); city; city = player.nextCity(&itIndex))
 		{
+			const bool isCityInspectable = city->canBeSelected();
+
 			for (const auto building : wonderBuildings)
 			{
 				// Differently from the info screen, we check that the city is inspectable.
-				const bool isInProgress = city->getProductionBuilding() == building && city->canBeSelected();
+				const bool isInProgress = isCityInspectable && city->getProductionBuilding() == building;
 
 				if (city->getNumBuilding(building) || isInProgress)
 				{
@@ -844,6 +924,20 @@ GlobalInfo Game::getGlobalInfo() const
 						});
 				}
 			}
+
+			if (isCityInspectable)
+				if (const ProjectTypes project = city->getProductionProject(); project != NO_PROJECT)
+					++info.projects[project].teams[teamI].numInProgress;
+		}
+
+		for (const size_t i : heck::range(gGlobals.getNumProjectInfos()))
+		{
+			const int n = GET_TEAM(teamI).getProjectCount(static_cast<ProjectTypes>(i));
+			if (activeTeam.isHasMet(teamI))
+				info.projects[i].teams[teamI].numBuilt += n;
+			else
+				info.projects[i].numBuiltByUnknownTeams += n;
+			info.projects[i].numBuiltTotal += n;
 		}
 	}
 
@@ -904,13 +998,13 @@ GlobalInfo Game::getGlobalInfo() const
 
 	for (const auto i : heck::range<ReligionTypes>(gGlobals.getNumReligionInfos()))
 	{
-		if (gGlobals.getGame().isReligionFounded(i))
+		if (game.isReligionFounded(i))
 		{
 			GlobalInfo::ReligionInfo religionInfo{
 				.religion = static_cast<EReligion>(i),
 			};
 
-			if (const CvCity* const city = gGlobals.getGame().getHolyCity(i))
+			if (const CvCity* const city = game.getHolyCity(i))
 				if (city->isRevealed(activeTeamI, false))
 					religionInfo.optRevealedHolyCityCoord = ivec2{ city->getX(), city->getY() };
 
@@ -918,18 +1012,22 @@ GlobalInfo Game::getGlobalInfo() const
 		}
 	}
 	
-	info.numAliveCivPlayers = gGlobals.getGameINLINE().countCivPlayersAlive();
-	info.hasCircumnavigated = gGlobals.getGame().isCircumnavigated();
+	info.numAliveCivPlayers = game.countCivPlayersAlive();
+	info.numAliveCivTeams = game.countCivTeamsAlive();
+	info.hasCircumnavigated = game.isCircumnavigated();
 
 	return info;
 }
 
 CivState Game::getCivState() const
 {
-	CvPlayer& activePlayer = GET_PLAYER(gGlobals.getGame().getActivePlayer());
-	const CvTeam& activeTeam = GET_TEAM(gGlobals.getGame().getActiveTeam());
+	CvGame& game = gGlobals.getGameINLINE();
+	CvPlayer& activePlayer = GET_PLAYER(game.getActivePlayer());
+	const CvTeam& activeTeam = GET_TEAM(game.getActiveTeam());
 
 	CivState state{
+		.activePlayerI = static_cast<EPlayer>(activePlayer.getID()),
+		.activeTeamI = static_cast<ETeam>(activePlayer.getTeam()),
 		//.researchSlider = activePlayer.getCommercePercent(COMMERCE_RESEARCH),
 		//.optCultureSlider = activePlayer.isCommerceFlexible(COMMERCE_CULTURE) ? std::optional(activePlayer.getCommercePercent(COMMERCE_CULTURE)) : std::nullopt,
 		//.optEspionageSlider = activePlayer.isCommerceFlexible(COMMERCE_ESPIONAGE) ? std::optional(activePlayer.getCommercePercent(COMMERCE_ESPIONAGE)) : std::nullopt,
@@ -939,7 +1037,7 @@ CivState Game::getCivState() const
 
 	for (const auto i : heck::range<CommerceTypes>(NUM_COMMERCE_TYPES))
 		if (activePlayer.isCommerceFlexible(i))
-			state.optSliders[i] = activePlayer.getCommercePercent(i);
+			state.optSliderPercents[i] = activePlayer.getCommercePercent(i);
 
 	for (const auto i : heck::range<CivicOptionTypes>(gGlobals.getNumCivicOptionInfos()))
 		state.civics.push_back(static_cast<ECivic>(activePlayer.getCivics(i)));
@@ -948,39 +1046,62 @@ CivState Game::getCivState() const
 
 	//const dllgeneric::ActivePlayerInfo activePlayerInfo = dllgeneric::getActivePlayerInfo(activePlayer);
 
+	const int researchSliderOutput = activePlayer.getCommerceRate(COMMERCE_RESEARCH);
+
 	for (const auto i : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
 	{
-		state.techs[i] = {
+		TechState& techState = state.techs[i];
+		techState = {
 			.isResearched = activeTeam.isHasTech(i),
 			.canResearch = activePlayer.canResearch(i),
 			.progress = activeTeam.getResearchProgress(i),
 			.cost = activeTeam.getResearchCost(i),
 		};
+
+		if (techState.canResearch)
+		{
+			// CvPlayer::doResearch
+			const int iOverflowResearch = (activePlayer.getOverflowResearch() * activePlayer.calculateResearchModifier(i)) / 100;
+			const int researchRate = activePlayer.calculateBaseNetResearch(i);
+			//techState.clampedFinalRateWidthInResearchBar = heck::rdiv(std::min(finalRate, techState.cost - techState.progress) * kSimulatedResearchBarWidth, static_cast<unsigned int>(techState.cost));
+
+			techState.overflow = iOverflowResearch;
+			techState.researchRate = researchRate;
+			techState.isOverflowTruncated = techState.progress + iOverflowResearch >= techState.cost; // Using `>=`: you can't tell the difference in the UI.
+			techState.isResearchRateTruncated = techState.progress + iOverflowResearch + researchRate >= techState.cost;
+
+			if (techState.isOverflowTruncated)
+				techState.overflow = techState.cost - techState.progress;
+			if (techState.isResearchRateTruncated)
+				techState.researchRate = std::max(techState.cost - (techState.progress + iOverflowResearch), GC.getDefineINT("BASE_RESEARCH_RATE") + researchSliderOutput);
+		}
 	}
 
 	for (auto* node = activePlayer.headResearchQueueNode(); node; node = activePlayer.nextResearchQueueNode(node))
 		state.techs[node->m_data].isInQueue = true;
 
+	// This logic is mirroed in Infos.
 	for (const auto i : heck::range<ReligionTypes>(gGlobals.getNumReligionInfos()))
 	{
-		if (!GC.getGameINLINE().isReligionSlotTaken(i))
+		if (!game.isReligionSlotTaken(i))
 		{
 			const TechTypes tech = static_cast<TechTypes>(GC.getReligionInfo(i).getTechPrereq());
-			if (tech != NO_TECH && GC.getGameINLINE().countKnownTechNumTeams(tech) == 0)
-				state.techs[tech].canBeFirstToFoundReligion = true;
+			if (tech != NO_TECH)
+				state.techs[tech].hasMissedOutOnFirstToResearch |= game.countKnownTechNumTeams(tech) != 0;
 		}
 	}
 
 	for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
 	{
-		if (GC.getGameINLINE().countKnownTechNumTeams(tech) == 0)
-		{
-			if (activePlayer.getTechFreeUnit(tech) != NO_UNIT)
-				state.techs[tech].canBeFirstToSpawnsGreatPerson = true;
-			if (gGlobals.getTechInfo(tech).getFirstFreeTechs() > 0)
-				state.techs[tech].canBeFirstToGetFreeTech = true;
-		}
+		if (activePlayer.getTechFreeUnit(tech) != NO_UNIT)
+			state.techs[tech].hasMissedOutOnFirstToResearch |= game.countKnownTechNumTeams(tech) != 0;
+		if (gGlobals.getTechInfo(tech).getFirstFreeTechs() > 0)
+			state.techs[tech].hasMissedOutOnFirstToResearch |= game.countKnownTechNumTeams(tech) != 0;
 	}
+
+	state.techStatesReferenceSliderOutput = activePlayer.getCommerceRate(COMMERCE_RESEARCH);
+	state.totalTradeGoldPerTurn = activePlayer.getGoldPerTurn();
+	state.inflatedCosts = activePlayer.calculateInflatedCosts();
 
 	return state;
 }
@@ -1556,15 +1677,15 @@ std::vector<CityBuildChoice> Game::getCityProductionChoices(i16vec2 coord) const
 
 	for (const auto i : heck::range(gGlobals.getNumUnitClassInfos()))
 		if (const auto type = static_cast<UnitTypes>(civInfo.getCivilizationUnits(i)); city.canTrain(type))
-			out.push_back({ ProductionChoice(static_cast<EUnitClass>(i)), city.getProductionNeeded(type) });
+			out.push_back({ ProductionChoice(static_cast<EUnitClass>(i)), city.getUnitProduction(type), city.getProductionNeeded(type) });
 
 	for (const auto i : heck::range(gGlobals.getNumBuildingClassInfos()))
 		if (const auto type = static_cast<BuildingTypes>(civInfo.getCivilizationBuildings(i)); city.canConstruct(type))
-			out.push_back({ ProductionChoice(static_cast<EBuildingClass>(i)), city.getProductionNeeded(type) });
+			out.push_back({ ProductionChoice(static_cast<EBuildingClass>(i)), city.getBuildingProduction(type), city.getProductionNeeded(type) });
 
 	for (const auto i : heck::range<ProjectTypes>(gGlobals.getNumProjectInfos()))
 		if (city.canCreate(i))
-			out.push_back({ ProductionChoice(static_cast<EProject>(i)), city.getProductionNeeded(i) });
+			out.push_back({ ProductionChoice(static_cast<EProject>(i)), city.getProjectProduction(i), city.getProductionNeeded(i) });
 
 	for (const auto i : heck::range<ProcessTypes>(gGlobals.getNumProcessInfos()))
 		if (city.canMaintain(i))

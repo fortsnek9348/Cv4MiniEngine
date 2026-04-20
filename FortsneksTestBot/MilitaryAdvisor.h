@@ -13,6 +13,7 @@ namespace mybot
 		std::vector<cvbot::EUnitType> rivalUnitsSeen;
 		bool barbsHaveEnteredTerritory = false;
 		bool canBarbsEnterTerritory = false;
+		int barbsThreatTurn = 0;
 
 		// Use them for scouting, extra defence, barb capturing, conquering.
 		std::vector<cvbot::EUnitId> spareMilitaryUnits;

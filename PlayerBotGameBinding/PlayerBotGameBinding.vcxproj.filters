@@ -39,6 +39,12 @@
     <ClInclude Include="inc\PlayerBotGameBinding\Infos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\PlayerBotGameBinding\Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\PlayerBotGameBinding\EnumStrings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="inc\PlayerBotGameBinding\PlayerBotPluginImpl.inl">
@@ -47,6 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLLDefs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStructs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumStrings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

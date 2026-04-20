@@ -2,6 +2,7 @@
 
 #include <CommonStuff/UnionFind.h>
 
+#include <algorithm>
 #include <ranges>
 
 using namespace mybot;
@@ -89,7 +90,7 @@ DynamicArray2D<MultipleSourceDistanceFieldCell> mybot::computeMultipleSourcePath
 
 				const ivec2 wrappedCoord{ wrappedX, wrappedY };
 
-				if ((map.plots[wrappedCoord.y, wrappedCoord.x].flags & avoidFlags) != 0)
+				if ((map.plots[wrappedCoord].flags & avoidFlags) != 0)
 					continue;
 
 				const unsigned int dstPathLength = srcPathLength + 1;
@@ -204,7 +205,7 @@ DynamicArray2D<unsigned int> mybot::computeGlobalReachability(PathingMap map, Pa
 	{
 		for (int x = 0; x < map.geom.dim.x; ++x)
 		{
-			if ((map.plots[y, x].flags & avoidFlags) != 0)
+			if ((map.plots[{ x, y }].flags& avoidFlags) != 0)
 			{
 				field[{ x, y }] = 0;
 				continue;
@@ -222,7 +223,7 @@ DynamicArray2D<unsigned int> mybot::computeGlobalReachability(PathingMap map, Pa
 					const int x2 = x + dx;
 					const int wrappedX = map.geom.wrapX(x2);
 
-					if ((map.plots[wrappedY, wrappedX].flags & avoidFlags) != 0)
+					if ((map.plots[{ wrappedX, wrappedY }].flags& avoidFlags) != 0)
 						continue;
 
 					uf.unionise(indexA, wrappedX + wrappedY * map.geom.dim.x);

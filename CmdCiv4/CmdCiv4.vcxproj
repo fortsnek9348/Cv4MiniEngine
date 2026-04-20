@@ -78,7 +78,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;zlibstaticd.lib;$(PUGIXML_DIR)\lib\pugixml_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;zlibstaticd.lib;$(PUGIXML_DIR)\lib\pugixml_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
     </Link>
@@ -103,7 +103,7 @@
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s.lib;sfml-audio-s.lib;zlibstatic.lib;$(PUGIXML_DIR)\lib\pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-system-s.lib;sfml-audio-s.lib;zlibstatic.lib;$(PUGIXML_DIR)\lib\pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

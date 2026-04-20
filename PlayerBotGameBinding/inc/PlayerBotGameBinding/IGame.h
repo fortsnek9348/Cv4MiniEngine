@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Common.h"
 #include "DLLDefs.h"
 #include "EnumFwd.h"
 
 #include <iosfwd>
 #include <vector>
 #include <string_view>
-#include <stdexcept>
+#include <optional>
 
 namespace cvbot
 {
@@ -31,6 +32,8 @@ namespace cvbot
 		virtual void getPlots(ivec2 origin, Span2D<Plot> out) const = 0;
 		virtual std::vector<Unit> getUnits(iaabb2 rect) const = 0;
 		virtual std::vector<std::optional<Player>> getPlayers() const = 0;
+		// CvPlayer::calculateResearchModifier
+		virtual int getNumAliveMetTeamsKnowTech(ETech) const = 0;
 		virtual ~IAllKnowingGameInterface() = default;
 	};
 

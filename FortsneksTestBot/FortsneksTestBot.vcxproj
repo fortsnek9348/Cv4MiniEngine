@@ -80,6 +80,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="MilitaryAdvisor.cpp" />
     <ClCompile Include="Pathing.cpp" />
+    <ClCompile Include="ResearchAdvisor.cpp" />
     <ClCompile Include="SettlingAdvisor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -91,8 +92,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DynamicArray2D.h" />
     <ClInclude Include="MilitaryAdvisor.h" />
     <ClInclude Include="Pathing.h" />
+    <ClInclude Include="ResearchAdvisor.h" />
     <ClInclude Include="SettlingAdvisor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

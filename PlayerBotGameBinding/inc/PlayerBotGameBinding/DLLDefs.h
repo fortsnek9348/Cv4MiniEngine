@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <array>
-#include <mdspan>
 #include <stdexcept>
+#include <span>
 
 namespace cvbot
 {
@@ -20,6 +21,7 @@ namespace cvbot
 	enum ETeam : std::int8_t;
 	enum class EUnitId : int;
 	enum ELeaderhead : int;
+	enum ECivlisation : int;
 
 	using CommandUnitGroup = std::span<const EUnitId>;
 
@@ -233,13 +235,4 @@ namespace cvbot
 	struct ivec2;
 
 	extern const std::array<ivec2, kNumCityWorkPlots> kCityWorkPlotCoords;
-
-	template<class T>
-	using Span2D = std::mdspan<T, std::dextents<int, 2>>;
-
-	class BotFailure : public std::runtime_error
-	{
-	public:
-		using std::runtime_error::runtime_error;
-	};
 }

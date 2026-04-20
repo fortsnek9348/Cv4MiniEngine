@@ -622,6 +622,8 @@ namespace
 				return false;
 			}
 
+			//sf::sleep(sf::milliseconds(1));
+
 			const std::span bufSamples{ buf->getSamples(), buf->getSampleCount() };
 			const std::span bufSamplesRemaining = bufSamples.subspan(position * numChannels);
 
@@ -711,12 +713,16 @@ namespace
 			{
 				if (fadeStateSamples < fadeOutDurationSamples)
 				{
+					// Okay, good, this makes the race condition easy to reproduce.
+					sf::sleep(sf::milliseconds(5));
 					const size_t n = std::min<size_t>({ size_t(fadeOutDurationSamples - fadeStateSamples), (size_t)fadeResolutionSamples, bufSamplesRemaining.size() / numChannels });
 					std::ranges::copy(bufSamplesRemaining.subspan(0, n * numChannels), fadeSamplesBuffer.begin());
 					for (size_t i = 0; i < n; ++i)
 					{
 						for (int j = 0; j < numChannels; ++j)
 						{
+							// TODO: A race condition happens that crashes here.
+							//       A soundstream is destroyed just as we're finishing a fade out, but SFML/miniaudio should wait until the audio thread is finished?
 							auto& y = fadeSamplesBuffer[i * numChannels + j];
 							y = int16_t(int64_t(int64_t(y) * (fadeOutDurationSamples - (fadeStateSamples + i)) + fadeOutDurationSamples / 2)
 								/ int64_t(fadeOutDurationSamples));
@@ -844,10 +850,12 @@ struct AudioSystem::Internals
 		void garbageCollect()
 		{
 			for (auto it = playingStreams.begin(); it != playingStreams.end(); )
+			{
 				if (it->getStatus() != sf::SoundSource::Status::Playing)
 					it = playingStreams.erase(it);
 				else
 					++it;
+			}
 		}
 
 		[[nodiscard]] bool isGarbage() const
@@ -936,7 +944,7 @@ struct AudioSystem::Internals
 		for (PlayingSoundscape& ss : deactivatedSoundscapes | std::views::values)
 			ss.garbageCollect();
 
-		std::erase_if(deactivatedSoundscapes, [](const auto& kv) { return kv.second.isGarbage(); });
+		std::erase_if(deactivatedSoundscapes, [](auto& kv) {  return kv.second.isGarbage(); });
 
 		while (playingSounds.size() > 10)
 		{

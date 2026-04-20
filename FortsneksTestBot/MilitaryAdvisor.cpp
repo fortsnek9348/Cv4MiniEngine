@@ -10,6 +10,7 @@
 #include <ranges>
 #include <generator>
 #include <functional>
+#include <algorithm>
 
 using namespace mybot;
 
@@ -382,7 +383,7 @@ void MilitaryAdvisor::update(
 		if (unitInfo.isAnimal || unitInfo.domain != cvbot::EDomain::Land)
 			continue;
 
-		barbsHaveEnteredTerritory |= unit.owner == cvbot::kBarbarianPlayer && plots[unit.coord.y, unit.coord.x].owner != cvbot::kNoPlayer && plots[unit.coord.y, unit.coord.x].owner != cvbot::kBarbarianPlayer;
+		barbsHaveEnteredTerritory |= unit.owner == cvbot::kBarbarianPlayer && plots[unit.coord].owner != cvbot::kNoPlayer && plots[unit.coord].owner != cvbot::kBarbarianPlayer;
 	}
 
 	const auto isItTime = [&] {
@@ -410,6 +411,8 @@ void MilitaryAdvisor::update(
 		};
 	
 	canBarbsEnterTerritory = canBarbsEnterTerritory || barbsHaveEnteredTerritory || isItTime();
+
+	barbsThreatTurn = canBarbsEnterTerritory ? 0 : infos.handicap.firstMilitaryBarbCreationTurn;
 
 	MapUnitLookup enemyUnitMapLookup(enemyUnits);
 	

@@ -30,6 +30,9 @@
     <ClCompile Include="MilitaryAdvisor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ResearchAdvisor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Pathing.h">
@@ -39,6 +42,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MilitaryAdvisor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResearchAdvisor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicArray2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

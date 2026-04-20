@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common.h"
 #include "DLLDefs.h"
 // Only forward declarations. This makes CvGameCoreDLL independent of how many infos there are.
 #include "EnumFwd.h"
@@ -8,91 +9,11 @@
 #include <span>
 #include <variant>
 #include <vector>
+#include <optional>
 
 namespace cvbot
 {
-	struct i16vec2;
-
-	struct [[nodiscard]] ivec2
-	{
-		int x{};
-		int y{};
-
-		friend int dot(ivec2 a, ivec2 b)
-		{
-			return a.x * b.x + a.y * b.y;
-		}
-
-
-		int lengthSq() const
-		{
-			return dot(*this, *this);
-		}
-		
-
-		friend ivec2 operator+(ivec2 a, ivec2 b)
-		{
-			return { a.x + b.x, a.y + b.y };
-		}
-
-		friend ivec2 operator-(ivec2 a, ivec2 b)
-		{
-			return { a.x - b.x, a.y - b.y };
-		}
-
-		// For coord sorting.
-		friend bool operator<(ivec2 a, ivec2 b)
-		{
-			return a.y < b.y || (a.y == b.y && a.x < b.x);
-		}
-
-		constexpr explicit operator i16vec2() const;
-
-		friend bool operator==(ivec2, ivec2) = default;
-	};
-
-	// This is for storage in packed structs and arrays. Use ivec2 for math.
-	struct [[nodiscard]] i16vec2
-	{
-		int16_t x{};
-		int16_t y{};
-
-		friend bool operator==(i16vec2 a, i16vec2 b) = default;
-
-		// For coord sorting.
-		friend bool operator<(i16vec2 a, i16vec2 b)
-		{
-			return a.y < b.y || (a.y == b.y && a.x < b.x);
-		}
-
-		friend std::strong_ordering operator<=>(i16vec2, i16vec2) = default;
-
-		operator ivec2() const
-		{
-			return { x, y };
-		}
-	};
-
-	constexpr ivec2::operator i16vec2() const
-	{
-		return { static_cast<int16_t>(x), static_cast<int16_t>(y) };
-	}
-
-	struct [[nodiscard]] iaabb2
-	{
-		ivec2 min{};
-		ivec2 max{}; // exclusive
-
-		static iaabb2 sized(ivec2 min, ivec2 dim)
-		{
-			return { min, min + dim };
-		}
-
-		int area() const
-		{
-			return (max.x - min.x) * (max.y - min.y);
-		}
-	};
+	
 
 	struct MapGeometry
 	{
@@ -199,6 +120,9 @@ namespace cvbot
 		EPlayer owner{};
 		bool isCapital = false;
 		bool isGovernmentCenter = false;
+		// Coastal enough to build a lighthouse.
+		bool isCoastal = false;
+		bool isOccupation = false;
 		int pop{};
 		int defence{};
 		int defenceIgnoringBuildings{};
@@ -225,15 +149,41 @@ namespace cvbot
 			int prodBinMax = 0;
 			ProductionChoice productionChoice;
 
+			// Data necessary to calculate empire commerce output given sliders.
+			std::array<int, EYield::Num> yieldRates{};
+			int baseCommerceRateTimes100WithZeroSlider{};
+			std::array<int, ECommerce::Num> productionToCommerceModifiers{};
+			std::array<int, ECommerce::Num> commerceRateModifiers{};
+
 			// CvCity::happyLevel, CvCity::unhappyLevel
-			// Note that we store only the minimal state. No derived variables.
 			int extraHappiness{};
 			int extraHappyTimer{};
 			std::array<int, kMaxPlayers> plotCultureValues{};
+			
+			// CvGameTextMgr::setAngerHelp
+
+			// Anger here was scaled by population: iUnhappiness = ((iAngerPercent * (getPopulation() + iExtra)) / GC.getPERCENT_ANGER_DIVISOR());
+			enum PercentAngerContribution
+			{
+				Overcrowding,
+				MilitaryProtection,
+				Occupied,
+				Religion,
+				Oppression,
+				Draft,
+				DefyResolution,
+				WarWeariness,
+				Emancipation,
+				Num,
+			};
+
+			std::array<int8_t, Num> percentAngerContributions{};
+			int8_t defyResolutionAngerTimer{};
+			int8_t vassalUnhappiness = 0;
+			int8_t espionageUnhappinessCounter{};
 			int hurryAngerTimer{};
 			int conscriptAngerTimer{};
-			int defyResolutionAngerTimer{};
-			int espionageUnhappinessCounter{};
+
 			// CvCity::goodHealth, CvCity::badHealth
 			int freshWaterHealth{};
 			int extraHealth{};
@@ -253,29 +203,136 @@ namespace cvbot
 
 	struct CityBuildChoice : ProductionChoice
 	{
+		int progress{};
 		int cost{};
+	};
+
+	struct GlobalInfoData;
+
+	// Never empty. Use `std::optional` for possibly empty intervals.
+	struct [[nodiscard]] Interval
+	{
+		int min{};
+		// Inclusive.
+		int imax{};
+
+		Interval() = default;
+		constexpr Interval(int x) : min(x), imax(x) {}
+		constexpr Interval(int min, int imax) : min(min), imax(imax) {}
+
+		int center() const
+		{
+			return (min + imax + 1) / 2;
+		}
+
+		bool contains(int x) const
+		{
+			return min <= x && x <= imax;
+		}
+
+		std::optional<Interval> optional() const
+		{
+			if (imax < min)
+				return std::nullopt;
+			else
+				return *this;
+		}
+
+		Interval& operator+=(Interval b)
+		{
+			return *this = *this + b;
+		}
+
+		Interval& operator-=(Interval b)
+		{
+			return *this = *this - b;
+		}
+
+		friend Interval operator+(Interval a, Interval b)
+		{
+			return { a.min + b.min, a.imax + b.imax };
+		}
+
+		friend Interval operator-(Interval a, Interval b)
+		{
+			return { a.min - b.imax, a.imax - b.min };
+		}
+
+		friend Interval operator*(Interval a, int b)
+		{
+			const int x0 = a.min * b;
+			const int x3 = a.imax * b;
+			return { std::min(x0, x3), std::max(x0, x3) };
+		}
+
+		friend Interval operator*(Interval a, Interval b)
+		{
+			if (a.min >= 0 && b.min >= 0)
+				return { a.min * b.min, a.imax * b.imax };
+			else
+			{
+				const int x0 = a.min * b.min;
+				const int x1 = a.min * b.imax;
+				const int x2 = a.imax * b.min;
+				const int x3 = a.imax * b.imax;
+				return { std::min({ x0, x1, x2, x3 }), std::max({ x0, x1, x2, x3 }) };
+			}
+		}
+
+		friend Interval operator/(Interval a, int b)
+		{
+			const int x0 = a.min / b;
+			const int x3 = a.imax / b;
+			return { std::min(x0, x3), std::max(x0, x3) };
+		}
 	};
 
 	struct TechState
 	{
 		bool isInQueue = false;
 		bool isResearched = false;
-		bool canBeFirstToFoundReligion = false;
-		bool canBeFirstToSpawnsGreatPerson = false;
-		bool canBeFirstToGetFreeTech = false;
+		bool hasMissedOutOnFirstToResearch = false;
 		bool canResearch = false;
 		int progress = 0;
 		int cost = 0;
+
+		// If canResearch, then we can see the overflow plus the research rate in the research bar.
+		// But they may be truncated in the UI.
+		int overflow{};
+		int researchRate{};
+		bool isOverflowTruncated{};
+		bool isResearchRateTruncated{}; // Even if truncated, research rate will be at least the value you'd get if the modifier was +0%.
+		// overflow + researchRate = final beaker delta
+		// These values may be more accurate then what you can get from the UI (when not truncated), but good luck making a bot where that matters.
+		// Also,
+		// final research rate = f(sliderOutput, baseOverflow, numPrereqsKnown, numKnownByRivals) // CvPlayer::getResearchTurnsLeftTimes100
+		// So if you know baseOverflow == 0, you can guess numKnownByRivals.
+		// And if you can bound numKnownByRivals, you can guess baseOverflow.
+
+		// Helpful utility functions.
+		// Rivals includes civs only, and yourself.
+		static std::optional<Interval> guessBaseOverflow(int overflow, const GlobalInfoData& globalInfoData, int sliderOutput, int numPrereqsKnown, Interval numKnownByMetRivals, int numRivalsAlive);
+		// With given research rate after modifier (with no overflow).
+		static std::optional<Interval> guessNumKnownByMetRivals(int rate, const GlobalInfoData& globalInfoData, int sliderOutput, int numPrereqsKnown, int numRivalsAlive);
 	};
 
 	struct CivState
 	{
+		EPlayer activePlayerI{};
+		ETeam activeTeamI{};
 		// nullopt if not flexible
-		std::array<std::optional<int>, ECommerce::Num> optSliders{};
+		std::array<std::optional<int>, ECommerce::Num> optSliderPercents{};
 		std::optional<ETech> optCurrentResearch{};
 		std::optional<EReligion> optStateReligion{};
 		std::vector<ECivic> civics{};
 		std::vector<TechState> techs{};
+
+		// This is the value used to calculate researchRates.
+		int techStatesReferenceSliderOutput{};
+
+		// Total player GPT = city commerce GPT + totalTradeGoldPerTurn - inflatedCosts (CvPlayer::calculateBaseNetGold)
+		int totalTradeGoldPerTurn{};
+		int inflatedCosts{};
 	};
 
 	struct TradeList
@@ -329,6 +386,7 @@ namespace cvbot
 		ETeam team{};
 		std::wstring_view name;
 		int score{};
+		ECivlisation civ{};
 		ELeaderhead leader{};
 
 		std::optional<int> optNumCities{}; // If known.
@@ -364,6 +422,9 @@ namespace cvbot
 
 			// This can be seen even if we can't trade.
 			int maxTradeGold{};
+
+			// False if that line of text is shown, which refers to Alphabet, not the game option.
+			bool isTechnologyTradingAllowed = false;
 		};
 
 		// If trading is allowed, otherwise, empty.
@@ -437,7 +498,25 @@ namespace cvbot
 			bool inProgress = false;
 		};
 
+		struct Project
+		{
+			struct TeamEntry
+			{
+				int numBuilt{};
+				int numInProgress{};
+			};
+
+			std::array<TeamEntry, kMaxTeams> teams{};
+
+			int numBuiltTotal{};
+			int numBuiltByUnknownTeams{};
+		};
+
+		EPlayer activePlayerI{};
+		ETeam activeTeamI{};
+
 		std::vector<BuiltWonder> builtWonders;
+		std::vector<Project> projects; // [projectI]
 
 		std::array<GlobalDemographicsStat, EGlobalDemographic::Num> globalDemographics{};
 
@@ -450,6 +529,7 @@ namespace cvbot
 		std::vector<ReligionInfo> foundedReligions{};
 
 		int numAliveCivPlayers = 0;
+		int numAliveCivTeams = 0;
 		bool hasCircumnavigated = false;
 
 		// TODO: Handle turn message?

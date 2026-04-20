@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DynamicArray2D.h"
+
 #include <PlayerBotGameBinding/DLLDefs.h>
 #include <PlayerBotGameBinding/GameStructs.h>
 
@@ -37,44 +39,7 @@ namespace mybot
 
 	unsigned int computeDistance(const MapGeometry& geom, ivec2 a, ivec2 b, EDistanceMetric metric) noexcept;
 
-	template<class T>
-	struct DynamicArray2D
-	{
-		std::vector<T> cells;
-		ivec2 dim{};
-
-		DynamicArray2D() = default;
-
-		explicit DynamicArray2D(ivec2 dim) : cells(dim.x * dim.y), dim(dim)
-		{
-		}
-
-		explicit DynamicArray2D(ivec2 dim, T def) : cells(dim.x * dim.y, def), dim(dim)
-		{
-		}
-
-		Span2D<const T> view() const noexcept
-		{
-			return { cells.data(), std::dextents<int, 2>{ dim.y, dim.x } };
-		}
-
-		Span2D<T> view() noexcept
-		{
-			return { cells.data(), std::dextents<int, 2>{ dim.y, dim.x } };
-		}
-
-		T& operator[](ivec2 p)
-		{
-			assert(unsigned(p.x) < unsigned(dim.x) && unsigned(p.y) < unsigned(dim.y));
-			return cells[p.x + p.y * dim.x];
-		}
-
-		const T& operator[](ivec2 p) const
-		{
-			assert(unsigned(p.x) < unsigned(dim.x) && unsigned(p.y) < unsigned(dim.y));
-			return cells[p.x + p.y * dim.x];
-		}
-	};
+	
 
 	struct PathingMap
 	{

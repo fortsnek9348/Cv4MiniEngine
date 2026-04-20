@@ -21,6 +21,7 @@
 
 #include <CommonStuff/range.h>
 
+#include <algorithm>
 #include <ranges>
 
 using namespace cvbot;
@@ -170,7 +171,9 @@ namespace
 				choiceName = "USER_DIPLOCOMMENT_PEACE";
 			}
 			else if (aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_PEACE")
-				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_THANKS"))
+				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_THANKS")
+				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_CIVIC_DENIED")
+				|| aiCommentType == gGlobals.getInfoTypeForString("AI_DIPLOCOMMENT_JOIN_DENIED"))
 			{
 				choiceName = "USER_DIPLOCOMMENT_EXIT";
 			}

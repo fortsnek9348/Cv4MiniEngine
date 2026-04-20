@@ -871,7 +871,7 @@ int main(int argc, char* argv[])
 
 	initCommon(); // python initialised here
 
-	// -generate_player_bot_game_binding "..\PlayerBotGameBinding\inc\PlayerBotGameBinding"
+	// -generate_player_bot_game_binding "..\PlayerBotGameBinding"
 	if (!appStartConfig.generatePlayerBotGameDefsDir.empty())
 	{
 		cvbot::generatePlayerBotGameBindingHeaders(std::filesystem::path(appStartConfig.generatePlayerBotGameDefsDir));
