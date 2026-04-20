@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common.h"
 #include "DynamicArray2D.h"
 
 #include <PlayerBotGameBinding/DLLDefs.h>
@@ -10,11 +11,6 @@
 
 namespace mybot
 {
-	using cvbot::Span2D;
-	using cvbot::ivec2;
-	using cvbot::i16vec2;
-	using cvbot::MapGeometry;
-
 	struct PathingPlot
 	{
 		enum EFlag : uint8_t

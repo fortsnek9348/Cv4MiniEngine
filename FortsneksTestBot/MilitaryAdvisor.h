@@ -9,18 +9,18 @@ namespace mybot
 {
 	struct MilitaryAdvisor
 	{
-		std::vector<cvbot::EUnitType> barbUnitsSeen;
-		std::vector<cvbot::EUnitType> rivalUnitsSeen;
+		std::vector<EUnitType> barbUnitsSeen;
+		std::vector<EUnitType> rivalUnitsSeen;
 		bool barbsHaveEnteredTerritory = false;
 		bool canBarbsEnterTerritory = false;
 		int barbsThreatTurn = 0;
 
 		// Use them for scouting, extra defence, barb capturing, conquering.
-		std::vector<cvbot::EUnitId> spareMilitaryUnits;
+		std::vector<EUnitId> spareMilitaryUnits;
 
 		//struct CityDefenceStatus
 		//{
-		//	cvbot::i16vec2 cityCoord{};
+		//	i16vec2 cityCoord{};
 		//	// This measures how much defence strength is expected to be needed, including defence promotions.
 		//	// If <= 1, only minimal defence is needed. Almost certainly will never be attacked.
 		//	int defenceStrengthDemand = 0;
@@ -35,18 +35,18 @@ namespace mybot
 		int antiBarbDemand{};
 
 		void update(
-			std::span<const cvbot::Unit> myUnits,
-			std::span<const cvbot::Unit> enemyUnits,
+			std::span<const Unit> myUnits,
+			std::span<const Unit> enemyUnits,
 			std::optional<ivec2> futureSettlerEscortTarget,
-			std::span<const cvbot::City> myCities,
-			cvbot::MapGeometry mapGeom,
-			cvbot::Span2D<const cvbot::Plot> plots,
+			std::span<const City> myCities,
+			MapGeometry mapGeom,
+			Span2D<const Plot> plots,
 			const mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell>& cityPathLengthAnalysis,
-			std::span<const cvbot::TechState> techs,
-			const cvbot::GlobalInfoData& infos,
-			//const cvbot::GameSetup& setup,
-			const cvbot::GlobalInfo& globalInfo,
-			cvbot::IGame& game
+			std::span<const TechState> techs,
+			const GlobalInfoData& infos,
+			//const GameSetup& setup,
+			const GlobalInfo& globalInfo,
+			IGame& game
 		);
 	};
 }

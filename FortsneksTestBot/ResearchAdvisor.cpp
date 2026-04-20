@@ -16,8 +16,6 @@
 
 using namespace mybot;
 
-using cvbot::ETech;
-
 namespace
 {
 	constexpr int kOrderEnumerationDepth = 4;
@@ -25,12 +23,12 @@ namespace
 
 	struct ResearchTreePreprocessed
 	{
-		const cvbot::GlobalInfoData* globalInfoData{};
-		const cvbot::GlobalInfo* globalInfo{};
-		std::span<const cvbot::TechInfo> infos;
+		const GlobalInfoData* globalInfoData{};
+		const GlobalInfo* globalInfo{};
+		std::span<const TechInfo> infos;
 		std::vector<std::vector<ETech>> dependencies;
 
-		explicit ResearchTreePreprocessed(const cvbot::GlobalInfoData* globalInfoData, const cvbot::GlobalInfo* globalInfo)
+		explicit ResearchTreePreprocessed(const GlobalInfoData* globalInfoData, const GlobalInfo* globalInfo)
 			: globalInfoData(globalInfoData), globalInfo(globalInfo), infos(globalInfoData->techs), dependencies(infos.size())
 		{
 			for (const auto i : heck::range<ETech>(infos.size()))
@@ -51,7 +49,7 @@ namespace
 		std::bitset<ETech::Num> hasTech;
 		std::vector<ETech> choices;
 
-		explicit ResearchChoicesState(const ResearchTreePreprocessed* preprocessedTree, std::span<const cvbot::TechState> initialState)
+		explicit ResearchChoicesState(const ResearchTreePreprocessed* preprocessedTree, std::span<const TechState> initialState)
 			: preprocessedTree(preprocessedTree)
 		{
 			for (const auto i : kTechIndices)
@@ -61,7 +59,7 @@ namespace
 			{
 				const bool canResearch = calculateCanResearch(i);
 				if (canResearch != initialState[i].canResearch)
-					throw cvbot::BotFailure("Internal research implementation got tech choices wrong.");
+					throw BotFailure("Internal research implementation got tech choices wrong.");
 				if (canResearch)
 					choices.push_back(i);
 			}
@@ -129,7 +127,7 @@ namespace
 
 			bool bFoundValid = false;
 
-			const cvbot::TechInfo& info = preprocessedTree->infos[t];
+			const TechInfo& info = preprocessedTree->infos[t];
 
 			for (const ETech prereq : info.prereqOrTechs)
 			{
@@ -151,7 +149,7 @@ namespace
 		}
 	};
 
-	std::vector<std::vector<ETech>> generateResearchOrders(const ResearchTreePreprocessed& preprocessedTree, std::span<const cvbot::TechState> initialState, size_t depth)
+	std::vector<std::vector<ETech>> generateResearchOrders(const ResearchTreePreprocessed& preprocessedTree, std::span<const TechState> initialState, size_t depth)
 	{
 		ResearchChoicesState state(&preprocessedTree, initialState);
 		std::vector<ETech> order;
@@ -165,7 +163,7 @@ namespace
 	}
 
 	// CvPlayer::calculateResearchModifier
-	int calculateResearchModifier(const cvbot::GlobalInfoData& infos, int numKnownByAliveTeamsMet, int numPrereqOrsResearched, int numRivalsAlive)
+	int calculateResearchModifier(const GlobalInfoData& infos, int numKnownByAliveTeamsMet, int numPrereqOrsResearched, int numRivalsAlive)
 	{
 		int iModifier = 100;
 
@@ -178,14 +176,14 @@ namespace
 	}
 
 	// NOTE: The isHasMet check in CvPlayer::calculateResearchModifier includes ourselves.
-	int calculateResearchRate(const cvbot::GlobalInfoData& infos, int sliderOutput, int numPrereqsKnown, int numKnownByAliveTeamsMet, int numRivalsAlive)
+	int calculateResearchRate(const GlobalInfoData& infos, int sliderOutput, int numPrereqsKnown, int numKnownByAliveTeamsMet, int numRivalsAlive)
 	{
 		const int modifier = calculateResearchModifier(infos, numKnownByAliveTeamsMet, numPrereqsKnown, numRivalsAlive);
 		const int researchRate = (sliderOutput + infos.baseResearchRate) * modifier / 100;
 		return researchRate;
 	}
 
-	int getNumPrereqOrsKnown(std::span<const cvbot::TechState> initialTechStates, ETech tech, const cvbot::GlobalInfoData& infos)
+	int getNumPrereqOrsKnown(std::span<const TechState> initialTechStates, ETech tech, const GlobalInfoData& infos)
 	{
 		int n{};
 		for (const auto prereq : infos.techs[tech].prereqOrTechs)
@@ -206,8 +204,8 @@ namespace
 		int baseOverflow{};
 		std::vector<TechResearchRateEstimation> techs{};
 
-		explicit ResearchRateEstimation(const cvbot::GlobalInfoData& infos, int breakevenSliderResearch, int currentResearchSliderOutput, std::span<const cvbot::TechState> initialTechStates,
-			const std::array<cvbot::Interval, cvbot::ETech::Num>& techHasCountIntervals, int numAliveCivTeams)
+		explicit ResearchRateEstimation(const GlobalInfoData& infos, int breakevenSliderResearch, int currentResearchSliderOutput, std::span<const TechState> initialTechStates,
+			const std::array<Interval, ETech::Num>& techHasCountIntervals, int numAliveCivTeams)
 			: sliderOutputWithBaseResearchRate(breakevenSliderResearch + infos.baseResearchRate)
 		{
 			// Perform research rate estimations.
@@ -228,7 +226,7 @@ namespace
 
 						// We could guess by reversing the math, but trial and error sounds better.
 						//const int overflow = isZeroOverflow ? 0 : initialTechStates[i].overflow;
-						//const std::optional<cvbot::Interval> optNumKnownByTeamsUsingOverflow = cvbot::TechState::guessNumKnownByMetRivals(
+						//const std::optional<Interval> optNumKnownByTeamsUsingOverflow = TechState::guessNumKnownByMetRivals(
 						//	initialTechStates[i].overflow + initialTechStates[i].researchRate,
 						//	infos,
 						//	currentSliderOutput,
@@ -288,20 +286,20 @@ namespace
 			// If there are non-truncated overflow values, calculate baseOverflow for all of them and take the most constrained value.
 			// Otherwise, calculate baseOverflow from the maximum overflow value.
 			bool foundNonTruncatedOverflow = false;
-			cvbot::Interval nontruncatedBaseOverflowInterval{ INT_MIN, INT_MAX };
+			Interval nontruncatedBaseOverflowInterval{ INT_MIN, INT_MAX };
 			int maxTruncatedBaseOverflow{};
 			for (const ETech i : kTechIndices)
 			{
-				const cvbot::TechState state = initialTechStates[i];
+				const TechState state = initialTechStates[i];
 				if (state.canResearch)
 				{
-					const cvbot::Interval numKnownByTeams = techHasCountIntervals[i];
+					const Interval numKnownByTeams = techHasCountIntervals[i];
 
 					int numPrereqOrsResearched{};
 					for (const auto prereq : infos.techs[i].prereqOrTechs)
 						numPrereqOrsResearched += initialTechStates[prereq].isResearched;
 
-					const std::optional<cvbot::Interval> optBaseOverflowInterval = cvbot::TechState::guessBaseOverflow(state.overflow, infos, currentResearchSliderOutput, numPrereqOrsResearched, numKnownByTeams, numAliveCivTeams);
+					const std::optional<Interval> optBaseOverflowInterval = TechState::guessBaseOverflow(state.overflow, infos, currentResearchSliderOutput, numPrereqOrsResearched, numKnownByTeams, numAliveCivTeams);
 
 					if (optBaseOverflowInterval)
 					{
@@ -427,7 +425,7 @@ namespace
 			// firstTurnBeakers + rate * N >= remaining
 			// N >= (remaining - firstTurnBeakers) / rate
 
-			const int numTurns = 1 + cvbot::cdiv(std::max(0, rateInfo.remaining - firstTurnBeakers), static_cast<unsigned int>(rate));
+			const int numTurns = 1 + cdiv(std::max(0, rateInfo.remaining - firstTurnBeakers), static_cast<unsigned int>(rate));
 
 			const int beakerOverflow = firstTurnBeakers + rate * (numTurns - 1) - rateInfo.remaining;
 
@@ -438,9 +436,9 @@ namespace
 
 	struct EvalInput
 	{
-		const cvbot::CivState& civState{};
-		const cvbot::ELeaderhead leaderhead{};
-		std::array<int, cvbot::EBonus::Num> bonusCounts{};
+		const CivState& civState{};
+		const ELeaderhead leaderhead{};
+		std::array<int, EBonus::Num> bonusCounts{};
 		bool hasLandOil{};
 		bool hasOceanOil{}; // Plastics
 		// Remember to not use counts raw because their importance should be relative to number of cities.
@@ -463,16 +461,15 @@ namespace
 		int researchStartTurn{}; // For when evaluating in the future.
 		int researchRate{};
 		std::bitset<ETech::Num> techsGone{}; // True iff /anybody/ has researched the tech and we know about it.
-		std::bitset<cvbot::EBuildingClass::Num> wondersGone{};
-		std::bitset<cvbot::EProject::Num> projectsGone{};
-		const cvbot::GlobalInfoData& infos{};
-		//const cvbot::IGame& game;
+		std::bitset<EBuildingClass::Num> wondersGone{};
+		std::bitset<EProject::Num> projectsGone{};
+		const GlobalInfoData& infos{};
+		//const IGame& game;
 	};
 
 	int calculateTechValue(const EvalInput& input, ETech tech)
 	{
-		using enum cvbot::EBonus;
-		using cvbot::EBuildingClass;
+		using enum EBonus;
 		const int turnsNeeded = ((input.civState.techs[tech].cost - input.civState.techs[tech].progress) + input.researchRate - 1) / input.researchRate;
 		const int finishTurn = input.researchStartTurn + turnsNeeded;
 		switch (tech)
@@ -485,8 +482,8 @@ namespace
 		case Agriculture: return 100 + (input.bonusCounts[Corn] * 2 + input.bonusCounts[Rice] + input.bonusCounts[Wheat] * 2) * 100 / input.numCities;
 		case Hunting: return 100 + (input.bonusCounts[Deer] * 2 + input.bonusCounts[Fur] * 3 + input.bonusCounts[Ivory] * 3) * 100 / input.numCities;
 			// happy bonus from monument, more than one city and we don't have creative, rival border tension
-		case Mysticism: return std::ranges::contains(input.infos.leaders[input.leaderhead].traits, cvbot::ELeaderTrait::Charismatic) * input.numCities * 100
-			+ (input.numCities > 1 && !std::ranges::contains(input.infos.leaders[input.leaderhead].traits, cvbot::ELeaderTrait::Creative) ? (input.numCities - 1) * 100 + input.numCitiesOnRivalBorder * 50 : 0)
+		case Mysticism: return std::ranges::contains(input.infos.leaders[input.leaderhead].traits, ELeaderTrait::Charismatic) * input.numCities * 100
+			+ (input.numCities > 1 && !std::ranges::contains(input.infos.leaders[input.leaderhead].traits, ELeaderTrait::Creative) ? (input.numCities - 1) * 100 + input.numCitiesOnRivalBorder * 50 : 0)
 			;
 		case Mining: return 100;
 
@@ -592,7 +589,7 @@ namespace
 		case Satellites: return 700; // Let's go for space victory.
 		case Plastics: return 100 + !input.wondersGone[EBuildingClass::GreatDam] * 100 + (!input.hasLandOil && input.hasOceanOil) * 200;
 		case MassMedia: return 100 + !input.wondersGone[EBuildingClass::Hollywood] * 200;
-		case Computers: return 100 + !input.projectsGone[cvbot::EProject::TheInternet] * 100;
+		case Computers: return 100 + !input.projectsGone[EProject::TheInternet] * 100;
 
 		case AdvancedFlight: return 100;
 		case Laser: return 200;
@@ -618,14 +615,14 @@ namespace
 }
 
 ETech mybot::ResearchAdvisor::update(
-	const cvbot::CivState& civState,
-	std::span<const std::optional<cvbot::Player>> revealedPlayers,
-	cvbot::Span2D<const cvbot::Plot> plots,
-	std::span<const cvbot::City> myCities,
+	const CivState& civState,
+	std::span<const std::optional<Player>> revealedPlayers,
+	Span2D<const Plot> plots,
+	std::span<const City> myCities,
 	int barbThreatTurn,
-	const cvbot::GlobalInfo& globalInfo,
-	const cvbot::GlobalInfoData& infos,
-	[[maybe_unused]] const cvbot::IGame& game
+	const GlobalInfo& globalInfo,
+	const GlobalInfoData& infos,
+	[[maybe_unused]] const IGame& game
 )
 {
 	const auto activePlayerI = civState.activePlayerI;
@@ -638,10 +635,10 @@ ETech mybot::ResearchAdvisor::update(
 
 	numAliveTeams = globalInfo.numAliveCivTeams;
 
-	const std::span<const cvbot::TechState> initialTechStates = civState.techs;
+	const std::span<const TechState> initialTechStates = civState.techs;
 
 	// Gather up inputs to tech valuation
-	std::array<int, cvbot::EBonus::Num> revealedBonuses{};
+	std::array<int, EBonus::Num> revealedBonuses{};
 	bool hasLandOil = false;
 	bool hasOceanOil = false;
 	int numForests{};
@@ -655,23 +652,23 @@ ETech mybot::ResearchAdvisor::update(
 	{
 		for (int x = 0; x < plots.dim.x; ++x)
 		{
-			const cvbot::Plot& plot = plots[{ x, y }];
+			const Plot& plot = plots[{ x, y }];
 			if (plot.owner == activePlayerI)
 			{
-				if (const cvbot::EBonus bonus = plot.bonus; bonus != cvbot::EBonus::None)
+				if (const EBonus bonus = plot.bonus; bonus != EBonus::None)
 				{
 					++revealedBonuses[bonus];
-					if (bonus == cvbot::EBonus::Oil)
-						(plot.type == cvbot::EPlotType::Ocean ? hasOceanOil : hasLandOil) = true;
+					if (bonus == EBonus::Oil)
+						(plot.type == EPlotType::Ocean ? hasOceanOil : hasLandOil) = true;
 				}
 
-				numForests += plot.feature == cvbot::EFeature::Forest;
-				numJungles += plot.feature == cvbot::EFeature::Jungle;
+				numForests += plot.feature == EFeature::Forest;
+				numJungles += plot.feature == EFeature::Jungle;
 				numRiversidePlots += plot.isRiverside;
-				numCottagablePlots += plot.type == cvbot::EPlotType::Land && (plot.feature == cvbot::EFeature::None || plot.feature == cvbot::EFeature::FloodPlains);
-				numCottagablePlotsUnderForest += plot.type == cvbot::EPlotType::Land && plot.feature == cvbot::EFeature::Forest;
-				numVillagesOrTowns += plot.improvement == cvbot::EImprovement::Village || plot.improvement == cvbot::EImprovement::Town;
-				numFarms += plot.improvement == cvbot::EImprovement::Farm;
+				numCottagablePlots += plot.type == EPlotType::Land && (plot.feature == EFeature::None || plot.feature == EFeature::FloodPlains);
+				numCottagablePlotsUnderForest += plot.type == EPlotType::Land && plot.feature == EFeature::Forest;
+				numVillagesOrTowns += plot.improvement == EImprovement::Village || plot.improvement == EImprovement::Town;
+				numFarms += plot.improvement == EImprovement::Farm;
 			}
 		}
 	}
@@ -682,13 +679,13 @@ ETech mybot::ResearchAdvisor::update(
 	int totalEmancipationUnhappiness{};
 	int totalSignedHappy{};
 	int totalSignedHealth{};
-	for (const cvbot::City& city : myCities)
+	for (const City& city : myCities)
 	{
 		numCoastalCities += city.isCoastal;
 		numCityReligions += static_cast<int>(city.religions.size());
 		if (civState.optStateReligion)
 			numCitiesWithStateReligion += std::ranges::contains(city.religions, *civState.optStateReligion);
-		totalEmancipationUnhappiness += city.optInspectableCityInfo->percentAngerContributions[cvbot::City::InspectableCityInfo::Emancipation];
+		totalEmancipationUnhappiness += city.optInspectableCityInfo->percentAngerContributions[City::InspectableCityInfo::Emancipation];
 		totalSignedHappy += city.optInspectableCityInfo->happiness;
 		totalSignedHealth += city.optInspectableCityInfo->healthiness;
 	}
@@ -702,11 +699,11 @@ ETech mybot::ResearchAdvisor::update(
 	for (const size_t i : heck::range(techsGone.size()))
 		techsGone[i] = civState.techs[i].isResearched || civState.techs[i].hasMissedOutOnFirstToResearch;
 
-	std::bitset<cvbot::EBuildingClass::Num> wondersGone{};
+	std::bitset<EBuildingClass::Num> wondersGone{};
 	for (const auto& builtWonder : globalInfo.builtWonders)
 		wondersGone[builtWonder.buildingClass] = true;
 
-	std::bitset<cvbot::EProject::Num> projectsGone{};
+	std::bitset<EProject::Num> projectsGone{};
 	for (const size_t i : heck::range(projectsGone.size()))
 		projectsGone[i] = globalInfo.projects[i].numBuiltTotal > 0;
 
@@ -792,7 +789,7 @@ ETech mybot::ResearchAdvisor::update(
 	//const auto& allKnowing = game.getAllKnowingGameInterface();
 	//for (const ETech tech : kTechIndices)
 	//{
-	//	file << cvbot::kTechNames[tech];
+	//	file << kTechNames[tech];
 	//	if (initialTechStates[tech].isResearched)
 	//		file << " (isResearched)";
 	//	if (initialTechStates[tech].canResearch)
@@ -819,7 +816,7 @@ ETech mybot::ResearchAdvisor::update(
 	//	for (const auto& entry : sim.log)
 	//	{
 	//		sum += valuePerTurn * std::max(0, std::min(entry.finishTurn, researchSimEndTurn) - prevTurn);
-	//		file << entry.finishTurn << '(' << sum << "):" << cvbot::kTechNames[entry.tech] << '(' << techValues[entry.tech] << "),";
+	//		file << entry.finishTurn << '(' << sum << "):" << kTechNames[entry.tech] << '(' << techValues[entry.tech] << "),";
 	//		valuePerTurn += techValues[entry.tech];
 	//		prevTurn = entry.finishTurn;
 	//		//if (researchSimEndTurn > entry.finishTurn)
@@ -832,7 +829,7 @@ ETech mybot::ResearchAdvisor::update(
 	return bestSim.getFirstTech();
 }
 
-void ResearchAdvisor::updateBreakevenSliderResearch(const cvbot::CivState& civState, std::span<const cvbot::City> myCities)
+void ResearchAdvisor::updateBreakevenSliderResearch(const CivState& civState, std::span<const City> myCities)
 {
 	// Research slider % at 0 gpt = gpt0 * 100 / (gpt0 - gpt100)
 	// Research at 0 gpt = lerp(bpt0, bpt100, break-even % / 100)
@@ -843,41 +840,41 @@ void ResearchAdvisor::updateBreakevenSliderResearch(const cvbot::CivState& civSt
 	int totalBPTAt0 = 0;
 	int totalBPTAt100 = 0;
 
-	for (const cvbot::City& city : myCities)
+	for (const City& city : myCities)
 	{
 		const auto& info = *city.optInspectableCityInfo;
 
-		std::array<int, cvbot::ECommerce::Num> sliders{};
+		std::array<int, ECommerce::Num> sliders{};
 
-		const auto getCommerceFromPercent = [&](this auto&& self, cvbot::ECommerce i, int yieldRate) -> int {
-			if (i == cvbot::ECommerce::Gold)
-				return yieldRate - self(cvbot::ECommerce::Research, yieldRate) - self(cvbot::ECommerce::Culture, yieldRate) - self(cvbot::ECommerce::Espionage, yieldRate);
+		const auto getCommerceFromPercent = [&](this auto&& self, ECommerce i, int yieldRate) -> int {
+			if (i == ECommerce::Gold)
+				return yieldRate - self(ECommerce::Research, yieldRate) - self(ECommerce::Culture, yieldRate) - self(ECommerce::Espionage, yieldRate);
 			else
 				return yieldRate * sliders[i] / 100;
 			};
 
-		const auto getBaseCommerceRateTimes100 = [&](cvbot::ECommerce i) {
+		const auto getBaseCommerceRateTimes100 = [&](ECommerce i) {
 			int iBaseCommerceRate;
-			iBaseCommerceRate = getCommerceFromPercent(i, info.yieldRates[cvbot::EYield::Commerce] * 100);
+			iBaseCommerceRate = getCommerceFromPercent(i, info.yieldRates[EYield::Commerce] * 100);
 			iBaseCommerceRate += info.baseCommerceRateTimes100WithZeroSlider;
 			return iBaseCommerceRate;
 			};
 
-		const auto getCommerceRate = [&](cvbot::ECommerce i) {
+		const auto getCommerceRate = [&](ECommerce i) {
 			// CvCity::updateCommerce
 			int iNewCommerce = (getBaseCommerceRateTimes100(i) * info.commerceRateModifiers[i]) / 100;
-			iNewCommerce += info.yieldRates[cvbot::EYield::Production] * info.productionToCommerceModifiers[i];
+			iNewCommerce += info.yieldRates[EYield::Production] * info.productionToCommerceModifiers[i];
 			return iNewCommerce;
 			};
 
-		sliders[cvbot::ECommerce::Gold] = 100;
-		sliders[cvbot::ECommerce::Research] = 0;
-		totalGPTAt0 += getCommerceRate(cvbot::ECommerce::Gold);
-		totalBPTAt0 += getCommerceRate(cvbot::ECommerce::Research);
-		sliders[cvbot::ECommerce::Gold] = 0;
-		sliders[cvbot::ECommerce::Research] = 100;
-		totalGPTAt100 += getCommerceRate(cvbot::ECommerce::Gold);
-		totalBPTAt100 += getCommerceRate(cvbot::ECommerce::Research);
+		sliders[ECommerce::Gold] = 100;
+		sliders[ECommerce::Research] = 0;
+		totalGPTAt0 += getCommerceRate(ECommerce::Gold);
+		totalBPTAt0 += getCommerceRate(ECommerce::Research);
+		sliders[ECommerce::Gold] = 0;
+		sliders[ECommerce::Research] = 100;
+		totalGPTAt100 += getCommerceRate(ECommerce::Gold);
+		totalBPTAt100 += getCommerceRate(ECommerce::Research);
 	}
 
 	totalGPTAt0 /= 100;
@@ -896,9 +893,9 @@ void ResearchAdvisor::updateBreakevenSliderResearch(const cvbot::CivState& civSt
 
 }
 
-void ResearchAdvisor::updateAllRivalStates(cvbot::ETeam activeTeamI, const cvbot::CivState& civState, const cvbot::GlobalInfoData& infos, std::span<const std::optional<cvbot::Player>> revealedPlayers)
+void ResearchAdvisor::updateAllRivalStates(ETeam activeTeamI, const CivState& civState, const GlobalInfoData& infos, std::span<const std::optional<Player>> revealedPlayers)
 {
-	rivalTeams.resize(std::ranges::max(revealedPlayers | std::views::transform([](const std::optional<cvbot::Player>& player) {
+	rivalTeams.resize(std::ranges::max(revealedPlayers | std::views::transform([](const std::optional<Player>& player) {
 		return player ? player->team + 1 : 0;
 		})));
 
@@ -1003,11 +1000,11 @@ void ResearchAdvisor::updateAllRivalStates(cvbot::ETeam activeTeamI, const cvbot
 	}
 }
 
-void ResearchAdvisor::updateRivalState(const cvbot::GlobalInfoData& infos, RivalTeamState& rivalState, const cvbot::Player& player)
+void ResearchAdvisor::updateRivalState(const GlobalInfoData& infos, RivalTeamState& rivalState, const Player& player)
 {
 	struct Context
 	{
-		const cvbot::GlobalInfoData& infos;
+		const GlobalInfoData& infos;
 		RivalTeamState& state;
 
 		bool markHas(ETech t)

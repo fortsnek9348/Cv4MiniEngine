@@ -26,6 +26,7 @@ using namespace cvbot;
 // TODO: Produce research if we've got plenty of GPT.
 // TODO: City production valuation.
 // TODO: War.
+// TODO: When an AI goes red fist immediately after denying them, prep for war.
 // TODO: Pick different civics. Go for emancipation if beneficial.
 // TODO: Abstract city simulation.
 // TODO: Abstract empire simulation.

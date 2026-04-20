@@ -12,10 +12,10 @@ namespace mybot
 
 		void update(
 			MapGeometry geom,
-			const mybot::DynamicArray2D<cvbot::Plot>& map,
-			const mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell>& pathLengthAnalysis,
-			const mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell>& stepDistanceAnalysis,
-			const cvbot::IGame& game
+			const DynamicArray2D<Plot>& map,
+			const DynamicArray2D<MultipleSourceDistanceFieldCell>& pathLengthAnalysis,
+			const DynamicArray2D<MultipleSourceDistanceFieldCell>& stepDistanceAnalysis,
+			const IGame& game
 		);
 		int getSettlerDemand() const;
 	};

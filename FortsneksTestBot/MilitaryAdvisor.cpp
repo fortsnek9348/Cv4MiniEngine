@@ -54,13 +54,13 @@ namespace
 
 	struct TaskEvalContext
 	{
-		const cvbot::IGame& game;
+		const IGame& game;
 		MapGeometry geom{};
-		const cvbot::Unit& unit;
-		const cvbot::GlobalInfoData& infos;
+		const Unit& unit;
+		const GlobalInfoData& infos;
 	};
 
-	int guessUnitTurns(const MapGeometry& geom, const cvbot::Unit& unit, ivec2 target)
+	int guessUnitTurns(const MapGeometry& geom, const Unit& unit, ivec2 target)
 	{
 		return mybot::computeDistance(geom, unit.coord, target, mybot::EDistanceMetric::Step);
 	}
@@ -74,14 +74,14 @@ namespace
 
 	struct CityDefenceTask
 	{
-		const cvbot::City* city{};
+		const City* city{};
 
 		static constexpr int kScoreScale = 100;
 
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
 			int score = ctx.unit.strength;
-			const cvbot::UnitInfo& unitInfo = ctx.infos.units[ctx.infos.unitClasses[ctx.unit.klass].activeType];
+			const UnitInfo& unitInfo = ctx.infos.units[ctx.infos.unitClasses[ctx.unit.klass].activeType];
 			const int fortifyBonus = unitInfo.bNoDefensiveBonus ? 0 : kFortifyBonus;// +(unit.numFortifyTurns - kNumFortifyTurns) * 5 / 5; // Bias to units that are already fortified.
 			int modifier = unitInfo.cityDefenceModifier + fortifyBonus;
 			score = score * (modifier + 100) / 100;
@@ -93,11 +93,11 @@ namespace
 			return evalDistanceScaledScore(ctx, city->coord, taskKindScore);
 		}
 
-		void execute(cvbot::IGame& game, const cvbot::Unit& unit) const
+		void execute(IGame& game, const Unit& unit) const
 		{
-			game.startMission(std::array{ unit.id }, cvbot::EMission::MoveTo, city->coord.x, city->coord.y);
+			game.startMission(std::array{ unit.id }, EMission::MoveTo, city->coord.x, city->coord.y);
 			if (game.getUnitCoord(unit.id) == city->coord)
-				game.startMission(std::array{ unit.id }, cvbot::EMission::Fortify, -1, -1);
+				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
 		}
 
 		friend bool operator==(CityDefenceTask, CityDefenceTask) = default;
@@ -110,13 +110,13 @@ namespace
 
 	struct SettlerEscortTask
 	{
-		const cvbot::Unit* settler{};
+		const Unit* settler{};
 
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
 			int score = CityDefenceTask::evaluateTaskKindScore(ctx) / 10;
 			// Bias if can keep up with settler.
-			score += ctx.unit.maxMoves >= 2 * cvbot::kMoveDenominator;
+			score += ctx.unit.maxMoves >= 2 * kMoveDenominator;
 			return score;
 		}
 
@@ -125,12 +125,12 @@ namespace
 			return evalDistanceScaledScore(ctx, settler->coord, taskKindScore);
 		}
 
-		void execute(cvbot::IGame& game, const cvbot::Unit& unit) const
+		void execute(IGame& game, const Unit& unit) const
 		{
 			// Only escorting if we can keep up... need to group these units.
-			game.startMission(std::array{ unit.id }, cvbot::EMission::MoveTo, settler->coord.x, settler->coord.y);
+			game.startMission(std::array{ unit.id }, EMission::MoveTo, settler->coord.x, settler->coord.y);
 			if (game.getUnitCoord(unit.id) ==  settler->coord)
-				game.startMission(std::array{ unit.id }, cvbot::EMission::Fortify, -1, -1);
+				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
 		}
 
 		friend bool operator==(SettlerEscortTask, SettlerEscortTask) = default;
@@ -155,12 +155,12 @@ namespace
 			return evalDistanceScaledScore(ctx, target, taskKindScore);
 		}
 
-		void execute(cvbot::IGame& game, const cvbot::Unit& unit) const
+		void execute(IGame& game, const Unit& unit) const
 		{
 			// Only escorting if we can keep up... need to group these units.
-			game.startMission(std::array{ unit.id }, cvbot::EMission::MoveTo, target.x, target.y);
+			game.startMission(std::array{ unit.id }, EMission::MoveTo, target.x, target.y);
 			if (game.getUnitCoord(unit.id) == target)
-				game.startMission(std::array{ unit.id }, cvbot::EMission::Fortify, target.x, target.y);
+				game.startMission(std::array{ unit.id }, EMission::Fortify, target.x, target.y);
 		}
 
 		friend bool operator==(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
@@ -170,13 +170,13 @@ namespace
 
 	struct AntiBarbTask
 	{
-		std::span<const cvbot::Unit* const> barbs{};
+		std::span<const Unit* const> barbs{};
 
 		static constexpr int kScoreScale = 20;
 
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
-			const cvbot::UnitInfo& unitInfo = ctx.infos.units[ctx.infos.unitClasses[ctx.unit.klass].activeType];
+			const UnitInfo& unitInfo = ctx.infos.units[ctx.infos.unitClasses[ctx.unit.klass].activeType];
 			if (unitInfo.canAttack)
 				return ctx.unit.strength * kScoreScale;
 			else
@@ -188,9 +188,9 @@ namespace
 			return evalDistanceScaledScore(ctx, barbs[0]->coord, taskKindScore);
 		}
 
-		void execute(cvbot::IGame& game, const cvbot::Unit& unit) const
+		void execute(IGame& game, const Unit& unit) const
 		{
-			game.startMission(std::array{ unit.id }, cvbot::EMission::MoveTo, barbs[0]->coord.x, barbs[0]->coord.y);
+			game.startMission(std::array{ unit.id }, EMission::MoveTo, barbs[0]->coord.x, barbs[0]->coord.y);
 		}
 
 		friend bool operator==(AntiBarbTask a, AntiBarbTask b)
@@ -208,18 +208,18 @@ namespace
 	{
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
-			return ctx.unit.strength * (ctx.unit.maxMoves > cvbot::kMoveDenominator ? 2 : 1);
+			return ctx.unit.strength * (ctx.unit.maxMoves > kMoveDenominator ? 2 : 1);
 		}
 
 		int evaluateScore(const TaskEvalContext& ctx, int taskKindScore) const
 		{
 			// Check if can automate?
-			return taskKindScore + (ctx.game.getAutomation(std::array{ ctx.unit.id }) == cvbot::EAutomation::Explore) * 2;
+			return taskKindScore + (ctx.game.getAutomation(std::array{ ctx.unit.id }) == EAutomation::Explore) * 2;
 		}
 
-		void execute(cvbot::IGame& game, const cvbot::Unit& unit) const
+		void execute(IGame& game, const Unit& unit) const
 		{
-			game.tryAutomate(std::array{ unit.id }, cvbot::EAutomation::Explore);
+			game.tryAutomate(std::array{ unit.id }, EAutomation::Explore);
 		}
 
 		friend std::strong_ordering operator<=>(ScoutingTask, ScoutingTask) = default;
@@ -251,8 +251,8 @@ namespace
 
 	struct TaskExecutor
 	{
-		cvbot::IGame& game;
-		const cvbot::Unit& unit;
+		IGame& game;
+		const Unit& unit;
 
 		void operator()(const auto& task) const
 		{
@@ -263,7 +263,7 @@ namespace
 	struct TaskAssignment
 	{
 		Task task{};
-		const cvbot::Unit* unit{};
+		const Unit* unit{};
 		int score{};
 
 		friend std::strong_ordering operator<=>(const TaskAssignment& a, const TaskAssignment& b)
@@ -279,17 +279,17 @@ namespace
 
 	struct UnitAssignmentResult
 	{
-		std::map<const cvbot::Unit*, TaskAssignment> assignments;
-		std::vector<const cvbot::Unit*> spareUnits;
+		std::map<const Unit*, TaskAssignment> assignments;
+		std::vector<const Unit*> spareUnits;
 		std::vector<Task> unassignedTasks;
 	};
 
-	UnitAssignmentResult assignUnitTasks(const cvbot::IGame& game, cvbot::MapGeometry mapGeom, const cvbot::GlobalInfoData& infos, std::span<const cvbot::Unit> myUnits, std::span<const Task> tasks)
+	UnitAssignmentResult assignUnitTasks(const IGame& game, MapGeometry mapGeom, const GlobalInfoData& infos, std::span<const Unit> myUnits, std::span<const Task> tasks)
 	{
 		std::vector<TaskAssignment> combinations;
 		combinations.reserve(100);
 
-		for (const cvbot::Unit& unit : myUnits)
+		for (const Unit& unit : myUnits)
 		{
 			const TaskEvalContext ctx{
 				game,
@@ -315,7 +315,7 @@ namespace
 		std::ranges::sort(combinations, std::greater());
 
 		std::set<Task> satisfiedTasks;
-		std::map<const cvbot::Unit*, TaskAssignment> assignments;
+		std::map<const Unit*, TaskAssignment> assignments;
 
 		for (const TaskAssignment& candidate : combinations)
 		{
@@ -326,8 +326,8 @@ namespace
 			assignments[candidate.unit] = candidate;
 		}
 
-		std::vector<const cvbot::Unit*> spareUnits;
-		for (const cvbot::Unit& unit : myUnits)
+		std::vector<const Unit*> spareUnits;
+		for (const Unit& unit : myUnits)
 			if (!assignments.contains(&unit))
 				spareUnits.push_back(&unit);
 
@@ -345,15 +345,15 @@ namespace
 
 	struct MapUnitLookup
 	{
-		std::map<cvbot::i16vec2, std::vector<const cvbot::Unit*>> byCoord;
+		std::map<i16vec2, std::vector<const Unit*>> byCoord;
 
-		explicit MapUnitLookup(std::span<const cvbot::Unit> units)
+		explicit MapUnitLookup(std::span<const Unit> units)
 		{
-			for (const cvbot::Unit& unit : units)
+			for (const Unit& unit : units)
 				byCoord[unit.coord].push_back(&unit);
 		}
 
-		std::span<const cvbot::Unit* const> getUnitsAt(cvbot::i16vec2 coord) const
+		std::span<const Unit* const> getUnitsAt(i16vec2 coord) const
 		{
 			if (const auto it = byCoord.find(coord); it != byCoord.end())
 				return it->second;
@@ -363,27 +363,27 @@ namespace
 	};
 }
 void MilitaryAdvisor::update(
-	std::span<const cvbot::Unit> myUnits,
-	std::span<const cvbot::Unit> enemyUnits,
+	std::span<const Unit> myUnits,
+	std::span<const Unit> enemyUnits,
 	std::optional<ivec2> futureSettlerEscortTarget,
-	std::span<const cvbot::City> myCities,
-	cvbot::MapGeometry mapGeom,
-	[[maybe_unused]] cvbot::Span2D<const cvbot::Plot> plots,
+	std::span<const City> myCities,
+	MapGeometry mapGeom,
+	[[maybe_unused]] Span2D<const Plot> plots,
 	[[maybe_unused]] const mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell>& cityPathLengthAnalysis,
-	[[maybe_unused]] std::span<const cvbot::TechState> techs,
-	const cvbot::GlobalInfoData& infos,
-	//const cvbot::GameSetup& setup,
-	const cvbot::GlobalInfo& globalInfo,
-	cvbot::IGame& game
+	[[maybe_unused]] std::span<const TechState> techs,
+	const GlobalInfoData& infos,
+	//const GameSetup& setup,
+	const GlobalInfo& globalInfo,
+	IGame& game
 )
 {
-	for (const cvbot::Unit& unit : enemyUnits)
+	for (const Unit& unit : enemyUnits)
 	{
-		const cvbot::UnitInfo& unitInfo = infos.units[infos.unitClasses[unit.klass].defaultType]; // We'll assume it's the right info
-		if (unitInfo.isAnimal || unitInfo.domain != cvbot::EDomain::Land)
+		const UnitInfo& unitInfo = infos.units[infos.unitClasses[unit.klass].defaultType]; // We'll assume it's the right info
+		if (unitInfo.isAnimal || unitInfo.domain != EDomain::Land)
 			continue;
 
-		barbsHaveEnteredTerritory |= unit.owner == cvbot::kBarbarianPlayer && plots[unit.coord].owner != cvbot::kNoPlayer && plots[unit.coord].owner != cvbot::kBarbarianPlayer;
+		barbsHaveEnteredTerritory |= unit.owner == kBarbarianPlayer && plots[unit.coord].owner != kNoPlayer && plots[unit.coord].owner != kBarbarianPlayer;
 	}
 
 	const auto isItTime = [&] {
@@ -396,13 +396,13 @@ void MilitaryAdvisor::update(
 		constexpr int kRing1Land = 9;
 		constexpr int kRing2Land = 21;
 		const int cultureThreshold = infos.cultureLevels[2].culture;
-		const int culturePerTurn = infos.buildings[cvbot::EBuildingType::Palace].obsoleteSafeCommerceChanges[cvbot::ECommerce::Culture];
+		const int culturePerTurn = infos.buildings[EBuildingType::Palace].obsoleteSafeCommerceChanges[ECommerce::Culture];
 		const int numCapitals = globalInfo.numAliveCivPlayers;
 		const int landPerCapital = game.getTurnNumber() * culturePerTurn >= cultureThreshold ? kRing2Land : kRing1Land;
 		const int capitalLandCoveragePercent = 90; // Take into account some coastal starts.
 		const int totalLandFromCapitals = numCapitals * landPerCapital * capitalLandCoveragePercent / 100;
 
-		const int totalLand = globalInfo.globalDemographics[cvbot::GlobalInfo::Land].rivalAverage * (globalInfo.numAliveCivPlayers - 1) + globalInfo.globalDemographics[cvbot::GlobalInfo::Land].value;
+		const int totalLand = globalInfo.globalDemographics[GlobalInfo::Land].rivalAverage * (globalInfo.numAliveCivPlayers - 1) + globalInfo.globalDemographics[GlobalInfo::Land].value;
 		const int remainingLandFromSecondCities = std::max(0, totalLand - totalLandFromCapitals);
 		const int numSecondCities = (remainingLandFromSecondCities + kRing1Land / 2) / kRing1Land;
 
@@ -418,21 +418,21 @@ void MilitaryAdvisor::update(
 	
 	std::vector<Task> tasks;
 	if (canBarbsEnterTerritory)
-		for (const cvbot::City& city : myCities)
+		for (const City& city : myCities)
 			tasks.emplace_back(CityDefenceTask{ &city });
 	for (const auto& [coord, stack] : enemyUnitMapLookup.byCoord)
 	{
-		const cvbot::UnitInfo& unitInfo = infos.units[infos.unitClasses[stack[0]->klass].defaultType]; 
-		if (unitInfo.isAnimal || unitInfo.domain != cvbot::EDomain::Land)
+		const UnitInfo& unitInfo = infos.units[infos.unitClasses[stack[0]->klass].defaultType]; 
+		if (unitInfo.isAnimal || unitInfo.domain != EDomain::Land)
 			continue;
 
-		if (stack[0]->owner == cvbot::kBarbarianPlayer && !canBarbsEnterTerritory)
+		if (stack[0]->owner == kBarbarianPlayer && !canBarbsEnterTerritory)
 			continue;
 
 		tasks.emplace_back(AntiBarbTask{ stack });
 	}
-	for (const cvbot::Unit& unit : myUnits)
-		if (unit.klass == cvbot::EUnitClass::Settler)
+	for (const Unit& unit : myUnits)
+		if (unit.klass == EUnitClass::Settler)
 			tasks.emplace_back(SettlerEscortTask{ &unit });
 	if (futureSettlerEscortTarget)
 		tasks.emplace_back(FutureSettlerEscortTask{ *futureSettlerEscortTarget });

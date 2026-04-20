@@ -29,7 +29,7 @@ unsigned int mybot::computeDistance(const MapGeometry& geom, ivec2 a, ivec2 b, E
 DynamicArray2D<MultipleSourceDistanceFieldCell> mybot::computeMultipleSourcePathLengthField(PathingMap map, PathingPlot::EFlag avoidFlags, int maxDistance, std::span<const ivec2> starts)
 {
 	if (!starts.empty() && starts.size() - 1 > MultipleSourceDistanceFieldCell{ .index = UINT16_MAX }.index)
-		throw cvbot::BotFailure(std::string("Too many sources in ") + __func__);
+		throw BotFailure(std::string("Too many sources in ") + __func__);
 
 	// NOTE: Ordinarly, you'd use a priority queue for an A* implementation, but in reality, you only need enough buckets to cover the max edge weight,
 	//       which in this case, is 1 for step distance and 2 for cultural distance.
@@ -116,7 +116,7 @@ DynamicArray2D<MultipleSourceDistanceFieldCell> mybot::computeMultipleSourcePath
 DynamicArray2D<MultipleSourceDistanceFieldCell> mybot::computeMultipleSourceDistanceField(PathingMap map, EDistanceMetric metric, std::span<const ivec2> starts)
 {
 	if (!starts.empty() && starts.size() - 1 > MultipleSourceDistanceFieldCell{ .index = UINT16_MAX }.index)
-		throw cvbot::BotFailure(std::string("Too many sources in ") + __func__);
+		throw BotFailure(std::string("Too many sources in ") + __func__);
 
 	// NOTE: Ordinarly, you'd use a priority queue for an A* implementation, but in reality, you only need enough buckets to cover the max edge weight,
 	//       which in this case, is 1 for step distance and 2 for cultural distance.

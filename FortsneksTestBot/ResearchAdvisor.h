@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Common.h"
+
 #include <PlayerBotGameBinding/GameStructs.h>
-#include <PlayerBotGameBinding/IGame.h>
 #include <PlayerBotGameBinding/EnumDefs.h>
 
 //#include <optional>
@@ -21,44 +22,44 @@ namespace mybot
 
 			
 			bool isAliveAndMet{};
-			//std::array<EState, cvbot::ETech::Num> techs{};
+			//std::array<EState, ETech::Num> techs{};
 
 			// Persistently valid. Once a civ has a tech, they always have it.
-			std::bitset<cvbot::ETech::Num> techsKnownHas{};
+			std::bitset<ETech::Num> techsKnownHas{};
 			// Only valid for the current turn. A civ can always get a tech later.
-			std::bitset<cvbot::ETech::Num> techsKnownHasNot{};
+			std::bitset<ETech::Num> techsKnownHasNot{};
 		};
 
 		std::vector<RivalTeamState> rivalTeams; // [team]
 
 		int numAliveTeams = 0;
-		std::array<cvbot::Interval, cvbot::ETech::Num> techHasCountIntervals{};
-		std::array<cvbot::Interval, cvbot::ETech::Num> techHasNotCountIntervals{};
+		std::array<Interval, ETech::Num> techHasCountIntervals{};
+		std::array<Interval, ETech::Num> techHasNotCountIntervals{};
 
 		int breakevenSliderResearch{};
 
 		// If we're researching the same tech as the previous turn, then overflow is guarenteed zero (and applied to the current tech), even during anarchy.
-		//cvbot::ETech prevTech = cvbot::ETech::None;
+		//ETech prevTech = ETech::None;
 
-		//cvbot::ETech prevTechDecision = cvbot::ETech::None;
+		//ETech prevTechDecision = ETech::None;
 
 		// NOTE: Teams are supported in RivalTeamState, but active player research rates do not support teams.
 		// NOTE: Keep civState slider at max for more accurate data (unless bar truncation occurs).
-		[[nodiscard]] cvbot::ETech update(
-			const cvbot::CivState& civState,
-			std::span<const std::optional<cvbot::Player>> revealedPlayers,
-			cvbot::Span2D<const cvbot::Plot> plots,
-			std::span<const cvbot::City> myCities,
+		[[nodiscard]] ETech update(
+			const CivState& civState,
+			std::span<const std::optional<Player>> revealedPlayers,
+			Span2D<const Plot> plots,
+			std::span<const City> myCities,
 			int barbThreatTurn,
-			const cvbot::GlobalInfo& globalInfo,
-			const cvbot::GlobalInfoData& infos,
-			const cvbot::IGame& game
+			const GlobalInfo& globalInfo,
+			const GlobalInfoData& infos,
+			const IGame& game
 		);
 
 	private:
-		void updateBreakevenSliderResearch(const cvbot::CivState& civState, std::span<const cvbot::City> myCities);
-		void updateAllRivalStates(cvbot::ETeam activeTeamI, const cvbot::CivState& civState, const cvbot::GlobalInfoData& infos, std::span<const std::optional<cvbot::Player>> revealedPlayers);
-		void updateRivalState(const cvbot::GlobalInfoData& infos, RivalTeamState& rivalState, const cvbot::Player& player);
+		void updateBreakevenSliderResearch(const CivState& civState, std::span<const City> myCities);
+		void updateAllRivalStates(ETeam activeTeamI, const CivState& civState, const GlobalInfoData& infos, std::span<const std::optional<Player>> revealedPlayers);
+		void updateRivalState(const GlobalInfoData& infos, RivalTeamState& rivalState, const Player& player);
 	};
 
 

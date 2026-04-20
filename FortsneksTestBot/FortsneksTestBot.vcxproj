@@ -92,6 +92,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="DomesticAdvisor.h" />
     <ClInclude Include="DynamicArray2D.h" />
     <ClInclude Include="MilitaryAdvisor.h" />
     <ClInclude Include="Pathing.h" />
