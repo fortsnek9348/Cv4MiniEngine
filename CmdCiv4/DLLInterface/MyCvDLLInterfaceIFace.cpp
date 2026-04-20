@@ -7,10 +7,9 @@
 #include "../CvApp.h"
 #include "../WorldView.h"
 #include "../CvButtonPopup.h"
-#include "../CLinkListIterator.h"
 #include "../DXT.h"
 
-
+#include <CLinkListIterator.h>
 #include <CvGameAI.h>
 #include <CvGlobals.h>
 #include <CvPopupInfo.h>

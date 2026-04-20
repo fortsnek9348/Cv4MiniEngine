@@ -35,8 +35,8 @@ namespace
 
 	void handleDiplo(CvPlayerAI& player, IBot& bot, std::unique_ptr<CvDiploParameters> diploParams)
 	{
-		static int nesting = 0;
-		assert(nesting++ == 0);
+		//static int nesting = 0;
+		//assert(nesting++ == 0);
 
 		PlayerBotDiplomacyScreen diploScreen{ std::move(diploParams) };
 		gGlobals.setDiplomacyScreen(&diploScreen);
@@ -200,7 +200,7 @@ namespace
 			controller.onClickUserComment(static_cast<DiploCommentTypes>(choice.type), choice.data1, choice.data2);
 		}
 
-		--nesting;
+		//--nesting;
 	}
 
 	PopupReturn makePopupReturnButtonClicked(int groupId, int value)

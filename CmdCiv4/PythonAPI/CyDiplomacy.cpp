@@ -1,13 +1,11 @@
 #include "CyDiplomacy.h"
 #include "../Common.h"
-
-#include "../CvDiplomacyScreen.h"
 #include "../CvInterface.h"
-
 #include "../DLLInterface/MyCvDLLUtility.h"
 #include "../TuiTextCode.h"
 
 #include <CvGlobals.h>
+#include <CvDiplomacyScreen.h>
 #include <CvDiploParameters.h>
 
 #include <pybind11/stl.h>

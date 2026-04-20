@@ -395,30 +395,30 @@ static CLinkList<TradeData> convert(const TradeList& list)
 	CLinkList<TradeData> table;
 
 	if (list.gold)
-		table.insertAtEnd({ .m_eItemType = TRADE_GOLD, .m_iData = list.gold });
+		table.insertAtEnd({ .m_eItemType = TRADE_GOLD, .m_iData = list.gold, .m_bOffering{}, .m_bHidden{} });
 	if (list.goldPerTurn)
-		table.insertAtEnd({ .m_eItemType = TRADE_GOLD_PER_TURN, .m_iData = list.goldPerTurn });
+		table.insertAtEnd({ .m_eItemType = TRADE_GOLD_PER_TURN, .m_iData = list.goldPerTurn, .m_bOffering{}, .m_bHidden{} });
 	if (list.openBorders)
-		table.insertAtEnd({ .m_eItemType = TRADE_OPEN_BORDERS });
+		table.insertAtEnd({ .m_eItemType = TRADE_OPEN_BORDERS, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 	if (list.peaceTreaty)
-		table.insertAtEnd({ .m_eItemType = TRADE_PEACE_TREATY });
+		table.insertAtEnd({ .m_eItemType = TRADE_PEACE_TREATY, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 	if (list.vassalState)
-		table.insertAtEnd({ .m_eItemType = TRADE_VASSAL });
+		table.insertAtEnd({ .m_eItemType = TRADE_VASSAL, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 	if (list.surrender)
-		table.insertAtEnd({ .m_eItemType = TRADE_SURRENDER });
+		table.insertAtEnd({ .m_eItemType = TRADE_SURRENDER, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 	if (list.defensivePact)
-		table.insertAtEnd({ .m_eItemType = TRADE_DEFENSIVE_PACT });
+		table.insertAtEnd({ .m_eItemType = TRADE_DEFENSIVE_PACT, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 	if (list.map)
-		table.insertAtEnd({ .m_eItemType = TRADE_MAPS });
+		table.insertAtEnd({ .m_eItemType = TRADE_MAPS, .m_iData{}, .m_bOffering{}, .m_bHidden{} });
 
 	for (const auto bonus : list.bonuses)
-		table.insertAtEnd({ .m_eItemType = TRADE_RESOURCES, .m_iData = bonus });
+		table.insertAtEnd({ .m_eItemType = TRADE_RESOURCES, .m_iData = bonus, .m_bOffering{}, .m_bHidden{} });
 	for (const auto tech : list.techs)
-		table.insertAtEnd({ .m_eItemType = TRADE_TECHNOLOGIES, .m_iData = tech });
+		table.insertAtEnd({ .m_eItemType = TRADE_TECHNOLOGIES, .m_iData = tech, .m_bOffering{}, .m_bHidden{} });
 	for (const auto team : list.declareWar)
-		table.insertAtEnd({ .m_eItemType = TRADE_WAR, .m_iData = static_cast<int>(team) });
+		table.insertAtEnd({ .m_eItemType = TRADE_WAR, .m_iData = static_cast<int>(team), .m_bOffering{}, .m_bHidden{} });
 	for (const auto team : list.makePeace)
-		table.insertAtEnd({ .m_eItemType = TRADE_PEACE, .m_iData = static_cast<int>(team) });
+		table.insertAtEnd({ .m_eItemType = TRADE_PEACE, .m_iData = static_cast<int>(team), .m_bOffering{}, .m_bHidden{} });
 
 	return table;
 }
@@ -479,6 +479,8 @@ static std::optional<bool> isWHEOOH(PlayerTypes aiPlayerI, PlayerTypes activePla
 		const TradeData tradeData{
 			.m_eItemType = TRADE_WAR,
 			.m_iData = otherTeamI,
+			.m_bOffering{},
+			.m_bHidden{},
 		};
 
 		if (aiPlayer.canTradeItem(activePlayerI, tradeData, false))
@@ -529,7 +531,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 
 	
 	out.civicChoices.resize(gGlobals.getNumCivicOptionInfos());
-	for (int i = 0; i < out.civicChoices.size(); ++i)
+	for (size_t i = 0; i < out.civicChoices.size(); ++i)
 		out.civicChoices[i] = static_cast<ECivic>(otherPlayer.getCivics(static_cast<CivicOptionTypes>(i)));
 
 	if ((allKnowing || canSeeResearch(otherPlayerI)) && otherPlayer.getCurrentResearch() != NO_TECH)
@@ -559,7 +561,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 		{
 			for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
 			{
-				const TradeData tradeItem{ .m_eItemType = TRADE_TECHNOLOGIES, .m_iData = tech };
+				const TradeData tradeItem{ .m_eItemType = TRADE_TECHNOLOGIES, .m_iData = tech, .m_bOffering{}, .m_bHidden{} };
 				const bool canExportAndWontDeny = activePlayer.canTradeItem(otherPlayerI, tradeItem, true);
 				const bool canImport = otherPlayer.canTradeItem(activePlayer.getID(), tradeItem, false);
 				if (canExportAndWontDeny)
@@ -584,7 +586,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 
 	for (const auto bonus : heck::range<BonusTypes>(gGlobals.getNumBonusInfos()))
 	{
-		const TradeData tradeItem{ .m_eItemType = TRADE_RESOURCES, .m_iData = bonus };
+		const TradeData tradeItem{ .m_eItemType = TRADE_RESOURCES, .m_iData = bonus, .m_bOffering{}, .m_bHidden{} };
 		if (otherPlayer.canTradeItem(activePlayer.getID(), tradeItem))
 			if (diploCanTrade(otherPlayer))
 				out.tradeAdvisorData.bonusesHas.push_back(static_cast<EBonus>(bonus));
@@ -941,8 +943,6 @@ GlobalInfo Game::getGlobalInfo() const
 		}
 	}
 
-	int numAlivePlayers = 0;
-
 	struct GlobalDemographicEntry
 	{
 		PlayerTypes playerI{};
@@ -958,8 +958,6 @@ GlobalInfo Game::getGlobalInfo() const
 		// Logic from info screen.
 		if (player.isAlive() && !player.isBarbarian())
 		{
-			++numAlivePlayers;
-
 			globalDemographicTable[GlobalInfo::GDP].emplace_back(playerI, player.calculateTotalCommerce());
 			globalDemographicTable[GlobalInfo::Prod].emplace_back(playerI, player.calculateTotalYield(YIELD_PRODUCTION));
 			globalDemographicTable[GlobalInfo::Food].emplace_back(playerI, player.calculateTotalYield(YIELD_FOOD));
@@ -1177,7 +1175,7 @@ static CvSelectionGroup* regroup(CommandUnitGroup group)
 	// Check if group is mirrored.
 	CvUnit& firstUnit = *player.getUnit(static_cast<int>(group[0]));
 	CvSelectionGroup* missionGroup{};
-	if (CvSelectionGroup* const firstGroup = firstUnit.getGroup(); firstGroup->getNumUnits() == group.size())
+	if (CvSelectionGroup* const firstGroup = firstUnit.getGroup(); static_cast<size_t>(firstGroup->getNumUnits()) == group.size())
 	{
 		if (std::ranges::all_of(group, [&player, firstGroup](EUnitId id) {
 			return player.getUnit(static_cast<int>(id))->getGroup() == firstGroup;
@@ -1799,7 +1797,7 @@ bool Game::tryCancelOpenBorders(EPlayer themI)
 	{
 		const PlayerTypes players[2]{ deal->getFirstPlayer(), deal->getSecondPlayer() };
 
-		if (deal->isCancelable() && (players[0] == us.getID() && players[1] == them.getID() || players[1] == us.getID() && players[0] == them.getID()))
+		if (deal->isCancelable() && ((players[0] == us.getID() && players[1] == them.getID()) || (players[1] == us.getID() && players[0] == them.getID())))
 		{
 			if (std::ranges::contains(viewCLinkList(*deal->getFirstTrades()), TRADE_OPEN_BORDERS, &TradeData::m_eItemType))
 			{

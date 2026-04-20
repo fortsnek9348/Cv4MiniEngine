@@ -49,7 +49,7 @@ namespace cvbot
 		bool isAnimal{};
 		EReligion optMissionaryReligion{};
 		EDomain domain{};
-		std::vector<ETech> requiredTechs;
+		std::vector<ETech> requiredTechs{};
 	};
 
 	struct CultureLevelInfo
@@ -103,9 +103,9 @@ namespace cvbot
 		std::vector<ETerrain> terrainTrades{};
 
 		// Only list active civ's unit types.
-		std::vector<EUnitType> unitsPotentiallyUnlocked;
+		std::vector<EUnitType> unitsPotentiallyUnlocked{};
 
-		std::vector<EBuild> buildActionsUnlocked;
+		std::vector<EBuild> buildActionsUnlocked{};
 
 		std::vector<ETech> prereqOrTechs{};
 		std::vector<ETech> prereqAndTechs{};

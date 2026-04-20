@@ -5,16 +5,19 @@
 #include "LinkedList.h"
 #include "CvStructs.h"
 
+#include <CommonStuff/NoCopy.h>
+
 #include <memory>
 #include <vector>
 
 class CvDiploParameters;
 class CvPopupInfo;
 
-class DllExportForInterface CvDiplomacyController
+class DllExportForInterface CvDiplomacyController : public heck::NoCopyNoMove
 {
 public:
 	explicit CvDiplomacyController(std::unique_ptr<CvDiploParameters> diploParams);
+	~CvDiplomacyController() noexcept;
 
 	void startDiplo(bool isRegreet);
 

@@ -28,7 +28,7 @@ void* DynamicLibrary::resolve(const char* name) const
 {
 	void* sym{};
 #ifdef _WIN32
-	sym = GetProcAddress(static_cast<HMODULE>(mPtr), name);
+	sym = reinterpret_cast<void*>(GetProcAddress(static_cast<HMODULE>(mPtr), name));
 #else
 	sym = dlsym(mPtr, name);
 #endif

@@ -23,6 +23,8 @@ CvDiplomacyController::CvDiplomacyController(std::unique_ptr<CvDiploParameters> 
 {
 }
 
+CvDiplomacyController::~CvDiplomacyController() noexcept = default;
+
 void CvDiplomacyController::startDiplo(bool isRegreet)
 {
 	CvPlayerAI& aiPlayer = GET_PLAYER(mSides[kSideAI].playerI);

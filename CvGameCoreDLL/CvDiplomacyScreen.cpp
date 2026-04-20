@@ -27,7 +27,7 @@ void CvDiplomacyScreen::endDiplomacy()
 	mController.endDiplomacy();
 }
 
-CvDiplomacyScreen::~CvDiplomacyScreen()
+CvDiplomacyScreen::~CvDiplomacyScreen() noexcept
 {
 	assert(gGlobals.getDiplomacyScreen() == this);
 	gGlobals.setDiplomacyScreen(nullptr);

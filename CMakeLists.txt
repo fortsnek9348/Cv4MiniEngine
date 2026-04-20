@@ -18,6 +18,7 @@ option(ENABLE_BUILD_ENGINE "Build the engine." ON)
 option(ENABLE_GAMECOREDLL_ENHANCEMENTS "Compile in the DLL enhancements that can be enabled via INI at runtime" OFF)
 option(ENABLE_AVX512 "Compile everything with AVX512/x86-64-v4 support." OFF)
 option(ENABLE_NFD "Use native file dialogs via nativefiledialog-extended. Don't enable on pure console systems." OFF)
+option(ENABLE_PLAYER_BOT "Enable player bot support. Must be disabled if headers have not yet been generated." ON)
 
 # Doesn't work for some reason
 #option(ENABLE_PGO_GENERATE "Enable DLL PGO instrumentation." OFF)
@@ -29,8 +30,9 @@ option(ENABLE_NFD "Use native file dialogs via nativefiledialog-extended. Don't 
 # Then, put "interceptor_via_lib:libpython2.7" in a text file and run with ASAN_OPTIONS=suppressions=supp.txt
 
 # =============================================================================
-find_package(SFML 3.0.2 COMPONENTS Audio System REQUIRED)
+find_package(SFML 3.1.0 COMPONENTS Audio System REQUIRED)
 add_library(CommonStuff STATIC
+	"CommonStuff/DynamicLibrary.cpp"
 	"CommonStuff/PPM.cpp"
 	"CommonStuff/PQCoordSimdAStar.cpp"
 	"CommonStuff/ProfilerMarkers.cpp"
@@ -57,6 +59,7 @@ if (MSVC)
 		target_compile_options(CommonStuff PUBLIC /showFilenames)
 	else()
 		target_compile_options(CommonStuff PUBLIC /wd4251) # ... needs to have dll-interface to be used by clients of ...
+		target_compile_options(CommonStuff PUBLIC /wd4275) # non-DLL-interface class 'class_1' used as base for DLL-interface class 'class_2'
 		target_compile_options(CommonStuff PUBLIC /wd5311) # warning C5311: A literal-operator-id of the form 'operator string-literal identifier' has been deprecated
 	endif()
 else()
@@ -109,7 +112,8 @@ if (WIN32)
 	string(REPLACE "forward_like" "forward_like_pybind11" temp "${temp}")
 	string(REPLACE [[#include "pybind11.h"]] [[#include <pybind11/pybind11.h>]] temp "${temp}")
 	string(REPLACE [[#include "detail/common.h"]] [[#include <pybind11/detail/common.h>]] temp "${temp}")
-	file(WRITE "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${temp}")
+	#file(WRITE "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${temp}")
+	file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" CONTENT "${temp}")
 else()
 	find_package(Patch REQUIRED)
 	add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h"
@@ -324,6 +328,57 @@ if (ENABLE_BUILD_ENGINE)
 	install(DIRECTORY "Data/PublicMaps" DESTINATION . PATTERN "*.bak" EXCLUDE)
 endif()
 
+if (ENABLE_PLAYER_BOT)
+	target_compile_definitions(CvGameCoreDLL PUBLIC ENABLE_PLAYER_BOT=1)
+
+	add_library(PlayerBotGameBinding STATIC)
+
+	target_sources(
+		PlayerBotGameBinding
+		PRIVATE
+			PlayerBotGameBinding/DLLDefs.cpp
+			PlayerBotGameBinding/EnumStrings.cpp
+			PlayerBotGameBinding/GameStructs.cpp
+
+		PUBLIC
+			FILE_SET HEADERS
+			BASE_DIRS PlayerBotGameBinding/inc
+			FILES
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/Common.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/DLLDefs.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumDefs.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumStrings.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/GameStructs.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/IGame.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/Infos.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBot.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBotPlugin.h
+				PlayerBotGameBinding/inc/PlayerBotGameBinding/PlayerBotPluginImpl.inl
+	)
+
+	target_link_libraries(CvGameCoreDLL PUBLIC PlayerBotGameBinding)
+
+	#install(TARGETS PlayerBotGameBinding EXPORT PlayerBotGameBinding FILE_SET HEADERS)
+	#include(GNUInstallDirs)
+	#install(EXPORT PlayerBotGameBinding DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PlayerBotGameBinding)
+
+	add_library(FortsneksTestBot SHARED)
+	target_link_libraries(FortsneksTestBot PUBLIC CommonStuff PlayerBotGameBinding)
+
+	target_sources(
+		FortsneksTestBot
+		PRIVATE
+			FortsneksTestBot/Bot.cpp
+			FortsneksTestBot/dllmain.cpp
+			FortsneksTestBot/MilitaryAdvisor.cpp
+			FortsneksTestBot/Pathing.cpp
+			FortsneksTestBot/ResearchAdvisor.cpp
+			FortsneksTestBot/SettlingAdvisor.cpp
+	)
+
+	install(TARGETS FortsneksTestBot RUNTIME DESTINATION "Bots")
+endif()
+
 if (WIN32)
 	install(TARGETS CvGameCoreDLL RUNTIME DESTINATION "CvGameCoreDLL_${CvGameCoreDLL_NameSuffix}")
 	# Note that when dragging a file onto the batch file, Windows will change the working directory.
@@ -352,7 +407,6 @@ else()
 
 	install(FILES "cmake/ShowLog.desktop" DESTINATION . PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 	install(FILES "cmake/Cv4MiniEngine Attach GDB.desktop" DESTINATION . PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
-	
 endif()
 
 install(FILES "LICENSE.txt" DESTINATION .)

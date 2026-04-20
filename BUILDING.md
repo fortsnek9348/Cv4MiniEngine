@@ -2,8 +2,8 @@
 
 Cv4MiniEngine depends on:
 
-* SFML 3.0.2 (for audio)
-	* At least this specific version. Fixes use-after-free bug in the audio engine.
+* SFML 3.1.0 (for audio)
+	* Older SFML 3 versions may have a use-after-free race condition in the audio engine.
 * Python 2.7.18 (final Python 2)
 * pugixml 1.15: https://github.com/zeux/pugixml
 	* At least this specific version. Adds `string_view` support.
@@ -19,7 +19,7 @@ On Linux, you will likely need to build SFML 3, Python 2.7, and NFD.
 
 When building dependencies with cmake, remember to build AND install (install to anywhere).
 
-Tested with VS 2022 MSVC and Clang-CL, Ubuntu Clang 20, and Ubuntu 25.10 G++ 15.
+Tested with VS 2026 MSVC and Clang-CL, Ubuntu Clang 20, and Ubuntu 25.10 G++ 15.
 
 #### Windows VS
 

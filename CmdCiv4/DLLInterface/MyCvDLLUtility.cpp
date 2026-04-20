@@ -17,7 +17,6 @@
 #include "../CvTranslator.h"
 #include "../Logger.h"
 #include "../DLLMessageQueue.h"
-#include "../CvDiplomacyScreen.h"
 #include "../CvUserProfile.h"
 #include "../CivIni.h"
 
@@ -25,6 +24,7 @@
 #include <CvGameTextMgr.h>
 #include <CvGlobals.h>
 #include <CvRandom.h>
+#include <CvDiplomacyScreen.h>
 #include <CvDLLPythonIFaceBase.h>
 #include <CvDLLPlotBuilderIFaceBase.h>
 #include <CvEventReporter.h>

@@ -10806,6 +10806,7 @@ void CvPlayer::setCommercePercents(std::array<int, NUM_COMMERCE_TYPES> values)
 	}
 
 	FAssert(100 == sum);
+	(void)sum;
 
 	if (changed)
 	{
