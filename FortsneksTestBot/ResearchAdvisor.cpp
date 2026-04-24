@@ -514,13 +514,13 @@ namespace
 		}
 
 		case Writing: return 300;
-		case MetalCasting: return 100;
+		case MetalCasting: return 200;
 		case IronWorking: return (input.bonusCounts[Copper] ? 50 : 200) + input.numJungles * 20 / input.numCities;
 
 		case Aesthetics: return 100;
 		case Mathematics: return 100 + input.numForests * 40 / input.numCities;
 		case Alphabet: return 100;
-		case Monarchy: return (-input.totalSignedHappy * 200) / input.numCities + 100 + (input.bonusCounts[Wine] ? 100 : 0) + (input.bonusCounts[Wine] * 50 / input.numCities);
+		case Monarchy: return cdiv(-input.totalSignedHappy * 200, static_cast<unsigned int>(input.numCities)) + 100 + (input.bonusCounts[Wine] ? 100 : 0) + (input.bonusCounts[Wine] * 50 / input.numCities);
 		case Compass: return 50 + input.numCoastalCities * 50 / input.numCities;
 
 		case Literature: return 100;
@@ -535,7 +535,7 @@ namespace
 		case Feudalism: return 100;
 		case Optics: return 50;
 
-		case Music: return input.techsGone[tech] ? 50 : 300;
+		case Music: return input.techsGone[tech] ? 50 : 200;
 		case Philosophy: return 200;
 		case CivilService: return 300;
 		case Theology: return 50;

@@ -18,6 +18,7 @@
 #include "CvInfos.h"
 #include "CvDLLUtilityIFaceBase.h"
 #include "CvDLLEngineIFaceBase.h"
+#include "CvMessageControl.h"
 
 #include <PlayerBotGameBinding/GameStructs.h>
 
@@ -44,7 +45,7 @@ static T clampCast(U value)
 	return static_cast<T>(value);
 }
 
-static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes activeTeam, bool allKnowing)
+static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes activeTeam, bool allKnowing, TerrainTypes coastalTerrainType)
 {
 	const TeamTypes activeTeamIfRestricted = allKnowing ? activeTeam : NO_TEAM;
 	const bool isRevealed = plot.isRevealed(activeTeam, false);
@@ -68,8 +69,9 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 	{
 		return {
 			.type = static_cast<EPlotType>(plot.getPlotType()),
-			.owner = static_cast<EPlayer>(plot.getOwner()),
+			.owner = static_cast<EPlayer>(allKnowing ? plot.getOwner() : plot.getRevealedOwner(activeTeam, false)),
 			.improvement = static_cast<EImprovement>(allKnowing ? plot.getImprovementType() : plot.getRevealedImprovementType(activeTeam, false)),
+			.route = static_cast<ERoute>(allKnowing ? plot.getRouteType() : plot.getRevealedRouteType(activeTeam, false)),
 			.feature = static_cast<EFeature>(plot.getFeatureType()),
 			.terrain = static_cast<ETerrain>(plot.getTerrainType()),
 			.bonus = static_cast<EBonus>(plot.getBonusType(activeTeamIfRestricted)),
@@ -77,9 +79,11 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 			.hasMyUnits = hasMyUnits,
 			.hasOtherVisibleUnits = hasOtherUnits,
 			.hasEnemyUnit = hasEnemyUnits,
-			.hasRevealedCity = plot.getPlotCity() && (allKnowing ? true : plot.getPlotCity()->isRevealed(activeTeam, false)),
+			.hasRevealedCity = plot.getPlotCity() && (allKnowing || plot.getPlotCity()->isRevealed(activeTeam, false)),
 			.isRiverside = plot.isRiverSide(),
 			.isLake = plot.isLake(),
+			.isCoastalWater = plot.getTerrainType() == coastalTerrainType,
+			.isCoastalLand = plot.isCoastalLand(),
 			.yields{
 				static_cast<int8_t>(plot.getYield(YIELD_FOOD)),
 				static_cast<int8_t>(plot.getYield(YIELD_PRODUCTION)),
@@ -93,6 +97,7 @@ static Plot convert(const CvPlot& plot, PlayerTypes activePlayer, TeamTypes acti
 			.type = EPlotType::None,
 			.owner = kNoPlayer,
 			.improvement = static_cast<EImprovement>(NO_IMPROVEMENT),
+			.route = static_cast<ERoute>(NO_ROUTE),
 			.feature = static_cast<EFeature>(NO_FEATURE),
 			.terrain = static_cast<ETerrain>(NO_TERRAIN),
 			.bonus = static_cast<EBonus>(NO_BONUS),
@@ -112,10 +117,10 @@ static void getPlots(ivec2 origin, Span2D<Plot> out, bool allKnowing)
 	const CvMap& map = gGlobals.getMap();
 	const PlayerTypes playerI = allKnowing ? NO_PLAYER : gGlobals.getGame().getActivePlayer();
 	const TeamTypes teamI = GET_PLAYER(playerI).getTeam();
-
+	const auto coastalTerrainType = static_cast<TerrainTypes>(gGlobals.getDefineINT("SHALLOW_WATER_TERRAIN"));
 	for (int y = 0; y < out.dim.y; ++y)
 		for (int x = 0; x < out.dim.x; ++x)
-			out[{ x, y }] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI, allKnowing);
+			out[{ x, y }] = convert(*map.plot(origin.x + x, origin.y + y), playerI, teamI, allKnowing, coastalTerrainType);
 }
 
 static Unit convert(const CvUnit& unit, bool allKnowing)
@@ -679,7 +684,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 	return out;
 }
 
-static City convert(const CvCity& city, bool allKnowing)
+static City convertCity(const CvCity& city, bool allKnowing)
 {
 	City out{
 		.coord{
@@ -691,6 +696,7 @@ static City convert(const CvCity& city, bool allKnowing)
 		.isGovernmentCenter = city.isGovernmentCenter(),
 		.isCoastal = city.isCoastal(gGlobals.getBuildingInfo(static_cast<BuildingTypes>(gGlobals.getInfoTypeForString("BUILDING_LIGHTHOUSE"))).getMinAreaSize()),
 		.isOccupation = city.isOccupation(),
+		.isPowered = city.isPower(),
 		.pop = city.getPopulation(),
 		.defence = city.getDefenseModifier(false),
 		.defenceIgnoringBuildings = city.getDefenseModifier(true),
@@ -706,7 +712,14 @@ static City convert(const CvCity& city, bool allKnowing)
 		City::InspectableCityInfo& info = out.optInspectableCityInfo.emplace();
 
 		for (const int i : heck::range(NUM_CITY_PLOTS))
-			info.workedPlotsMask[i] = city.isWorkingPlot(i);
+		{
+			info.currentPlotsMask[i] = city.isWorkingPlot(i);
+			if (CvPlot* const workPlot = city.getCityIndexPlot(i))
+			{
+				info.workablePlotsMask[i] = city.canWork(workPlot);
+				info.assignedPlotsMask[i] = workPlot->getWorkingCity() == &city;
+			}
+		}
 
 		// Left
 		info.tradeRouteCommerce = city.getTradeYield(YIELD_COMMERCE);
@@ -714,6 +727,8 @@ static City convert(const CvCity& city, bool allKnowing)
 			if (city.getNumBuilding(i) > 0)
 				info.buildings.push_back(static_cast<EBuildingType>(i));
 		info.culture = city.getCulture(city.getOwnerINLINE());
+
+		info.maintainence = clampCast<uint8_t>(city.getMaintenance()),
 
 		// Middle
 		info.foodBinLevel = city.getFood();
@@ -744,6 +759,8 @@ static City convert(const CvCity& city, bool allKnowing)
 
 		for (int i = 0; i < NUM_YIELD_TYPES; ++i)
 			info.yieldRates[i] = city.getYieldRate(static_cast<YieldTypes>(i));
+		for (int i = 0; i < NUM_COMMERCE_TYPES; ++i)
+			info.commerceRates[i] = city.getCommerceRate(static_cast<CommerceTypes>(i));
 		for (int i = 0; i < NUM_COMMERCE_TYPES; ++i)
 		{
 			info.productionToCommerceModifiers[i] = city.getProductionToCommerceModifier(static_cast<CommerceTypes>(i));
@@ -1161,8 +1178,8 @@ std::vector<EBuild> Game::getPlotBuildChoicesAt(ivec2 coord) const
 
 bool Game::hasFoundActionAt(ivec2 coord) const
 {
-	// bTestVisible becuase we only want to know if the aciton button is visible, not if we can actually found.
-	return GET_PLAYER(gGlobals.getGame().getActivePlayer()).canFound(coord.x, coord.y, true);
+	const CvPlot& plot = *gGlobals.getMap().plotINLINE(coord.x, coord.y);
+	return plot.isActiveVisible(false) && GET_PLAYER(gGlobals.getGame().getActivePlayer()).canFound(coord.x, coord.y, true);
 }
 
 static CvSelectionGroup* regroup(CommandUnitGroup group)
@@ -1553,7 +1570,7 @@ std::vector<City> Game::getRevealedCities() const
 		int itIndex{};
 		for (CvCity* city = player.firstCity(&itIndex); city; city = player.nextCity(&itIndex))
 			if (city->isRevealed(activeTeamI, false))
-				out.push_back(convert(*city, false));
+				out.push_back(convertCity(*city, false));
 	}
 
 	return out;
@@ -1564,7 +1581,7 @@ std::optional<City> Game::getRevealedCityAt(ivec2 coord) const
 	const CvPlot& plot = *gGlobals.getMap().plot(coord.x, coord.y);
 	if (const CvCity* const city = plot.getPlotCity())
 		if (city->isRevealed(gGlobals.getGame().getActiveTeam(), false))
-			return convert(*city, false);
+			return convertCity(*city, false);
 	return std::nullopt;
 }
 
@@ -1809,10 +1826,22 @@ bool Game::tryCancelOpenBorders(EPlayer themI)
 	return false;
 }
 
+int Game::getSpaceshipChancePercent() const
+{
+	const auto& game = gGlobals.getGameINLINE();
+	return CvTeamAI::getTeam(game.getActiveTeam()).getLaunchSuccessRate(game.getSpaceVictory());
+}
+void Game::launchSpaceship()
+{
+	const auto& game = gGlobals.getGameINLINE();
+	if (!CvTeamAI::getTeam(game.getActiveTeam()).hasLaunched())
+		CvMessageControl::getInstance().sendLaunch(game.getActivePlayer(), game.getSpaceVictory());
+}
+
 void Game::saveGame(std::string_view name) const
 {
 	CvString nameStr(name);
-	gGlobals.getDLLIFaceNonInl()->getEngineIFace()->SaveGame(nameStr);
+	gGlobals.getDLLIFace()->getEngineIFace()->SaveGame(nameStr);
 }
 
 

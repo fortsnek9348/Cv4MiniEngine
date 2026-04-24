@@ -136,11 +136,14 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 			.klass = static_cast<EUnitClass>(info.getUnitClassType()),
 			.productionCost = activePlayer.getProductionNeeded(i),
 			.cityDefenceModifier = info.getCityDefenseModifier(),
+			.baseCombatStrength = info.getCombat(),
 			.canAttack = info.getCombat() && !info.isOnlyDefensive(),
 			.bNoDefensiveBonus = info.isNoDefensiveBonus(),
 			.isAnimal = info.isAnimal(),
+			.isMilitaryHappiness = info.isMilitaryHappiness(),
 			.optMissionaryReligion = static_cast<EReligion>(NO_RELIGION),
 			.domain = static_cast<EDomain>(info.getDomainType()),
+			.moveSteps = static_cast<uint8_t>(info.getMoves()),
 		};
 		if (info.getDefaultUnitAIType() == UNITAI_MISSIONARY)
 		{
@@ -245,7 +248,7 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 		}
 	}
 
-	for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
+	for (const auto tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))
 	{
 		if (activePlayer.getTechFreeUnit(tech) != NO_UNIT)
 			infos.techs[tech].isIfFirstThenSpawnsGreatPerson = true;
@@ -257,11 +260,24 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 			|| infos.techs[tech].isIfFirstThenGetFreeTech;
 	}
 
+	infos.projects.resize(gGlobals.getNumProjectInfos());
+	for (const auto i : heck::range<ProjectTypes>(gGlobals.getNumProjectInfos()))
+	{
+		const auto& info = gGlobals.getProjectInfo(i);
+		infos.projects[i] = {
+			.productionCost = activePlayer.getProductionNeeded(i),
+			.optVictoryPrereq = static_cast<EVictory>(info.getVictoryPrereq()),
+		};
+	}
+
 	const CvHandicapInfo& handicapInfo = gGlobals.getHandicapInfo(game.getHandicapType());
 	const CvGameSpeedInfo& speedInfo = gGlobals.getGameSpeedInfo(game.getGameSpeedType());
 
 	infos.speedInfo = {
 		.researchPercent = speedInfo.getResearchPercent(),
+		.buildingProdPercent = speedInfo.getConstructPercent(),
+		.unitProdPercent = speedInfo.getTrainPercent(),
+		.projectProdPercent = speedInfo.getCreatePercent(),
 	};
 
 	for (const TechTypes tech : heck::range<TechTypes>(gGlobals.getNumTechInfos()))

@@ -13,7 +13,8 @@ namespace mybot
 		void update(
 			MapGeometry geom,
 			const DynamicArray2D<Plot>& map,
-			const DynamicArray2D<MultipleSourceDistanceFieldCell>& pathLengthAnalysis,
+			const DynamicArray2D<PathingPlot>& pathingMap,
+			std::span<const ivec2> myCityCoords,
 			const DynamicArray2D<MultipleSourceDistanceFieldCell>& stepDistanceAnalysis,
 			const IGame& game
 		);

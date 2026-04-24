@@ -13,18 +13,20 @@ namespace mybot
 {
 	struct PathingPlot
 	{
-		enum EFlag : uint8_t
+		enum EFlag : uint16_t
 		{
-			Unrevealed          /**/ = 1 << 0,
-			EnemyUnit           /**/ = 1 << 1,
-			NoGoTerritory       /**/ = 1 << 2,
-			Water               /**/ = 1 << 3,
-			Land                /**/ = 1 << 4,
-			NoGoForCoastalUnits /**/ = 1 << 5,
-			Impassible          /**/ = 1 << 6,
+			Unrevealed              /**/ = 1 << 0,
+			EnemyUnit               /**/ = 1 << 1,
+			NoGoTerritory           /**/ = 1 << 2,
+			Water                   /**/ = 1 << 3,
+			Land                    /**/ = 1 << 4,
+			NoGoForOurCoastalUnits  /**/ = 1 << 5, // Avoid open sea, land (except friendly cities). Does not avoid unrevealed or impassible.
+			Impassible              /**/ = 1 << 6,
+			NoGoForBarbCoastalUnits /**/ = 1 << 7, // Same as NoGoForOurCoastalUnits, but for kBarbarianPlayer.
+			OwnedByOtherPlayer      /**/ = 1 << 8,
 		};
 
-		uint8_t flags = 0;
+		uint16_t flags = 0;
 	};
 
 	enum class EDistanceMetric

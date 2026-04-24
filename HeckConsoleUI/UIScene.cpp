@@ -454,6 +454,9 @@ bool UIScene::injectEvent(const ConsoleEvent& e)
 
 		//std::clog << (int)e2.type << std::endl;
 
+		// Fix that bug where pressing the exit button on a screen sometimes teleports you elsewhere on the map (because the UI thought you clicked the minimap underneath).
+		static_cast<MouseEvent&>(mLastMouseMoveEvent) = static_cast<const MouseEvent&>(e);
+
 		mLastModifierKeyState = e2;
 		if (const auto ctrl = mMouseCapture.lock())
 		{

@@ -4,6 +4,8 @@
 #include <PlayerBotGameBinding/DLLDefs.h>
 #include <PlayerBotGameBinding/EnumFwd.h>
 
+#include <CommonStuff/range.h>
+
 namespace cvbot
 {
 	class IGame;
@@ -19,49 +21,101 @@ namespace cvbot
 	struct TechInfo;
 	struct Interval;
 	struct Player;
+	struct ProductionChoice;
+	struct GameSetup;
+	struct TradeList;
+	struct UnitKilledTurnMessage;
+	struct GreatPersonTurnMessage;
+	class IPlayerBotPlugin;
+	struct Relation;
+	class IBot;
+	class IBotInit;
+	struct BuildingClassInfo;
+	struct BuildingInfo;
+	struct CivilisationInfo;
+	struct LeaderInfo;
+	struct ProjectInfo;
+	struct CityBuildChoice;
+	struct UnitClassInfo;
 }
 
 namespace mybot
 {
+	using cvbot::BotFailure;
+	using cvbot::cdiv;
 	using cvbot::City;
+	using cvbot::CivState;
 	using cvbot::EAutomation;
+	using cvbot::EBonus;
+	using cvbot::EBuildingClass;
+	using cvbot::ESpecialist;
 	using cvbot::EBuildingType;
+	using cvbot::ECivic;
+	using cvbot::ECivicOptionType;
 	using cvbot::ECommerce;
 	using cvbot::EDomain;
+	using cvbot::EEvent;
+	using cvbot::EEventTrigger;
+	using cvbot::EFeature;
+	using cvbot::EImprovement;
+	using cvbot::ELeaderhead;
+	using cvbot::ELeaderTrait;
 	using cvbot::EMission;
+	using cvbot::EPlayer;
+	using cvbot::EPlotType;
+	using cvbot::EProcess;
+	using cvbot::EProject;
+	using cvbot::EReligion;
+	using cvbot::ETeam;
+	using cvbot::ETech;
 	using cvbot::EUnitClass;
 	using cvbot::EUnitId;
 	using cvbot::EUnitType;
+	using cvbot::EVictory;
+	using cvbot::EYield;
+	using cvbot::ELeaderTrait;
+	using cvbot::GameSetup;
 	using cvbot::GlobalInfo;
 	using cvbot::GlobalInfoData;
+	using cvbot::GreatPersonTurnMessage;
 	using cvbot::i16vec2;
+	using cvbot::iaabb2;
+	using cvbot::IBot;
+	using cvbot::IBotInit;
 	using cvbot::IGame;
+	using cvbot::Interval;
+	using cvbot::IPlayerBotPlugin;
 	using cvbot::ivec2;
 	using cvbot::kBarbarianPlayer;
+	using cvbot::kCityWorkPlotCoords;
+	using cvbot::kMaxCivPlayers;
+	using cvbot::kMaxCivTeams;
+	using cvbot::kMaxPlayers;
+	using cvbot::kMaxTeams;
 	using cvbot::kMoveDenominator;
 	using cvbot::kNoPlayer;
+	using cvbot::kNumCityWorkPlots;
 	using cvbot::MapGeometry;
+	using cvbot::Player;
 	using cvbot::Plot;
+	using cvbot::ProductionChoice;
+	using cvbot::Relation;
 	using cvbot::Span2D;
+	using cvbot::TechInfo;
 	using cvbot::TechState;
+	using cvbot::TradeList;
 	using cvbot::Unit;
 	using cvbot::UnitInfo;
-	using cvbot::BotFailure;
-	using cvbot::ETech;
-	using cvbot::Interval;
-	using cvbot::CivState;
-	using cvbot::ETeam;
-	using cvbot::Player;
-	using cvbot::TechInfo;
-	using cvbot::cdiv;
-	using cvbot::ELeaderhead;
-	using cvbot::EBonus;
-	using cvbot::EBuildingClass;
-	using cvbot::EProject;
-	using cvbot::ELeaderTrait;
-	using cvbot::EPlotType;
-	using cvbot::EFeature;
-	using cvbot::EImprovement;
-	using cvbot::EYield;
-	using cvbot::kCityWorkPlotCoords;
+	using cvbot::UnitKilledTurnMessage;
+	using cvbot::UnitClassInfo;
+
+	using cvbot::BuildingClassInfo;
+	using cvbot::BuildingInfo;
+	using cvbot::CivilisationInfo;
+	using cvbot::LeaderInfo;
+	using cvbot::ProjectInfo;
+	using cvbot::CityBuildChoice;
+
+	using heck::range;
+
 }

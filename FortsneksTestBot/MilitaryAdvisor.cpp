@@ -1,8 +1,11 @@
 #include "MilitaryAdvisor.h"
+#include "MapUnitLookup.h"
 
 #include <PlayerBotGameBinding/Infos.h>
 #include <PlayerBotGameBinding/EnumDefs.h>
+#include <PlayerBotGameBinding/EnumStrings.h>
 
+#include <CommonStuff/div.h>
 #include <CommonStuff/RangeTransformUtil.h>
 
 #include <map>
@@ -11,6 +14,7 @@
 #include <generator>
 #include <functional>
 #include <algorithm>
+#include <iostream>
 
 using namespace mybot;
 
@@ -19,6 +23,9 @@ using namespace mybot;
 // https://github.com/mzetkowski/tbsf-unity-docs?tab=readme-ov-file#7-ai-system
 // https://en.wikipedia.org/wiki/Weapon-target_assignment_problem
 // https://gamedev.stackexchange.com/questions/206216/ai-for-global-decision-making-in-4x-games
+
+// Power = CvCity::processBuilding + CvUnit::init + CvPlayer::changeTotalPopulation + CvTeam::processTech
+// 
 
 // This is a resource assignment problem. X units to Y cities/enemies.
 // To solve generally, you generate all X*Y combinations of task assignments and sort them.
@@ -47,6 +54,7 @@ namespace
 	{
 		Scouting,
 		FutureSettlerEscort,
+		MilitaryDefence,
 		SettlerEscort,
 		AntiBarb,
 		CityDefence,
@@ -58,6 +66,14 @@ namespace
 		MapGeometry geom{};
 		const Unit& unit;
 		const GlobalInfoData& infos;
+	};
+
+	struct UnitPreference
+	{
+		EUnitClass cheapMilitaryPolice{};
+		EUnitClass cityDefender{};
+		EUnitClass attacker{};
+		EUnitClass scout{};
 	};
 
 	int guessUnitTurns(const MapGeometry& geom, const Unit& unit, ivec2 target)
@@ -100,9 +116,60 @@ namespace
 				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
 		}
 
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.cityDefender,
+				.target = city->coord,
+				.turns = 0,
+				.count = 1,
+				.urgency = EProductionUrgency::UndefendedCity,
+			};
+		}
+
 		friend bool operator==(CityDefenceTask, CityDefenceTask) = default;
 
 		friend std::strong_ordering operator<=>(CityDefenceTask a, CityDefenceTask b)
+		{
+			return a.city->coord <=> b.city->coord;
+		}
+	};
+
+	struct MilitaryPolice
+	{
+		const City* city{};
+
+		static constexpr int kScoreScale = 100;
+
+		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
+		{
+			return CityDefenceTask::evaluateTaskKindScore(ctx);
+		}
+
+		int evaluateScore(const TaskEvalContext& ctx, int taskKindScore) const
+		{
+			return evalDistanceScaledScore(ctx, city->coord, taskKindScore);
+		}
+
+		void execute(IGame& game, const Unit& unit) const
+		{
+			return CityDefenceTask{ city }.execute(game, unit);
+		}
+
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.cheapMilitaryPolice,
+				.target = city->coord,
+				.turns = 0,
+				.count = 1,
+				.urgency = EProductionUrgency::UndefendedCity,
+			};
+		}
+
+		friend bool operator==(MilitaryPolice, MilitaryPolice) = default;
+
+		friend std::strong_ordering operator<=>(MilitaryPolice a, MilitaryPolice b)
 		{
 			return a.city->coord <=> b.city->coord;
 		}
@@ -131,6 +198,17 @@ namespace
 			game.startMission(std::array{ unit.id }, EMission::MoveTo, settler->coord.x, settler->coord.y);
 			if (game.getUnitCoord(unit.id) ==  settler->coord)
 				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
+		}
+
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.cityDefender,
+				.target = settler->coord,
+				.turns = 0,
+				.count = 1,
+				.urgency = EProductionUrgency::Escort,
+			};
 		}
 
 		friend bool operator==(SettlerEscortTask, SettlerEscortTask) = default;
@@ -163,6 +241,17 @@ namespace
 				game.startMission(std::array{ unit.id }, EMission::Fortify, target.x, target.y);
 		}
 
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.cityDefender,
+				.target = static_cast<i16vec2>(target),
+				.turns = 5,
+				.count = 1,
+				.urgency = EProductionUrgency::Escort,
+			};
+		}
+
 		friend bool operator==(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
 
 		friend std::strong_ordering operator<=>(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
@@ -193,6 +282,17 @@ namespace
 			game.startMission(std::array{ unit.id }, EMission::MoveTo, barbs[0]->coord.x, barbs[0]->coord.y);
 		}
 
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.attacker,
+				.target = barbs[0]->coord,
+				.turns = 0,
+				.count = static_cast<uint16_t>(barbs.size()),
+				.urgency = EProductionUrgency::TerritoryDefence,
+			};
+		}
+
 		friend bool operator==(AntiBarbTask a, AntiBarbTask b)
 		{
 			return a.barbs[0]->coord == b.barbs[0]->coord;
@@ -206,6 +306,8 @@ namespace
 
 	struct ScoutingTask
 	{
+		i16vec2 taget{};
+
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
 			return ctx.unit.strength * (ctx.unit.maxMoves > kMoveDenominator ? 2 : 1);
@@ -222,10 +324,21 @@ namespace
 			game.tryAutomate(std::array{ unit.id }, EAutomation::Explore);
 		}
 
+		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		{
+			return ProductionDemand{
+				.thing = unitPreference.scout,
+				.target = taget,
+				.turns = 0,
+				.count = 1,
+				.urgency = EProductionUrgency::NonCombat,
+			};
+		}
+
 		friend std::strong_ordering operator<=>(ScoutingTask, ScoutingTask) = default;
 	};
 
-	using Task = std::variant<ScoutingTask, FutureSettlerEscortTask, SettlerEscortTask, AntiBarbTask, CityDefenceTask>;
+	using Task = std::variant<ScoutingTask, FutureSettlerEscortTask, MilitaryPolice, SettlerEscortTask, AntiBarbTask, CityDefenceTask>;
 
 	struct TaskKindScoreEval
 	{
@@ -262,7 +375,7 @@ namespace
 
 	struct TaskAssignment
 	{
-		Task task{};
+		const Task* task{};
 		const Unit* unit{};
 		int score{};
 
@@ -281,7 +394,7 @@ namespace
 	{
 		std::map<const Unit*, TaskAssignment> assignments;
 		std::vector<const Unit*> spareUnits;
-		std::vector<Task> unassignedTasks;
+		std::vector<const Task*> unassignedTasks;
 	};
 
 	UnitAssignmentResult assignUnitTasks(const IGame& game, MapGeometry mapGeom, const GlobalInfoData& infos, std::span<const Unit> myUnits, std::span<const Task> tasks)
@@ -304,7 +417,7 @@ namespace
 				if (taskScore > 0)
 				{
 					combinations.emplace_back(
-						task,
+						&task,
 						&unit,
 						taskScore
 					);
@@ -314,7 +427,7 @@ namespace
 
 		std::ranges::sort(combinations, std::greater());
 
-		std::set<Task> satisfiedTasks;
+		std::set<const Task*> satisfiedTasks;
 		std::map<const Unit*, TaskAssignment> assignments;
 
 		for (const TaskAssignment& candidate : combinations)
@@ -331,10 +444,10 @@ namespace
 			if (!assignments.contains(&unit))
 				spareUnits.push_back(&unit);
 
-		std::vector<Task> unassignedTasks;
+		std::vector<const Task*> unassignedTasks;
 		for (const Task& task : tasks)
-			if (!satisfiedTasks.contains(task))
-				unassignedTasks.push_back(task);
+			if (!satisfiedTasks.contains(&task))
+				unassignedTasks.push_back(&task);
 
 		return {
 			std::move(assignments),
@@ -343,30 +456,48 @@ namespace
 		};
 	}
 
-	struct MapUnitLookup
+	// Return the power ratio to use to decide ShowOfForce unit demand.
+	int computePowerRatioPercentForShowOfForce(EPlayer activePlayerI, std::span<const std::optional<Player>> players)
 	{
-		std::map<i16vec2, std::vector<const Unit*>> byCoord;
-
-		explicit MapUnitLookup(std::span<const Unit> units)
+		int myPower{};
+		int sumPower{};
+		int numPowerKnown{};
+		int maxPower{};
+		for (const size_t i : range(players.size()))
 		{
-			for (const Unit& unit : units)
-				byCoord[unit.coord].push_back(&unit);
+			if (!players[i] || !players[i]->optVisibleDemographics)
+				continue;
+
+			const int power = players[i]->optVisibleDemographics->power;
+
+			if (i == activePlayerI)
+			{
+				myPower = power;
+				continue;
+			}
+
+			if (players[i]->optVisibleDemographics)
+			{
+				sumPower += power;
+				maxPower = std::max(maxPower, power);
+				++numPowerKnown;
+			}
 		}
 
-		std::span<const Unit* const> getUnitsAt(i16vec2 coord) const
-		{
-			if (const auto it = byCoord.find(coord); it != byCoord.end())
-				return it->second;
-			else
-				return {};
-		}
-	};
+		if (numPowerKnown <= 0)
+			return 100;
+		else
+			return heck::rdiv(myPower * 100, static_cast<unsigned int>(std::max(1, maxPower)));
+			//return heck::rdiv(myPower * numPowerKnown * 100, static_cast<unsigned int>(std::max(1, sumPower)));
+	}
 }
 void MilitaryAdvisor::update(
+	const CivState& civState,
 	std::span<const Unit> myUnits,
 	std::span<const Unit> enemyUnits,
 	std::optional<ivec2> futureSettlerEscortTarget,
 	std::span<const City> myCities,
+	std::span<const std::optional<Player>> players,
 	MapGeometry mapGeom,
 	[[maybe_unused]] Span2D<const Plot> plots,
 	[[maybe_unused]] const mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell>& cityPathLengthAnalysis,
@@ -414,12 +545,27 @@ void MilitaryAdvisor::update(
 
 	barbsThreatTurn = canBarbsEnterTerritory ? 0 : infos.handicap.firstMilitaryBarbCreationTurn;
 
-	MapUnitLookup enemyUnitMapLookup(enemyUnits);
+	const MapUnitLookup enemyUnitMapLookup(enemyUnits);
+	const MapUnitLookup myUnitMapLookup(myUnits);
 	
 	std::vector<Task> tasks;
 	if (canBarbsEnterTerritory)
 		for (const City& city : myCities)
+		{
 			tasks.emplace_back(CityDefenceTask{ &city });
+			if (civState.civics[ECivicOptionType::Government] == ECivic::HereditaryRule)
+			{
+				const int currentMilitaryPolice = static_cast<int>(std::ranges::count_if(myUnitMapLookup.getUnitsAt(city.coord), [&](const Unit* unit) {
+					return infos.units[infos.unitClasses[unit->klass].activeType].isMilitaryHappiness;
+					}));
+				const int targetPop = city.pop + 1;
+				const int happinessAtTargetPop = city.optInspectableCityInfo->happiness - (targetPop - city.pop);
+				const int targetMilitaryPolice = std::clamp(currentMilitaryPolice - happinessAtTargetPop, 0, 100);
+				for ([[maybe_unused]] const int i : range(targetMilitaryPolice))
+					tasks.emplace_back(MilitaryPolice{ &city });
+			}
+
+		}
 	for (const auto& [coord, stack] : enemyUnitMapLookup.byCoord)
 	{
 		const UnitInfo& unitInfo = infos.units[infos.unitClasses[stack[0]->klass].defaultType]; 
@@ -441,13 +587,97 @@ void MilitaryAdvisor::update(
 
 	const UnitAssignmentResult result = assignUnitTasks(game, mapGeom, infos, myUnits, tasks);
 
-	for (const auto& assignment : result.assignments)
-		std::visit(TaskExecutor{ game, *assignment.second.unit }, assignment.second.task);
+	for (const auto& assignment : result.assignments)		std::visit(TaskExecutor{ game, *assignment.second.unit }, *assignment.second.task);
 
-	cityDefenceDemand = static_cast<int>(std::ranges::count_if(result.unassignedTasks, [](const Task& task) {
-		return std::holds_alternative<CityDefenceTask>(task) || std::holds_alternative<FutureSettlerEscortTask>(task);
-		}));
-	antiBarbDemand = static_cast<int>(std::ranges::count_if(result.unassignedTasks, [](const Task& task) {
-		return std::holds_alternative<AntiBarbTask>(task);
-		}));
+	const std::vector<EUnitClass> availableUnitClasses = game.getCityProductionChoices(myCities.front().coord)
+		| std::views::filter([](const ProductionChoice& choice) { return std::holds_alternative<EUnitClass>(choice); })
+		| std::views::transform([](const ProductionChoice& choice) { return std::get<EUnitClass>(choice); })
+		| std::ranges::to<std::vector>();
+
+	const auto getUnitStrength = [&](EUnitClass klass, bool onCityDefence) {
+		const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+		return unitInfo.baseCombatStrength * (100 + onCityDefence * unitInfo.cityDefenceModifier) / 100;
+		};
+
+	const UnitPreference unitPreference{
+		.cheapMilitaryPolice = std::ranges::min(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+			return unitInfo.isMilitaryHappiness ? unitInfo.productionCost : INT_MAX;
+		}),
+		.cityDefender = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+			//const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+			return getUnitStrength(klass, true);
+		}),
+		.attacker = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+			return unitInfo.canAttack ? getUnitStrength(klass, false) : -1;
+		}),
+		.scout = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+			// CvUnit::canAutomate condition
+			if ((unitInfo.baseCombatStrength <= 0 && unitInfo.domain != EDomain::Sea) || unitInfo.domain == EDomain::Air || unitInfo.domain == EDomain::Immobile)
+				return std::pair(-1, -1);
+			else
+				return std::pair(+unitInfo.moveSteps, unitInfo.baseCombatStrength);
+		}),
+	};
+
+	
+
+	const auto isMilitaryUnit = [&](const Unit& unit) {
+		const UnitInfo& info = infos.units[infos.unitClasses[unit.klass].activeType];
+		return info.isMilitaryHappiness;
+		};
+
+	const int numMilitaryUnits = static_cast<int>(std::ranges::count_if(myUnits, isMilitaryUnit));
+
+	const int bestAvailableEffectiveStrength = getUnitStrength(unitPreference.cityDefender, true);
+
+	const auto isObsoleteMilitaryUnit = [&](const Unit& unit) {
+		//const UnitInfo& info = infos.units[infos.unitClasses[unit.klass].activeType];
+		return isMilitaryUnit(unit) && getUnitStrength(unitPreference.cityDefender, true) * 2 < bestAvailableEffectiveStrength;
+		};
+
+	std::vector<const Unit*> spareMilitaryUnits = result.spareUnits;
+	std::ranges::sort(spareMilitaryUnits, std::greater(), [&](const Unit* unit) {
+		return getUnitStrength(unit->klass, true);
+		});
+
+	// Scrap units that are too weak to be useful.
+	while (spareMilitaryUnits.size() > myCities.size() && isObsoleteMilitaryUnit(*spareMilitaryUnits.back()))
+	{
+		const Unit& unit = *spareMilitaryUnits.back();
+		std::clog << "DELETING UNIT: " << cvbot::kUnitTypeNames[infos.unitClasses[unit.klass].activeType] << ", effective strength = " << getUnitStrength(unit.klass, true) << " vs best possible strength " << bestAvailableEffectiveStrength << '\n';
+		game.tryDelete(spareMilitaryUnits.back()->id);
+	}
+
+
+	const int showOfForcePowerRatio = computePowerRatioPercentForShowOfForce(civState.activePlayerI, players);
+	
+
+	const int targetNumMilitaryUnits = numMilitaryUnits * 100 / showOfForcePowerRatio;
+	const int numShowOfForceWanted = std::max(targetNumMilitaryUnits - numMilitaryUnits, 0);
+
+	std::clog << "showOfForcePowerRatio = " << showOfForcePowerRatio << '\n';
+	std::clog << "numMilitaryUnits = " << numMilitaryUnits << '\n';
+	std::clog << "numShowOfForceWanted = " << numShowOfForceWanted << '\n';
+
+	productionDemands.clear();
+	for (const Task* const task : result.unassignedTasks)
+	{
+		const ProductionDemand demand = std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task);
+		productionDemands.push_back(demand);
+	}
+
+	for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
+	{
+		const ProductionDemand demand{
+			.thing = unitPreference.attacker,
+			.target = myCities.front().coord,
+			.turns = 0,
+			.count = 1,
+			.urgency = EProductionUrgency::ShowOfForce,
+		};
+		productionDemands.push_back(demand);
+	}
 }

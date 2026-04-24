@@ -2,6 +2,7 @@
 #include "SettlingAdvisor.h"
 #include "MilitaryAdvisor.h"
 #include "ResearchAdvisor.h"
+#include "DomesticAdvisor.h"
 
 #include <PlayerBotGameBinding/IPlayerBot.h>
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
@@ -18,8 +19,9 @@
 #include <random>
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
-using namespace cvbot;
+using namespace mybot;
 
 // TODO: Detect changes in plot rival culture and prioritise cultural bonuses accordingly.
 // TODO: Use great people. And evaluate whether it's better to join or construct academy. And dump artists in border cities.
@@ -68,11 +70,14 @@ public:
 	mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell> cityDistanceField;
 	mybot::DynamicArray2D<mybot::MultipleSourceDistanceFieldCell> pathLengthField;
 
+	bool hasAnalysises = false;
+
 	mybot::SettlingAdvisor settlingAdvisor;
 	mybot::MilitaryAdvisor militaryAdvisor;
 	mybot::ResearchAdvisor researchAdvisor;
+	mybot::DomesticAdvisor domesticAdvisor;
 	
-	explicit MyBot(const IBotInit& init)
+	explicit MyBot(const cvbot::IBotInit& init)
 		: log(init.getLoggingStream())
 		, setup(init.getGameSetup())
 		, infos(init.buildGlobalInfoData())
@@ -81,18 +86,21 @@ public:
 
 	virtual void run(IGame& game) override
 	{
-		const cvbot::GlobalInfo globalInfo = game.getGlobalInfo();
+		
+
+		const GlobalInfo globalInfo = game.getGlobalInfo();
 
 		const std::vector<Unit> allVisibleUnits = game.getVisibleUnits(iaabb2::sized(ivec2(), setup.mapGeometry.dim));
 
-		const std::vector<std::optional<cvbot::Player>> players = game.getRevealedPlayers();
+		const std::vector<std::optional<Player>> players = game.getRevealedPlayers();
+		const Player& activePlayer = *players[setup.activePlayerI];
 
 		std::array<std::bitset<kMaxPlayers>, kMaxPlayers> warMatrix{};
 		for (size_t i = 0; i < kMaxCivPlayers; ++i)
 		{
 			if (players[i])
 			{
-				for (const cvbot::Relation& relation : players[i]->relations)
+				for (const Relation& relation : players[i]->relations)
 				{
 					if (relation.war)
 						warMatrix[i][relation.target] = true;
@@ -142,6 +150,14 @@ public:
 				if (plot.type == EPlotType::Peak)
 					pathing.flags |= mybot::PathingPlot::Impassible;
 
+				if (!(plot.type == EPlotType::Ocean && (plot.isCoastalWater || plot.owner == setup.activePlayerI)))
+					pathing.flags |= mybot::PathingPlot::NoGoForOurCoastalUnits;
+				if (!(plot.type == EPlotType::Ocean && (plot.isCoastalWater || plot.owner == kBarbarianPlayer)))
+					pathing.flags |= mybot::PathingPlot::NoGoForBarbCoastalUnits;
+
+				if (plot.owner != setup.activePlayerI && plot.owner != kNoPlayer)
+					pathing.flags |= mybot::PathingPlot::OwnedByOtherPlayer;
+
 				//NoGoTerritory       /**/ = 1 << 2,
 				//NoGoForCoastalUnits /**/ = 1 << 5,
 			}
@@ -164,19 +180,21 @@ public:
 		
 		const size_t desiredNumWorkers = myCities.size() * 3 / 2;
 
-		ptrdiff_t workerProductionDemand = desiredNumWorkers
-			- std::ranges::count(myUnits, EUnitClass::Worker, &Unit::klass);
+		ptrdiff_t workerProductionDemand = std::max<ptrdiff_t>(0, desiredNumWorkers
+			- std::ranges::count(myUnits, EUnitClass::Worker, &Unit::klass));
 		//- std::ranges::count(myCities, EUnitClass::Worker, projGetCityOrder());
 
-		settlingAdvisor.update(setup.mapGeometry, map, pathLengthField, cityDistanceField, game);
+		settlingAdvisor.update(setup.mapGeometry, map, pathingMap, myCityCoords, cityDistanceField, game);
 
 		const bool readyToExpand = workerProductionDemand <= 0 && settlingAdvisor.optTarget;
 
 		militaryAdvisor.update(
+			civState,
 			myUnits,
 			enemyUnits,
 			readyToExpand ? settlingAdvisor.optTarget : std::nullopt,
 			myCities,
+			players,
 			setup.mapGeometry,
 			map.view(),
 			pathLengthField,
@@ -186,133 +204,200 @@ public:
 			game
 		);
 		
+		domesticAdvisor.analyse(
+			setup.activePlayerI,
+			myCities,
+			setup.mapGeometry,
+			map.view(),
+			pathingMap.view(),
+			pathLengthField.view(),
+			allVisibleUnits,
+			mybot::MapUnitLookup(myUnits),
+			infos
+		);
 
-		
-
-		const int settlerDemand = !readyToExpand ? 0 : settlingDemand;
+		const int settlerDemand = readyToExpand ? settlingDemand : 0;
 		//const int extraCityDefenderDemand = settlingDemand - settlerDemand;
-
-		ptrdiff_t settlerProductionDemand = settlerDemand
-				- std::ranges::count(myUnits, EUnitClass::Settler, &Unit::klass);
+		
+		ptrdiff_t settlerProductionDemand = std::max<ptrdiff_t>(0, settlerDemand
+				- std::ranges::count(myUnits, EUnitClass::Settler, &Unit::klass));
 			//- std::ranges::count(myCities, EUnitClass::Settler, projGetCityOrder());
+		
+		////const size_t numDefendersInProduction = std::ranges::count_if(myCities, [this](ProductionChoice order) {
+		////	if (const EUnitClass* const klass = std::get_if<EUnitClass>(&order))
+		////		return infos.units[infos.unitClasses[*klass].activeType].cityDefenceModifier > 0 || *klass == EUnitClass::Warrior;
+		////	else
+		////		return false;
+		////	}, projGetCityOrder());
+		//
+		////const size_t numMilitaryUnitsInProduction = std::ranges::count_if(myCities, [this](ProductionChoice order) {
+		////	if (const EUnitClass* const klass = std::get_if<EUnitClass>(&order))
+		////		return infos.units[infos.unitClasses[*klass].activeType].canAttack;
+		////	else
+		////		return false;
+		////	}, projGetCityOrder());
+		//const size_t numMilitaryUnitsInProduction = 0;
+		//
+		//const size_t militaryAdvisorProductionDemand = militaryAdvisor.cityDefenceDemand + militaryAdvisor.antiBarbDemand;
+		//
+		//ptrdiff_t cityDefenceDemand{}; // = militaryAdvisor.cityDefenceDemand;
+		//ptrdiff_t antiBarbDemand{}; // = militaryAdvisor.antiBarbDemand;
+		//
+		//if (numMilitaryUnitsInProduction >= militaryAdvisorProductionDemand)
+		//	;
+		//else if (numMilitaryUnitsInProduction >= militaryAdvisor.cityDefenceDemand)
+		//{
+		//	cityDefenceDemand = 0;
+		//	antiBarbDemand = militaryAdvisorProductionDemand - numMilitaryUnitsInProduction;
+		//}
+		//else
+		//{
+		//	cityDefenceDemand = militaryAdvisor.cityDefenceDemand - numMilitaryUnitsInProduction;
+		//	antiBarbDemand = militaryAdvisor.antiBarbDemand;
+		//}
+		//
+		//
+		//const EUnitClass bestCityDefenderUnitClass = static_cast<EUnitClass>(std::ranges::max_element(infos.unitClasses, std::less(), [&](const UnitClassInfo& klass) {
+		//	return infos.units[klass.activeType].baseCombatStrength * (100 + infos.units[klass.activeType].cityDefenceModifier) / 100;
+		//	}) - infos.unitClasses.begin());
+		//
+		//const EUnitClass bestAttackerUnitClass = static_cast<EUnitClass>(std::ranges::max_element(infos.unitClasses, std::less(), [&](const UnitClassInfo& klass) {
+		//	return infos.units[klass.activeType].baseCombatStrength;
+		//	}) - infos.unitClasses.begin());
 
-		//const size_t numDefendersInProduction = std::ranges::count_if(myCities, [this](ProductionChoice order) {
-		//	if (const EUnitClass* const klass = std::get_if<EUnitClass>(&order))
-		//		return infos.units[infos.unitClasses[*klass].activeType].cityDefenceModifier > 0 || *klass == EUnitClass::Warrior;
-		//	else
-		//		return false;
-		//	}, projGetCityOrder());
+		std::vector<ProductionDemand> productionDemands;
 
-		//const size_t numMilitaryUnitsInProduction = std::ranges::count_if(myCities, [this](ProductionChoice order) {
-		//	if (const EUnitClass* const klass = std::get_if<EUnitClass>(&order))
-		//		return infos.units[infos.unitClasses[*klass].activeType].canAttack;
-		//	else
-		//		return false;
-		//	}, projGetCityOrder());
-		const size_t numMilitaryUnitsInProduction = 0;
+		productionDemands.push_back(ProductionDemand{
+			.thing = EUnitClass::Settler,
+			.target = static_cast<i16vec2>(settlingAdvisor.optTarget.value()),
+			.turns = 10,
+			.count = static_cast<uint16_t>(settlerProductionDemand),
+			.urgency = EProductionUrgency::NonCombat,
+			});
+		
+		std::clog << "settlerProductionDemand = " << settlerProductionDemand << '\n';
+		std::clog << "workerProductionDemand = " << workerProductionDemand << '\n';
 
-		const size_t militaryAdvisorProductionDemand = militaryAdvisor.cityDefenceDemand + militaryAdvisor.antiBarbDemand;
+		productionDemands.push_back(ProductionDemand{
+			.thing = EUnitClass::Worker,
+			.target = myCities.front().coord,
+			.turns = 10,
+			.count = static_cast<uint16_t>(workerProductionDemand),
+			.urgency = EProductionUrgency::NonCombat,
+			});
 
-		ptrdiff_t cityDefenceDemand{}; // = militaryAdvisor.cityDefenceDemand;
-		ptrdiff_t antiBarbDemand{}; // = militaryAdvisor.antiBarbDemand;
+		productionDemands.append_range(militaryAdvisor.productionDemands);
 
-		if (numMilitaryUnitsInProduction >= militaryAdvisorProductionDemand)
-			;
-		else if (numMilitaryUnitsInProduction >= militaryAdvisor.cityDefenceDemand)
-		{
-			cityDefenceDemand = 0;
-			antiBarbDemand = militaryAdvisorProductionDemand - numMilitaryUnitsInProduction;
-		}
-		else
-		{
-			cityDefenceDemand = militaryAdvisor.cityDefenceDemand - numMilitaryUnitsInProduction;
-			antiBarbDemand = militaryAdvisor.antiBarbDemand;
-		}
+		//productionDemands.push_back(ProductionDemand{
+		//	.thing = bestCityDefenderUnitClass,
+		//	.target = static_cast<i16vec2>(settlingAdvisor.optTarget.value()),
+		//	.turns = 10,
+		//	.count = static_cast<uint16_t>(settlerProductionDemand),
+		//	.urgency = EProductionUrgency::UndefendedCity,
+		//	});
+		//
+		//productionDemands.push_back(ProductionDemand{
+		//	.thing = bestCityDefenderUnitClass,
+		//	.target = static_cast<i16vec2>(settlingAdvisor.optTarget.value()),
+		//	.turns = 10,
+		//	.count = static_cast<uint16_t>(settlerProductionDemand),
+		//	.urgency = EProductionUrgency::UndefendedCity,
+		//	});
 
-		enum class EProductionPriority
-		{
-			None,
-			NothingBetterToDo,
-			Buildings,
-			Project,
-			Worker,
-			Settler,
-			AntiBarb,
-			Defender,
-		};
 
-		for (const City& city : myCities)
-		{
-			//if (std::holds_alternative<std::monostate>(city.optInspectableCityInfo->productionChoice))
-			{
-				EProductionPriority bestPriority = EProductionPriority::None;
+		domesticAdvisor.assignProduction(
+			game,
+			infos,
+			setup.mapGeometry,
+			activePlayer,
+			myCities,
+			productionDemands
+		);
 
-				const auto tryProduce = [&](ProductionChoice choice, EProductionPriority priority) {
-					if (priority > bestPriority && game.tryChangeProduction(city.coord, choice))
-					{
-						bestPriority = priority;
-						return true;
-					}
-					else if (priority == bestPriority && choice == city.optInspectableCityInfo->productionChoice)
-					{
-						game.tryChangeProduction(city.coord, choice);
-						return true;
-					}
-					else
-						return false;
-					};
-
-				//if (!map[city.coord].hasMyUnits)
-				if (cityDefenceDemand > 0)
-				{
-					cityDefenceDemand -= tryProduce(EUnitClass::Warrior, EProductionPriority::Defender);
-					cityDefenceDemand -= tryProduce(EUnitClass::Archer, EProductionPriority::Defender);
-					cityDefenceDemand -= tryProduce(EUnitClass::Longbowman, EProductionPriority::Defender);
-				}
-
-				if (antiBarbDemand > 0)
-				{
-					antiBarbDemand -= tryProduce(EUnitClass::Chariot, EProductionPriority::AntiBarb);
-					antiBarbDemand -= tryProduce(EUnitClass::Axeman, EProductionPriority::AntiBarb);
-					antiBarbDemand -= tryProduce(EUnitClass::Archer, EProductionPriority::AntiBarb);
-					antiBarbDemand -= tryProduce(EUnitClass::Warrior, EProductionPriority::AntiBarb);
-				}
-
-				if (settlerProductionDemand > 0 && city.optInspectableCityInfo->happiness <= 0)
-					settlerProductionDemand -= tryProduce(EUnitClass::Settler, EProductionPriority::Settler);
-
-				if (workerProductionDemand > 0)
-					workerProductionDemand -= tryProduce(EUnitClass::Worker, EProductionPriority::Worker);
-
-				for (const auto x : kCityBuildingOrder)
-					if (tryProduce(x, EProductionPriority::Buildings))
-						break;
-
-				if (bestPriority == EProductionPriority::None)
-				{
-					const auto choices = game.getCityProductionChoices(city.coord);
-
-					const auto buildings = choices | std::views::filter([](const ProductionChoice& c) {
-						return std::holds_alternative<EBuildingClass>(c)
-							// Yeah, don't build palaces randomly.
-							&& c != EBuildingClass::Palace;
-						}) | std::ranges::to<std::vector>();
-					const auto units = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EUnitClass>(c); }) | std::ranges::to<std::vector>();
-					// Gotta build the Apollo Program somehow.
-					const auto projects = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EProject>(c); }) | std::ranges::to<std::vector>();
-
-					if (!projects.empty())
-						tryProduce(projects[0], EProductionPriority::Project);
-					if (!buildings.empty())
-						tryProduce(buildings[0], EProductionPriority::Buildings);
-					tryProduce(EProcess::Wealth, EProductionPriority::NothingBetterToDo);
-					tryProduce(EProcess::Research, EProductionPriority::NothingBetterToDo);
-					tryProduce(EProcess::Culture, EProductionPriority::NothingBetterToDo);
-					if (!units.empty())
-						tryProduce(units[std::uniform_int_distribution<size_t>(0, units.size() - 1)(rng)], EProductionPriority::NothingBetterToDo);
-				}
-			}
-		}
+		//enum class EProductionPriority
+		//{
+		//	None,
+		//	NothingBetterToDo,
+		//	Buildings,
+		//	Project,
+		//	Worker,
+		//	Settler,
+		//	AntiBarb,
+		//	Defender,
+		//};
+		//
+		//for (const City& city : myCities)
+		//{
+		//	//if (std::holds_alternative<std::monostate>(city.optInspectableCityInfo->productionChoice))
+		//	{
+		//		EProductionPriority bestPriority = EProductionPriority::None;
+		//
+		//		const auto tryProduce = [&](ProductionChoice choice, EProductionPriority priority) {
+		//			if (priority > bestPriority && game.tryChangeProduction(city.coord, choice))
+		//			{
+		//				bestPriority = priority;
+		//				return true;
+		//			}
+		//			else if (priority == bestPriority && choice == city.optInspectableCityInfo->productionChoice)
+		//			{
+		//				game.tryChangeProduction(city.coord, choice);
+		//				return true;
+		//			}
+		//			else
+		//				return false;
+		//			};
+		//
+		//		//if (!map[city.coord].hasMyUnits)
+		//		if (cityDefenceDemand > 0)
+		//		{
+		//			cityDefenceDemand -= tryProduce(EUnitClass::Warrior, EProductionPriority::Defender);
+		//			cityDefenceDemand -= tryProduce(EUnitClass::Archer, EProductionPriority::Defender);
+		//			cityDefenceDemand -= tryProduce(EUnitClass::Longbowman, EProductionPriority::Defender);
+		//		}
+		//
+		//		if (antiBarbDemand > 0)
+		//		{
+		//			antiBarbDemand -= tryProduce(EUnitClass::Chariot, EProductionPriority::AntiBarb);
+		//			antiBarbDemand -= tryProduce(EUnitClass::Axeman, EProductionPriority::AntiBarb);
+		//			antiBarbDemand -= tryProduce(EUnitClass::Archer, EProductionPriority::AntiBarb);
+		//			antiBarbDemand -= tryProduce(EUnitClass::Warrior, EProductionPriority::AntiBarb);
+		//		}
+		//
+		//		if (settlerProductionDemand > 0 && city.optInspectableCityInfo->happiness <= 0)
+		//			settlerProductionDemand -= tryProduce(EUnitClass::Settler, EProductionPriority::Settler);
+		//
+		//		if (workerProductionDemand > 0)
+		//			workerProductionDemand -= tryProduce(EUnitClass::Worker, EProductionPriority::Worker);
+		//
+		//		for (const auto x : kCityBuildingOrder)
+		//			if (tryProduce(x, EProductionPriority::Buildings))
+		//				break;
+		//
+		//		if (bestPriority == EProductionPriority::None)
+		//		{
+		//			const auto choices = game.getCityProductionChoices(city.coord);
+		//
+		//			const auto buildings = choices | std::views::filter([](const ProductionChoice& c) {
+		//				return std::holds_alternative<EBuildingClass>(c)
+		//					// Yeah, don't build palaces randomly.
+		//					&& c != EBuildingClass::Palace;
+		//				}) | std::ranges::to<std::vector>();
+		//			const auto units = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EUnitClass>(c); }) | std::ranges::to<std::vector>();
+		//			// Gotta build the Apollo Program somehow.
+		//			const auto projects = choices | std::views::filter([](const ProductionChoice& c) { return std::holds_alternative<EProject>(c); }) | std::ranges::to<std::vector>();
+		//
+		//			if (!projects.empty())
+		//				tryProduce(projects[0], EProductionPriority::Project);
+		//			if (!buildings.empty())
+		//				tryProduce(buildings[0], EProductionPriority::Buildings);
+		//			tryProduce(EProcess::Wealth, EProductionPriority::NothingBetterToDo);
+		//			tryProduce(EProcess::Research, EProductionPriority::NothingBetterToDo);
+		//			tryProduce(EProcess::Culture, EProductionPriority::NothingBetterToDo);
+		//			if (!units.empty())
+		//				tryProduce(units[std::uniform_int_distribution<size_t>(0, units.size() - 1)(rng)], EProductionPriority::NothingBetterToDo);
+		//		}
+		//	}
+		//}
 
 		for (const Unit& unit : myUnits)
 		{
@@ -334,15 +419,14 @@ public:
 				}
 				break;
 			default:
-				if (infos.units[infos.unitClasses[unit.klass].activeType].optMissionaryReligion != EReligion::None)
-					game.tryAutomate(std::array{ unit.id }, EAutomation::Religion);
+				game.tryAutomate(std::array{ unit.id }, EAutomation::Religion);
 				break;
 			}
 		}
 
 		//const std::vector<std::optional<Player>> players = game.getRevealedPlayers();
 		
-		const cvbot::ETech techChoice = researchAdvisor.update(
+		const ETech techChoice = researchAdvisor.update(
 			civState,
 			players,
 			map.view(),
@@ -384,6 +468,11 @@ public:
 		std::array<int, ECommerce::Num> commerceRatio{};
 		commerceRatio[ECommerce::Research] = 1;
 		game.adjustSliders(commerceRatio);
+
+		if (game.getSpaceshipChancePercent() >= 100)
+			game.launchSpaceship();
+
+		hasAnalysises = true;
 	}
 
 	virtual std::string buildPlotDebugString(const IGame&, ivec2 coord) const override
@@ -393,8 +482,13 @@ public:
 		if (settlingAdvisor.optTarget)
 			ss << "Will settle at [" << settlingAdvisor.optTarget->x << ", " << settlingAdvisor.optTarget->y << "]\n";
 		ss << "canBarbsEnterTerritory = " << militaryAdvisor.canBarbsEnterTerritory << '\n';
-		if (cityDistanceField.cells.size())
-			ss << "cityDistanceField = " << cityDistanceField[coord].distance << '\n';
+		if (hasAnalysises)
+		{
+			if (cityDistanceField.cells.size())
+				ss << "cityDistanceField = " << cityDistanceField[coord].distance << '\n';
+			ss << "barbsSuppressed = " << domesticAdvisor.areBarbsSuppressed(coord) << '\n';
+			ss << "barbsPotential = " << domesticAdvisor.isPotentialBarbSpawnAt(coord) << '\n';
+		}
 		return std::move(ss).str();
 	}
 
@@ -503,7 +597,7 @@ public:
 	}
 	virtual std::wstring_view getModName() const override
 	{
-		return kModName;
+		return cvbot::kModName;
 	}
 	virtual std::wstring_view getAutoStartPlayerName() const override
 	{

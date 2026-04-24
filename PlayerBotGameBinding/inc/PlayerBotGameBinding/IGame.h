@@ -74,6 +74,8 @@ namespace cvbot
 		virtual std::vector<EBuild> getWorkerBuildChoicesAt(EUnitId unit, ivec2 coord) const = 0;
 		virtual std::vector<EBuild> getPlotBuildChoicesAt(ivec2 coord) const = 0;
 
+		// Returns true iff the plot is active visible and the found button is enabled at this plot.
+		// Note that CvMainInterface uses CvGame::canHandleAction, which, when the plot is not visible, uses the plot the unit is on, which is not suitable for a bot. So we only return true if the plot is visible.
 		virtual bool hasFoundActionAt(ivec2 coord) const = 0;
 
 		
@@ -127,6 +129,9 @@ namespace cvbot
 		virtual bool tryTrade(EPlayer them, const TradeList& fromThem, const TradeList& fromMe) = 0;
 		virtual bool tryDeclareWar(ETeam) = 0;
 		virtual bool tryCancelOpenBorders(EPlayer) = 0;
+
+		virtual int getSpaceshipChancePercent() const = 0;
+		virtual void launchSpaceship() = 0;
 
 		virtual void saveGame(std::string_view name) const = 0;
 

@@ -112,6 +112,9 @@ namespace cvbot
 		virtual bool tryDeclareWar(ETeam) override;
 		virtual bool tryCancelOpenBorders(EPlayer) override;
 
+		virtual int getSpaceshipChancePercent() const override;
+		virtual void launchSpaceship() override;
+
 		virtual void saveGame(std::string_view name) const override;
 	};
 

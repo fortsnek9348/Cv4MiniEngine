@@ -1,5 +1,7 @@
 #include "SettlingAdvisor.h"
 
+#include <PlayerBotGameBinding/EnumDefs.h>
+
 #include <CommonStuff/range.h>
 
 using namespace mybot;
@@ -15,7 +17,11 @@ namespace
 		for (const ivec2 dc : kCityWorkPlotCoords)
 			if (const auto optWorkCoord = geom.resolve(coord + dc))
 				if (stepDistanceAnalysis[*optWorkCoord].distance > 1) // Ignore plots that are right next to an existing city. 
-					value += map[*optWorkCoord].yields[EYield::Food];
+				{
+					value += map[*optWorkCoord].yields[EYield::Food] * 2;
+					value += (map[*optWorkCoord].bonus != EBonus::None) * 5;
+					value += map[*optWorkCoord].isRiverside;
+				}
 			
 		return value;
 	}
@@ -24,7 +30,8 @@ namespace
 void SettlingAdvisor::update(
 	MapGeometry geom, 
 	const DynamicArray2D<Plot>& map,
-	const DynamicArray2D<MultipleSourceDistanceFieldCell>& pathLengthAnalysis,
+	const DynamicArray2D<PathingPlot>& pathingMap,
+	std::span<const ivec2> myCityCoords,
 	const DynamicArray2D<MultipleSourceDistanceFieldCell>& stepDistanceAnalysis,
 	const IGame& game
 )
@@ -34,10 +41,19 @@ void SettlingAdvisor::update(
 
 	const int minStepDistanceToExistingCity = 3;
 	const int maxPathLength = 5;
-	const int minFoundValue = 9;
+	const int minFoundValue = 5;
+
+	const auto settlingPathPengthAnalysis = computeMultipleSourcePathLengthField({ geom, pathingMap.view() },
+		static_cast<PathingPlot::EFlag>(PathingPlot::Unrevealed | PathingPlot::Impassible | PathingPlot::Water | PathingPlot::OwnedByOtherPlayer),
+		maxPathLength,
+		myCityCoords
+	);
 
 	std::optional<ivec2> bestLocation = optTarget;
-	if (bestLocation && !game.hasFoundActionAt(*bestLocation))
+
+	// NOTE: When the previous optTarget becomes non-visible, it is stale and hasFoundActionAt isn't reliable. So only invalidate is the plot is also visible.
+	//       If the plot is not settleable, we'll find out when the settle arrives.
+	if (bestLocation && (map[*bestLocation].isVisible && !game.hasFoundActionAt(*bestLocation) || !settlingPathPengthAnalysis[*bestLocation].isReachable()))
 		bestLocation = std::nullopt;
 	int bestValue = bestLocation ? evalSettleLocation(geom, map, *bestLocation, stepDistanceAnalysis) : minFoundValue;
 
@@ -49,7 +65,7 @@ void SettlingAdvisor::update(
 
 			if (stepDistanceAnalysis[coord].distance < minStepDistanceToExistingCity)
 				continue;
-			if (pathLengthAnalysis[coord].distance > maxPathLength)
+			if (settlingPathPengthAnalysis[coord].distance > maxPathLength)
 				continue;
 			if (map[coord].type != EPlotType::Land && map[coord].type != EPlotType::Hills)
 				continue;

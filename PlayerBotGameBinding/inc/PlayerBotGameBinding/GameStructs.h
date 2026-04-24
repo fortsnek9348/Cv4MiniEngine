@@ -13,8 +13,6 @@
 
 namespace cvbot
 {
-	
-
 	struct MapGeometry
 	{
 		ivec2 dim{};
@@ -93,16 +91,19 @@ namespace cvbot
 		EPlotType type = EPlotType::None; // None if not revealed or out of bounds.
 		EPlayer owner = kNoPlayer;
 		EImprovement improvement{};
+		ERoute route{};
 		EFeature feature{};
 		ETerrain terrain{};
 		EBonus bonus{};
 		bool isVisible : 1 = false;
 		bool hasMyUnits : 1 = false;
-		bool hasOtherVisibleUnits : 1 = false; // You can't see enemy spies, etc.
+		bool hasOtherVisibleUnits : 1 = false; // You can't see rival spies, etc.
 		bool hasEnemyUnit : 1 = false;
 		bool hasRevealedCity : 1 = false;
 		bool isRiverside : 1 = false;
 		bool isLake : 1 = false;
+		bool isCoastalWater : 1 = false; // Including lakes
+		bool isCoastalLand : 1 = false; // Including lakes
 		std::array<int8_t, EYield::Num> yields{}; // Visible yields
 	};
 
@@ -115,7 +116,7 @@ namespace cvbot
 
 	struct City
 	{
-		// TODO: Knowing the coordinate lets you know where you are in the world before Calendar. Before circumnavigation, maybe coordinates should be randomised?
+		// TODO: Knowing the coordinate lets you know where you are in the world before Calendar. Before circumnavigation, maybe coordinates should be capital-relative?
 		i16vec2 coord{};
 		EPlayer owner{};
 		bool isCapital = false;
@@ -123,9 +124,11 @@ namespace cvbot
 		// Coastal enough to build a lighthouse.
 		bool isCoastal = false;
 		bool isOccupation = false;
+		bool isPowered = false;
 		int pop{};
 		int defence{};
 		int defenceIgnoringBuildings{};
+		
 		std::wstring name;
 
 		std::vector<EReligion> religions{};
@@ -133,7 +136,9 @@ namespace cvbot
 		// Info in CityBillboard conditioned on CvCity::canBeSelected.
 		struct InspectableCityInfo
 		{
-			std::bitset<kNumCityWorkPlots> workedPlotsMask{};
+			std::bitset<kNumCityWorkPlots> currentPlotsMask{}; // Plots the city is currently working
+			std::bitset<kNumCityWorkPlots> workablePlotsMask{}; // Plots that are both assigned and workable by the city
+			std::bitset<kNumCityWorkPlots> assignedPlotsMask{}; // Plots that have been assigned to this city
 
 			// Left
 			int tradeRouteCommerce{};
@@ -151,6 +156,7 @@ namespace cvbot
 
 			// Data necessary to calculate empire commerce output given sliders.
 			std::array<int, EYield::Num> yieldRates{};
+			std::array<int, ECommerce::Num> commerceRates{};
 			int baseCommerceRateTimes100WithZeroSlider{};
 			std::array<int, ECommerce::Num> productionToCommerceModifiers{};
 			std::array<int, ECommerce::Num> commerceRateModifiers{};
@@ -159,6 +165,8 @@ namespace cvbot
 			int extraHappiness{};
 			int extraHappyTimer{};
 			std::array<int, kMaxPlayers> plotCultureValues{};
+
+			uint8_t maintainence{}; // clamped, rounded
 			
 			// CvGameTextMgr::setAngerHelp
 

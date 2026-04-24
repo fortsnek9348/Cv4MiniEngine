@@ -44,11 +44,14 @@ namespace cvbot
 		EUnitClass klass{};
 		int productionCost{};
 		int cityDefenceModifier{}; // archer = 50
-		bool canAttack{}; // strength > 0 && !isOnlyDefensive
-		bool bNoDefensiveBonus{};
-		bool isAnimal{};
+		int baseCombatStrength{};
+		bool canAttack : 1 {}; // strength > 0 && !isOnlyDefensive
+		bool bNoDefensiveBonus : 1 {};
+		bool isAnimal : 1 {};
+		bool isMilitaryHappiness : 1 {}; // For hereditary rule
 		EReligion optMissionaryReligion{};
 		EDomain domain{};
+		uint8_t moveSteps{};
 		std::vector<ETech> requiredTechs{};
 	};
 
@@ -114,6 +117,9 @@ namespace cvbot
 	struct SpeedInfo
 	{
 		int researchPercent{};
+		int buildingProdPercent{};
+		int unitProdPercent{};
+		int projectProdPercent{};
 	};
 
 	struct HandicapInfo
@@ -127,6 +133,12 @@ namespace cvbot
 		int firstMilitaryBarbCreationTurn = 0;
 	};
 
+	struct ProjectInfo
+	{
+		int productionCost{};
+		EVictory optVictoryPrereq{};
+	};
+
 	struct GlobalInfoData
 	{
 		std::vector<CivilisationInfo> civs;
@@ -137,6 +149,7 @@ namespace cvbot
 		std::vector<UnitInfo> units;
 		std::vector<CultureLevelInfo> cultureLevels;
 		std::vector<TechInfo> techs;
+		std::vector<ProjectInfo> projects;
 		SpeedInfo speedInfo{}; // Only the current speed is relevent.
 		HandicapInfo handicap{};
 		

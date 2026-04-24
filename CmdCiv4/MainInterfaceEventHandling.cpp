@@ -25,6 +25,13 @@ namespace
 {
 	static int findActionByKeyInput(FInputDevice::InputType c, bool ctrl, bool alt, bool shift)
 	{
+		if (c == FInputDevice::KB_RETURN && ctrl && !alt && !shift)
+		{
+			// Handle as CONTROL_FORCE_ENDTURN instead. Game core DLL will handle a player bot turn.
+			shift = true;
+			ctrl = false;
+		}
+
 		CvGame& game = gGlobals.getGame();
 		int bestPriority = -1;
 		int bestIndex = -1;

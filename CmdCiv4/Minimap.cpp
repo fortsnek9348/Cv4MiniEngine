@@ -334,11 +334,7 @@ bool Minimap::onEvent(const hecktui::ConsoleEvent& e)
 			{
 				const auto& e2 = static_cast<const MouseButtonEvent&>(e);
 				if (e2.button == EMouseButton::Left)
-				{
 					lookAt(e2.coord);
-
-
-				}
 
 				return true;
 			}

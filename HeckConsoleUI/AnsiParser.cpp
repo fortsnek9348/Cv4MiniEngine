@@ -321,7 +321,16 @@ void AnsiParser::inject(wchar_t c, std::vector<EventStorage>& out)
 					CharKeyEvent e{ KeyEvent{ {}, mMouseState } };
 					e.type = EConsoleEventType::CharKeyPressed;
 					e.c = L'a' + (c - 1);
-					out.emplace_back(e);
+					if (e.c == 'j')
+					{
+						// Ctrl+Enter (ambiguous, but needed for player bot end-turn)
+						ActionKeyEvent e2{ KeyEvent{ {}, mMouseState } };
+						e2.type = EConsoleEventType::ActionKeyPressed;
+						e2.key = EActionKey::Enter;;
+						out.emplace_back(e2);
+					}
+					else
+						out.emplace_back(e);
 				}
 				else if (c >= 32)
 				{

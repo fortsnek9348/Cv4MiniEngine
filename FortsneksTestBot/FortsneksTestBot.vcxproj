@@ -68,6 +68,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -76,8 +77,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssignmentProblem.cpp" />
     <ClCompile Include="Bot.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="DomesticAdvisor.cpp" />
     <ClCompile Include="MilitaryAdvisor.cpp" />
     <ClCompile Include="Pathing.cpp" />
     <ClCompile Include="ResearchAdvisor.cpp" />
@@ -92,11 +95,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssignmentProblem.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="DomesticAdvisor.h" />
     <ClInclude Include="DynamicArray2D.h" />
+    <ClInclude Include="MapUnitLookup.h" />
     <ClInclude Include="MilitaryAdvisor.h" />
     <ClInclude Include="Pathing.h" />
+    <ClInclude Include="ProductionDemand.h" />
     <ClInclude Include="ResearchAdvisor.h" />
     <ClInclude Include="SettlingAdvisor.h" />
   </ItemGroup>

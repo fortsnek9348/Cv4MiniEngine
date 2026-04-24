@@ -1562,7 +1562,7 @@ void CvGame::doControl(ControlTypes eControl)
 	case CONTROL_FORCEENDTURN:
 
 #if ENABLE_PLAYER_BOT
-		if (gDLL->altKey())
+		if (gDLL->ctrlKey())
 			GET_PLAYER(getActivePlayer()).setPlayerBotToRunNextTurn();
 #endif
 		CvMessageControl::getInstance().sendTurnComplete();
