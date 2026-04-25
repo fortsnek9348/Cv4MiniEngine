@@ -538,6 +538,7 @@ namespace
 		int totalEmancipationUnhappiness{};
 		int totalSignedHealth{};
 		int totalSignedHappy{};
+		int totalMaintainenceCents{};
 		int researchStartTurn{}; // For when evaluating in the future.
 		int researchRate{};
 		std::bitset<ETech::Num> techsGone{}; // True iff /anybody/ has researched the tech and we know about it.
@@ -611,7 +612,7 @@ namespace
 
 		case Drama: return input.numCitiesOnRivalBorder * 100 / input.numCities;
 		case Engineering: return 100;
-		case CodeOfLaws: return 200;
+		case CodeOfLaws: return 200 + input.totalMaintainenceCents / (3 * input.numCities);
 		case Feudalism: return 100;
 		case Optics: return 50;
 
@@ -647,7 +648,7 @@ namespace
 		case MilitaryScience: return 30;
 		case Steel: return 200;
 
-		case AssemblyLine: return 400;
+		case AssemblyLine: return 450;
 		case Utopia: return input.techsGone[tech] ? 50 : 400;
 		case Physics: return input.techsGone[tech] ? 200 : 500;
 		case Biology: return input.numFarms * 50 / input.numCities;
@@ -760,6 +761,7 @@ ETech mybot::ResearchAdvisor::update(
 	int totalEmancipationUnhappiness{};
 	int totalSignedHappy{};
 	int totalSignedHealth{};
+	int totalMaintainenceCents{};
 	for (const City& city : myCities)
 	{
 		numCoastalCities += city.isCoastal;
@@ -769,6 +771,7 @@ ETech mybot::ResearchAdvisor::update(
 		totalEmancipationUnhappiness += city.optInspectableCityInfo->percentAngerContributions[City::InspectableCityInfo::Emancipation];
 		totalSignedHappy += city.optInspectableCityInfo->happiness;
 		totalSignedHealth += city.optInspectableCityInfo->healthiness;
+		totalMaintainenceCents += city.optInspectableCityInfo->maintainenceCents;
 	}
 
 
@@ -812,6 +815,7 @@ ETech mybot::ResearchAdvisor::update(
 		.totalEmancipationUnhappiness = totalEmancipationUnhappiness,
 		.totalSignedHealth = totalSignedHealth,
 		.totalSignedHappy = totalSignedHappy,
+		.totalMaintainenceCents = totalMaintainenceCents,
 		.researchStartTurn = 0,
 		.researchRate = breakevenSliderResearch, // Note that this is not entirely accurate as research rate depends on tech.
 		.techsGone = techsGone,
@@ -834,7 +838,7 @@ ETech mybot::ResearchAdvisor::update(
 	const std::vector<int> techValues = kTechIndices | std::views::transform([&](ETech t) {
 		int value = calculateTechValue(input, t);
 		if (rivalPowerRatioPercent > 80 && victoryTechsSet[t])
-			value += 2000;
+			value += 500;
 		return value;
 		}) | std::ranges::to<std::vector>();
 

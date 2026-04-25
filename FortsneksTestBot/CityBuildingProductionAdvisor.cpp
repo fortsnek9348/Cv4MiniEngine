@@ -13,7 +13,7 @@ using namespace mybot;
 
 namespace
 {
-	constexpr int kValueForecastTurns = 100; // To be scaled
+	//constexpr int kValueForecastTurns = 100; // To be scaled
 
 	int getBuildingBaseValue(
 		[[maybe_unused]] const GlobalInfoData& infos,
@@ -55,15 +55,15 @@ namespace
 			return 100;
 
 		case EBuildingClass::Forge:
-			return averageProductionRate * 10;
+			return averageProductionRate * 50;
 		case EBuildingClass::Levee:
 			// TODO: Build forge first or not?
 			return 300;
 		case EBuildingClass::Factory:
-			return averageProductionRate * 5 + city.isPowered * 5;
+			return averageProductionRate * 40 + city.isPowered * 50;
 			//return 60 + city.isPowered * 20;
 		case EBuildingClass::IronWorks:
-			return averageProductionRate * 2;
+			return averageProductionRate * 30;
 
 		case EBuildingClass::Theatre:
 		case EBuildingClass::BroadcastTower:
@@ -73,9 +73,11 @@ namespace
 			return cityData.happiness <= 0 ? 300 : 0;
 
 		case EBuildingClass::Market:
+			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.happiness < 0) * 50;
 		case EBuildingClass::Grocer:
+			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.healthiness < 0) * 50;
 		case EBuildingClass::Bank:
-			return 50;
+			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider / 2;
 
 		case EBuildingClass::GreatPalace: // Forbidden
 			// TODO: Should determine the best city to build this in.
@@ -131,7 +133,7 @@ namespace
 			return 100;
 
 		case EBuildingClass::Courthouse:
-			return cityData.maintainence * 100;
+			return cityData.maintainenceCents;
 
 		case EBuildingClass::Jail:
 			return cityData.percentAngerContributions[City::InspectableCityInfo::WarWeariness] * 100;
@@ -206,7 +208,7 @@ namespace
 		case EBuildingClass::Stonehenge:
 			return !std::ranges::contains(leader.traits, ELeaderTrait::Creative) * 50 + 30;
 
-			// World wonders. For now, we don't care where a wonder is built, as long as it's built asap.
+			// World wonders. For now, we don't really know the civ-wide value.
 		case EBuildingClass::Oracle:
 		case EBuildingClass::TajMahal:
 		case EBuildingClass::GreatLibrary:
@@ -216,24 +218,28 @@ namespace
 		case EBuildingClass::Rocknroll:
 		case EBuildingClass::Broadway:
 		case EBuildingClass::EiffelTower:
+		case EBuildingClass::SistineChapel:
+			return 200;
+
 		case EBuildingClass::GreatLighthouse:
 		case EBuildingClass::HangingGarden:
+		case EBuildingClass::NotreDame:
+		case EBuildingClass::StatueOfLiberty:
+		case EBuildingClass::GreatDam:
+		case EBuildingClass::MausoleumOfMaussollos:
+			return 150;
+		
 		case EBuildingClass::AngkorWat:
 		case EBuildingClass::HagiaSophia:
 		case EBuildingClass::ChichenItza:
-		case EBuildingClass::SistineChapel:
-		case EBuildingClass::NotreDame:
 		case EBuildingClass::SpiralMinaret:
 		case EBuildingClass::Kremlin:
-		case EBuildingClass::StatueOfLiberty:
-		case EBuildingClass::GreatDam:
 		case EBuildingClass::Pentagon:
 		case EBuildingClass::UnitedNations:
 		case EBuildingClass::Artemis:
 		case EBuildingClass::Sankore:
 		case EBuildingClass::GreatWall:
 		case EBuildingClass::StatueOfZeus:
-		case EBuildingClass::MausoleumOfMaussollos:
 		case EBuildingClass::CristoRedentor:
 		case EBuildingClass::ShwedagonPaya:
 		case EBuildingClass::ApostolicPalace:
@@ -246,37 +252,37 @@ namespace
 		}
 	}
 
-	int computeBuildingScore(
-		const GlobalInfoData& infos,
-		const LeaderInfo& leader,
-		const City& city,
-		const CityAnalysis& analysis,
-		EBuildingClass choice,
-		// NOTE: Non-world-wonder buildings can have a deadline too if they are a prerequisite.
-		//uint16_t deadlineTurns,
-		int valueForecastTurns,
-		int remainingTurns
-		//int gameSpeedScale,
-	)
-	{
-		//const BuildingClassInfo& klassInfo = infos.buildingClasses[choice];
-		//const BuildingInfo& typeInfo = infos.buildings[klassInfo.activeType];
+	//int computeBuildingScore(
+	//	const GlobalInfoData& infos,
+	//	const LeaderInfo& leader,
+	//	const City& city,
+	//	const CityAnalysis& analysis,
+	//	EBuildingClass choice,
+	//	// NOTE: Non-world-wonder buildings can have a deadline too if they are a prerequisite.
+	//	//uint16_t deadlineTurns,
+	//	int valueForecastTurns,
+	//	int remainingTurns
+	//	//int gameSpeedScale,
+	//)
+	//{
+	//	//const BuildingClassInfo& klassInfo = infos.buildingClasses[choice];
+	//	//const BuildingInfo& typeInfo = infos.buildings[klassInfo.activeType];
+	//
+	//	const int numTurnsBuilt = std::max(1, valueForecastTurns - remainingTurns);
+	//	const int baseValue = getBuildingBaseValue(infos, leader, city, analysis, choice);
+	//
+	//	//if (choice == EBuildingClass::Barracks || choice == EBuildingClass::Stonehenge)
+	//	//{
+	//	//	std::clog << cvbot::kBuildingClassNames[choice] << ": " << urgencyScore << ", " << arrivalTimeScoreModifier << ", " << baseValue
+	//	//		<< ", " << (baseValue * (valueForcastTurns - productionTurns))
+	//	//		<< ", " << (urgencyScore * (baseValue * (valueForcastTurns - productionTurns)) * arrivalTimeScoreModifier)
+	//	//		<< '\n';
+	//	//}
+	//
+	//	return baseValue * numTurnsBuilt;
+	//}
 
-		const int numTurnsBuilt = std::max(1, valueForecastTurns - remainingTurns);
-		const int baseValue = getBuildingBaseValue(infos, leader, city, analysis, choice);
-
-		//if (choice == EBuildingClass::Barracks || choice == EBuildingClass::Stonehenge)
-		//{
-		//	std::clog << cvbot::kBuildingClassNames[choice] << ": " << urgencyScore << ", " << arrivalTimeScoreModifier << ", " << baseValue
-		//		<< ", " << (baseValue * (valueForcastTurns - productionTurns))
-		//		<< ", " << (urgencyScore * (baseValue * (valueForcastTurns - productionTurns)) * arrivalTimeScoreModifier)
-		//		<< '\n';
-		//}
-
-		return baseValue * numTurnsBuilt;
-	}
-
-	int getProjectPerTurnValue(const GlobalInfoData& infos, EProject choice)
+	int getProjectBaseValue(const GlobalInfoData& infos, EProject choice)
 	{
 		const ProjectInfo& info = infos.projects[choice];
 
@@ -297,25 +303,24 @@ namespace
 		return baseScore;
 	}
 
-	int computeProjectScore(
-		const GlobalInfoData& infos,
-		[[maybe_unused]] const City& city,
-		[[maybe_unused]] const CityAnalysis& analysis,
-		EProject choice,
-		//uint16_t deadlineTurns,
-		int valueForecastTurns,
-		int remainingTurns
-		//int gameSpeedScale,
-	)
-	{
-		const int numTurnsBuilt = std::max(1, valueForecastTurns - remainingTurns);
-		const int baseScore = getProjectPerTurnValue(infos, choice);
-		return baseScore * numTurnsBuilt;
-	}
+	//int computeProjectScore(
+	//	const GlobalInfoData& infos,
+	//	[[maybe_unused]] const City& city,
+	//	[[maybe_unused]] const CityAnalysis& analysis,
+	//	EProject choice,
+	//	//uint16_t deadlineTurns,
+	//	int valueForecastTurns,
+	//	int remainingTurns
+	//	//int gameSpeedScale,
+	//)
+	//{
+	//	const int numTurnsBuilt = std::max(1, valueForecastTurns - remainingTurns);
+	//	const int baseScore = getProjectPerTurnValue(infos, choice);
+	//	return baseScore * numTurnsBuilt;
+	//}
 
 	int computeProcessScore(
 		EProcess choice,
-		int valueForecastTurns,
 		unsigned int averageProductionRate
 	)
 	{
@@ -330,7 +335,12 @@ namespace
 
 		const int commerceOutput = averageProductionRate;
 
-		return (commerce == ECommerce::Culture ? 0 : 5 * commerceOutput + (commerce == ECommerce::Gold) * 10) * valueForecastTurns;
+		return commerce == ECommerce::Culture ? 0 : 5 * commerceOutput + (commerce == ECommerce::Gold) * 10;
+	}
+
+	static int stabliseProduction(int baseValue, int progress, int cost)
+	{
+		return baseValue + baseValue * progress / cost;
 	}
 
 	struct ProductionEvaluator
@@ -340,7 +350,7 @@ namespace
 		//const MapGeometry& geom;
 		const City& city;
 		const CityAnalysis& analysis;
-		int valueForecastTurns;
+		//int valueForecastTurns;
 		unsigned int averageProductionRate;
 
 		explicit ProductionEvaluator(
@@ -353,29 +363,31 @@ namespace
 			, leader(leader)
 			, city(city)
 			, analysis(analysis)
-			, valueForecastTurns(kValueForecastTurns* infos.speedInfo.projectProdPercent / 100)
-			, averageProductionRate(city.optInspectableCityInfo->prodBinRate)
+			//, valueForecastTurns(kValueForecastTurns* infos.speedInfo.projectProdPercent / 100)
+			, averageProductionRate(city.optInspectableCityInfo->yieldRates[EYield::Production])
 		{
 		}
 
 		int computeProductionChoiceScore(const CityBuildChoice& choice) const
 		{
-			const int remainingTurns = cdiv(choice.cost - choice.progress, std::max(1u, averageProductionRate));
+			//const int remainingTurns = cdiv(choice.cost - choice.progress, std::max(1u, averageProductionRate));
 			if (const auto* const buildingClass = std::get_if<EBuildingClass>(&choice))
-				return computeBuildingScore(infos, leader, city, analysis, *buildingClass, valueForecastTurns, remainingTurns);
+				return stabliseProduction(getBuildingBaseValue(infos, leader, city, analysis, *buildingClass), choice.progress, choice.cost);
 			if (const auto* const project = std::get_if<EProject>(&choice))
-				return computeProjectScore(infos, city, analysis, *project, valueForecastTurns, remainingTurns);
+				return stabliseProduction(getProjectBaseValue(infos, *project), choice.progress, choice.cost);
 			if (const auto* const process = std::get_if<EProcess>(&choice))
-				return computeProcessScore(*process, valueForecastTurns, averageProductionRate);
+				return computeProcessScore(*process, averageProductionRate);
 			return 0;
 		}
 
-		int computeProductionChoicePerTurnScore(const ProductionChoice& choice) const
+		int computeProductionChoiceBaseScore(const ProductionChoice& choice) const
 		{
 			if (const auto* const buildingClass = std::get_if<EBuildingClass>(&choice))
 				return getBuildingBaseValue(infos, leader, city, analysis, *buildingClass);
 			if (const auto* const project = std::get_if<EProject>(&choice))
-				return getProjectPerTurnValue(infos, *project);
+				return getProjectBaseValue(infos, *project);
+			if (const auto* const process = std::get_if<EProcess>(&choice))
+				return computeProcessScore(*process, averageProductionRate);
 			return 0;
 		}
 	};
@@ -385,10 +397,8 @@ namespace
 	// INT_MAX = can't build
 	// Returns result[taskI] = workerI. -1 = unassigned task.
 	// Tasks are finished in-order.
-	// Wonder value = (valueForecastTurns - finishT) * wonderPerTurnValue
 	// Worker production is overriden if wonder value > workerValueThreshold.
-	std::vector<int> solveWonderBuild(const DynamicArray2D<int>& costs, std::span<const int> workerValueThreshold,
-		std::span<const int> wonderBaseValue, std::span<const int> wonderPerTurnValue, int valueForecastTurns)
+	std::vector<int> solveWonderBuild(const DynamicArray2D<int>& costs, std::span<const int> workerValueThreshold, std::span<const int> wonderValue)
 	{
 		const int numWorkers = costs.dim.x;
 		const int numTasks = costs.dim.y;
@@ -407,8 +417,7 @@ namespace
 				if (cost < INT_MAX)
 				{
 					const int finishT = workerTimes[workerI] + cost;
-					const int wonderValue = wonderBaseValue[taskI] + std::max(0, valueForecastTurns - finishT) * wonderPerTurnValue[taskI];
-					if (wonderValue > workerValueThreshold[workerI] && finishT < bestFinishT)
+					if (wonderValue[taskI] > workerValueThreshold[workerI] && finishT < bestFinishT)
 					{
 						bestWorkerI = workerI;
 						bestFinishT = finishT;
@@ -481,6 +490,13 @@ namespace
 		return {};
 	}
 
+	bool isVictoryProduction(const GlobalInfoData& infos, ProductionChoice choice)
+	{
+		if (const auto* const project = std::get_if<EProject>(&choice))
+			return infos.projects[*project].optVictoryPrereq != EVictory::None;
+		return false;
+	}
+
 	std::vector<BuildChoiceEvaluation> solveWonderBuildForCities(
 		const GlobalInfoData& infos,
 		const LeaderInfo& leader,
@@ -493,9 +509,12 @@ namespace
 	{
 		std::vector<ProductionChoice> orderedWorldWonders;
 
+		const bool isVictoryAtHand = civState.projectCounts[EProject::ApolloProgram] > 0 || worldWonderProductionsCityChoices.contains(EProject::ApolloProgram);
+
 		// Multiply by limits.
 		for (const ProductionChoice& choice : worldWonderProductionsCityChoices | std::views::keys)
-			orderedWorldWonders.insert(orderedWorldWonders.end(), std::min<size_t>(myCities.size(), getProductionDecisionMethod(infos, civState, choice).limit), choice);
+			if (!isVictoryAtHand || isVictoryProduction(infos, choice))
+				orderedWorldWonders.insert(orderedWorldWonders.end(), std::min<size_t>(myCities.size(), getProductionDecisionMethod(infos, civState, choice).limit), choice);
 
 		// For now, just order by cost.
 		std::ranges::stable_sort(orderedWorldWonders, std::less(), [&](const ProductionChoice& choice) {
@@ -503,10 +522,10 @@ namespace
 			});
 
 		// How many turns left.
-		DynamicArray2D<int> worldWonderCosts(ivec2{ static_cast<int>(myCities.size()), static_cast<int>(worldWonderProductionsCityChoices.size()) }, INT_MAX);
+		DynamicArray2D<int> worldWonderCosts(ivec2{ static_cast<int>(myCities.size()), static_cast<int>(orderedWorldWonders.size()) }, INT_MAX);
 		for (const size_t wonderI : range(orderedWorldWonders.size()))
 			for (const CityChoice& cityChoice : worldWonderProductionsCityChoices.at(orderedWorldWonders[wonderI]))
-				worldWonderCosts[{ static_cast<int>(cityChoice.cityI), static_cast<int>(wonderI) }] = cdiv(cityChoice.cost - cityChoice.progress, static_cast<unsigned int>(std::max(1, myCities[cityChoice.cityI].optInspectableCityInfo->prodBinRate)));
+				worldWonderCosts[{ static_cast<int>(cityChoice.cityI), static_cast<int>(wonderI) }] = cdiv(cityChoice.cost - cityChoice.progress, static_cast<unsigned int>(std::max(1, myCities[cityChoice.cityI].optInspectableCityInfo->yieldRates[EYield::Production])));
 
 
 		const std::vector<int> workerValueThreshold(std::from_range, bestBuildChoicesPreWorldSolve | std::views::transform(&BuildChoiceEvaluation::value));
@@ -519,11 +538,11 @@ namespace
 			cityAnalyses[0]
 		);
 
-		const std::vector<int> wonderPerTurnValue(std::from_range, orderedWorldWonders | std::views::transform([&](const ProductionChoice& choice) {
-			return evaluator.computeProductionChoicePerTurnScore(choice);
+		const std::vector<int> wonderValue(std::from_range, orderedWorldWonders | std::views::transform([&](const ProductionChoice& choice) {
+			return evaluator.computeProductionChoiceBaseScore(choice);
 			}));
 
-		const std::vector<int> citySelections = solveWonderBuild(worldWonderCosts, workerValueThreshold, wonderPerTurnValue, evaluator.valueForecastTurns);
+		const std::vector<int> citySelections = solveWonderBuild(worldWonderCosts, workerValueThreshold, wonderValue);
 		// [wonderI] = cityI
 		// Pick minimum.
 
@@ -560,11 +579,12 @@ std::vector<CityBuildingProductionRecomendation> mybot::computeCityBuildingProdu
 )
 {
 	/// First, gather up choices. Clear production first to get a clean result.
+	for (const City& city : myCities)
+		game.tryChangeProduction(city.coord, std::monostate());
 	std::vector<std::vector<CityBuildChoice>> buildChoices;
 	buildChoices.reserve(myCities.size());
 	for (const City& city : myCities)
 	{
-		game.tryChangeProduction(city.coord, std::monostate());
 		auto choices = game.getCityProductionChoices(city.coord);
 		// Filter out units.
 		std::erase_if(choices, [](const CityBuildChoice& choice) {
@@ -660,7 +680,7 @@ std::vector<CityBuildingProductionRecomendation> mybot::computeCityBuildingProdu
 	return { std::from_range, bestBuildChoices  | std::views::transform([&](const BuildChoiceEvaluation& choiceEval) {
 		return CityBuildingProductionRecomendation{
 			.choice = choiceEval.choice,
-			.finalAssignmentValue = 100,
+			.finalAssignmentValue = choiceEval.value * 2,
 		};
 	}) };
 }

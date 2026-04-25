@@ -691,16 +691,16 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 	for (const Task* const task : result.unassignedTasks)
 		analysis.unitProductionDemands.push_back(std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task));
 
-	for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
-	{
-		const UnitProductionDemand demand{
-			.klass = unitPreference.attacker,
-			.target = myCities.front().coord,
-			.turns = 0,
-			.urgency = EUnitProductionUrgency::ShowOfForce,
-		};
-		analysis.unitProductionDemands.push_back(demand);
-	}
+	//for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
+	//{
+	//	const UnitProductionDemand demand{
+	//		.klass = unitPreference.attacker,
+	//		.target = myCities.front().coord,
+	//		.turns = 0,
+	//		.urgency = EUnitProductionUrgency::ShowOfForce,
+	//	};
+	//	analysis.unitProductionDemands.push_back(demand);
+	//}
 
 	return analysis;
 }

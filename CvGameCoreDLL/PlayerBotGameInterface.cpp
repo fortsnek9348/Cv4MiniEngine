@@ -728,7 +728,7 @@ static City convertCity(const CvCity& city, bool allKnowing)
 				info.buildings.push_back(static_cast<EBuildingType>(i));
 		info.culture = city.getCulture(city.getOwnerINLINE());
 
-		info.maintainence = clampCast<uint8_t>(city.getMaintenance()),
+		info.maintainenceCents = clampCast<uint16_t>(city.getMaintenanceTimes100()),
 
 		// Middle
 		info.foodBinLevel = city.getFood();

@@ -166,7 +166,7 @@ namespace cvbot
 			int extraHappyTimer{};
 			std::array<int, kMaxPlayers> plotCultureValues{};
 
-			uint8_t maintainence{}; // clamped, rounded
+			uint16_t maintainenceCents{}; // clamped, rounded
 			
 			// CvGameTextMgr::setAngerHelp
 
