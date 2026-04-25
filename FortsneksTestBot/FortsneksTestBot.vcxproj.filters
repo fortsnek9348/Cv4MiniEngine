@@ -33,10 +33,16 @@
     <ClCompile Include="ResearchAdvisor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DomesticAdvisor.cpp">
+    <ClCompile Include="AssignmentProblem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AssignmentProblem.cpp">
+    <ClCompile Include="DomesticAnalysis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CityBuildingProductionAdvisor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CityProduction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,9 +62,6 @@
     <ClInclude Include="DynamicArray2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DomesticAdvisor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -68,7 +71,16 @@
     <ClInclude Include="AssignmentProblem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProductionDemand.h">
+    <ClInclude Include="UnitProductionDemand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DomesticAnalysis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CityBuildingProductionAdvisor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CityProduction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

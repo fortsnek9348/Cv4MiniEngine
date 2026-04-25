@@ -21,6 +21,8 @@ namespace
 	constexpr int kOrderEnumerationDepth = 4;
 	constexpr int kEvaluationAdditionalTurnsAtNormalSpeed = 25; // Will be scaled.
 
+	constexpr auto kTechIndices = heck::range<ETech>(ETech::Num);
+
 	struct ResearchTreePreprocessed
 	{
 		const GlobalInfoData* globalInfoData{};
@@ -41,7 +43,85 @@ namespace
 		}
 	};
 
-	constexpr auto kTechIndices = heck::range<ETech>(ETech::Num);
+	// CvPlayer::pushResearch
+	std::bitset<ETech::Num> getResearchListForTech(const GlobalInfoData& infos, const CivState& civState, ETech tech)
+	{
+		struct Visitor
+		{
+			const GlobalInfoData& infos;
+			const CivState& civState;
+			std::bitset<ETech::Num> bits;
+
+			explicit Visitor(const GlobalInfoData& infos, const CivState& civState) : infos(infos), civState(civState)
+			{
+				for (const int i : kTechIndices)
+					bits[i] = civState.techs[i].isResearched;
+			}
+
+			//int accCost(ETech tech, std::bitset<ETech::Num>& accBits) const
+			//{
+			//	if (accBits[tech])
+			//		return 0;
+			//
+			//	int result = 0;
+			//	for (const auto prereq : infos.techs[tech].prereqAndTechs)
+			//		result += accCost(prereq, accBits);
+			//
+			//	ETech bestChoice = ETech::None;
+			//	int bestCost = 0;
+			//	for (const auto prereq : infos.techs[tech].prereqOrTechs)
+			//	{
+			//		std::bitset<ETech::Num> prereqAccBits = accBits;
+			//		const int branchCost = accCost(prereq, prereqAccBits);
+			//		if (branchCost < bestCost || bestChoice == ETech::None)
+			//		{
+			//			bestChoice = prereq;
+			//			bestCost = branchCost;
+			//		}
+			//	}
+			//	if (bestChoice != ETech::None)
+			//		result += accCost(bestChoice, accBits);
+			//	result += civState.techs[tech].cost - civState.techs[tech].progress;
+			//	return result;
+			//}
+
+			int operator()(ETech tech)
+			{
+				if (bits[tech])
+					return 0;
+
+				int cost = 0;
+				for (const auto prereq : infos.techs[tech].prereqAndTechs)
+					cost += (*this)(prereq);
+
+				ETech bestChoice = ETech::None;
+				int bestCost = INT_MAX;
+				for (const auto prereq : infos.techs[tech].prereqOrTechs)
+				{
+					const std::bitset<ETech::Num> saved = bits;
+					const int branchCost = (*this)(prereq);
+					if (branchCost < bestCost)
+					{
+						bestChoice = prereq;
+						bestCost = branchCost;
+					}
+					bits = saved;
+				}
+				if (bestChoice != ETech::None)
+					cost += (*this)(bestChoice);
+				cost += civState.techs[tech].cost - civState.techs[tech].progress;
+				bits[tech] = true;
+				return cost;
+			}
+		};
+
+		Visitor visitor(infos, civState);
+		visitor(tech);
+		return visitor.bits;
+	}
+
+
+	
 
 	struct ResearchChoicesState
 	{
@@ -580,7 +660,7 @@ namespace
 		case Medicine: return (-input.totalSignedHealth * 200 / input.numCities) + 200;
 		case Combustion: return input.bonusCounts[Oil] ? 400 : 50;
 
-		case Rocketry: return 1000; // Let's go for space victory.
+		case Rocketry: return 10'000; // Let's go for space victory.
 		case Industrialism: return 300;
 		case Fission: return 50;
 		case Radio: return (!input.wondersGone[EBuildingClass::EiffelTower] * 2 + !input.wondersGone[EBuildingClass::Rocknroll] * 2 + !input.wondersGone[EBuildingClass::CristoRedentor]) * 200;
@@ -620,6 +700,7 @@ ETech mybot::ResearchAdvisor::update(
 	Span2D<const Plot> plots,
 	std::span<const City> myCities,
 	int barbThreatTurn,
+	int rivalPowerRatioPercent,
 	const GlobalInfo& globalInfo,
 	const GlobalInfoData& infos,
 	[[maybe_unused]] const IGame& game
@@ -707,6 +788,8 @@ ETech mybot::ResearchAdvisor::update(
 	for (const size_t i : heck::range(projectsGone.size()))
 		projectsGone[i] = globalInfo.projects[i].numBuiltTotal > 0;
 
+	
+
 	EvalInput input{
 		.civState = civState,
 		.leaderhead = revealedPlayers[activePlayerI]->leader,
@@ -737,7 +820,26 @@ ETech mybot::ResearchAdvisor::update(
 		.infos = infos,
 	};
 
-	const std::vector<int> techValues = kTechIndices | std::views::transform(std::bind_front(calculateTechValue, std::ref(input))) | std::ranges::to<std::vector>();
+	const auto victoryTechsSet = civState.techs[ETech::Rocketry].isResearched ?
+		getResearchListForTech(infos, civState, ETech::Satellites) |
+		getResearchListForTech(infos, civState, ETech::Composites) |
+		getResearchListForTech(infos, civState, ETech::Superconductors) |
+		getResearchListForTech(infos, civState, ETech::FiberOptics) |
+		getResearchListForTech(infos, civState, ETech::Genetics) |
+		getResearchListForTech(infos, civState, ETech::Fusion)
+		:
+		getResearchListForTech(infos, civState, ETech::Rocketry)
+		;
+
+	const std::vector<int> techValues = kTechIndices | std::views::transform([&](ETech t) {
+		int value = calculateTechValue(input, t);
+		if (rivalPowerRatioPercent > 80 && victoryTechsSet[t])
+			value += 2000;
+		return value;
+		}) | std::ranges::to<std::vector>();
+
+
+	
 
 	// Perform research rate estimations.
 	const ResearchRateEstimation estimation(infos, breakevenSliderResearch, currentResearchSliderOutput, initialTechStates, techHasCountIntervals, numAliveTeams);

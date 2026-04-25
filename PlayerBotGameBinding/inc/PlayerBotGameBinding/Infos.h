@@ -18,11 +18,20 @@ namespace cvbot
 		int creativeCulture{};
 	};
 
+	struct ProjectInfo
+	{
+		int productionCost{};
+		EVictory optVictoryPrereq{};
+		int maxGlobalInstances{}; // the internet
+		int maxTeamInstances{}; // spaceship parts
+	};
+
 	struct BuildingClassInfo
 	{
 		EBuildingType activeType{};
 		EBuildingType defaultType{};
 		bool isWorldWonder{};
+		bool isNationalWonder{};
 	};
 
 	struct BuildingInfo
@@ -133,11 +142,7 @@ namespace cvbot
 		int firstMilitaryBarbCreationTurn = 0;
 	};
 
-	struct ProjectInfo
-	{
-		int productionCost{};
-		EVictory optVictoryPrereq{};
-	};
+	
 
 	struct GlobalInfoData
 	{

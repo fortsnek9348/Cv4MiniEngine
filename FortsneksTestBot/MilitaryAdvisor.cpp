@@ -116,14 +116,13 @@ namespace
 				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.cityDefender,
+			return UnitProductionDemand{
+				.klass = unitPreference.cityDefender,
 				.target = city->coord,
 				.turns = 0,
-				.count = 1,
-				.urgency = EProductionUrgency::UndefendedCity,
+				.urgency = EUnitProductionUrgency::UndefendedCity,
 			};
 		}
 
@@ -156,14 +155,13 @@ namespace
 			return CityDefenceTask{ city }.execute(game, unit);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.cheapMilitaryPolice,
+			return UnitProductionDemand{
+				.klass = unitPreference.cheapMilitaryPolice,
 				.target = city->coord,
 				.turns = 0,
-				.count = 1,
-				.urgency = EProductionUrgency::UndefendedCity,
+				.urgency = EUnitProductionUrgency::UndefendedCity,
 			};
 		}
 
@@ -200,14 +198,13 @@ namespace
 				game.startMission(std::array{ unit.id }, EMission::Fortify, -1, -1);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.cityDefender,
+			return UnitProductionDemand{
+				.klass = unitPreference.cityDefender,
 				.target = settler->coord,
 				.turns = 0,
-				.count = 1,
-				.urgency = EProductionUrgency::Escort,
+				.urgency = EUnitProductionUrgency::Escort,
 			};
 		}
 
@@ -241,14 +238,13 @@ namespace
 				game.startMission(std::array{ unit.id }, EMission::Fortify, target.x, target.y);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.cityDefender,
+			return UnitProductionDemand{
+				.klass = unitPreference.cityDefender,
 				.target = static_cast<i16vec2>(target),
 				.turns = 5,
-				.count = 1,
-				.urgency = EProductionUrgency::Escort,
+				.urgency = EUnitProductionUrgency::Escort,
 			};
 		}
 
@@ -282,14 +278,14 @@ namespace
 			game.startMission(std::array{ unit.id }, EMission::MoveTo, barbs[0]->coord.x, barbs[0]->coord.y);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.attacker,
+			return UnitProductionDemand{
+				.klass = unitPreference.attacker,
 				.target = barbs[0]->coord,
 				.turns = 0,
-				.count = static_cast<uint16_t>(barbs.size()),
-				.urgency = EProductionUrgency::TerritoryDefence,
+				.count = static_cast<int>(barbs.size()),
+				.urgency = EUnitProductionUrgency::TerritoryDefence,
 			};
 		}
 
@@ -324,14 +320,13 @@ namespace
 			game.tryAutomate(std::array{ unit.id }, EAutomation::Explore);
 		}
 
-		ProductionDemand makeDemand(const UnitPreference& unitPreference) const
+		UnitProductionDemand makeDemand(const UnitPreference& unitPreference) const
 		{
-			return ProductionDemand{
-				.thing = unitPreference.scout,
+			return UnitProductionDemand{
+				.klass = unitPreference.scout,
 				.target = taget,
 				.turns = 0,
-				.count = 1,
-				.urgency = EProductionUrgency::NonCombat,
+				.urgency = EUnitProductionUrgency::NonCombat,
 			};
 		}
 
@@ -491,7 +486,43 @@ namespace
 			//return heck::rdiv(myPower * numPowerKnown * 100, static_cast<unsigned int>(std::max(1, sumPower)));
 	}
 }
-void MilitaryAdvisor::update(
+
+void MilitaryKnowledge::update(
+	const GlobalInfoData& infos,
+	EPlayer activePlayerI,
+	Span2D<const Plot> plots,
+	std::span<const Unit> allUnits,
+	std::span<const Unit> enemyUnits
+)
+{
+	barbUnitsSeenBits.resize(EUnitType::Num);
+	rivalUnitsSeenBits.resize(EUnitType::Num);
+	for (const Unit& unit : allUnits)
+	{
+		if (unit.owner != activePlayerI)
+		{
+			auto& bits = unit.owner == kBarbarianPlayer ? barbUnitsSeenBits : rivalUnitsSeenBits;
+			const EUnitType type = infos.unitClasses[unit.klass].defaultType; // TODO: Use actual type
+			if (!bits[type])
+			{
+				bits[type] = true;
+				(unit.owner == kBarbarianPlayer ? barbUnitsSeen : rivalUnitsSeen).push_back(type);
+			}
+		}
+	}
+
+	for (const Unit& unit : enemyUnits)
+	{
+		const UnitInfo& unitInfo = infos.units[infos.unitClasses[unit.klass].defaultType]; // We'll assume it's the right info
+
+		if (unitInfo.isAnimal || unitInfo.domain != EDomain::Land)
+			continue;
+
+		barbsHaveEnteredTerritory |= unit.owner == kBarbarianPlayer && plots[unit.coord].owner != kNoPlayer && plots[unit.coord].owner != kBarbarianPlayer;
+	}
+}
+
+MilitaryAnalysis mybot::doMilitaryAnalysis(
 	const CivState& civState,
 	std::span<const Unit> myUnits,
 	std::span<const Unit> enemyUnits,
@@ -505,17 +536,11 @@ void MilitaryAdvisor::update(
 	const GlobalInfoData& infos,
 	//const GameSetup& setup,
 	const GlobalInfo& globalInfo,
-	IGame& game
+	IGame& game,
+	const MilitaryKnowledge& militaryKnowledge
 )
 {
-	for (const Unit& unit : enemyUnits)
-	{
-		const UnitInfo& unitInfo = infos.units[infos.unitClasses[unit.klass].defaultType]; // We'll assume it's the right info
-		if (unitInfo.isAnimal || unitInfo.domain != EDomain::Land)
-			continue;
-
-		barbsHaveEnteredTerritory |= unit.owner == kBarbarianPlayer && plots[unit.coord].owner != kNoPlayer && plots[unit.coord].owner != kBarbarianPlayer;
-	}
+	MilitaryAnalysis analysis;
 
 	const auto isItTime = [&] {
 		// Guess whether barbs can enter territory yet.
@@ -541,15 +566,15 @@ void MilitaryAdvisor::update(
 		return guessTotalCities > globalInfo.numAliveCivPlayers * 2;
 		};
 	
-	canBarbsEnterTerritory = canBarbsEnterTerritory || barbsHaveEnteredTerritory || isItTime();
+	analysis.canBarbsEnterTerritory = militaryKnowledge.barbsHaveEnteredTerritory || isItTime();
 
-	barbsThreatTurn = canBarbsEnterTerritory ? 0 : infos.handicap.firstMilitaryBarbCreationTurn;
+	analysis.barbsThreatTurn = analysis.canBarbsEnterTerritory ? 0 : infos.handicap.firstMilitaryBarbCreationTurn;
 
 	const MapUnitLookup enemyUnitMapLookup(enemyUnits);
 	const MapUnitLookup myUnitMapLookup(myUnits);
 	
 	std::vector<Task> tasks;
-	if (canBarbsEnterTerritory)
+	if (analysis.canBarbsEnterTerritory)
 		for (const City& city : myCities)
 		{
 			tasks.emplace_back(CityDefenceTask{ &city });
@@ -572,7 +597,7 @@ void MilitaryAdvisor::update(
 		if (unitInfo.isAnimal || unitInfo.domain != EDomain::Land)
 			continue;
 
-		if (stack[0]->owner == kBarbarianPlayer && !canBarbsEnterTerritory)
+		if (stack[0]->owner == kBarbarianPlayer && !analysis.canBarbsEnterTerritory)
 			continue;
 
 		tasks.emplace_back(AntiBarbTask{ stack });
@@ -587,7 +612,8 @@ void MilitaryAdvisor::update(
 
 	const UnitAssignmentResult result = assignUnitTasks(game, mapGeom, infos, myUnits, tasks);
 
-	for (const auto& assignment : result.assignments)		std::visit(TaskExecutor{ game, *assignment.second.unit }, *assignment.second.task);
+	for (const auto& assignment : result.assignments)
+		std::visit(TaskExecutor{ game, *assignment.second.unit }, *assignment.second.task);
 
 	const std::vector<EUnitClass> availableUnitClasses = game.getCityProductionChoices(myCities.front().coord)
 		| std::views::filter([](const ProductionChoice& choice) { return std::holds_alternative<EUnitClass>(choice); })
@@ -653,7 +679,7 @@ void MilitaryAdvisor::update(
 
 
 	const int showOfForcePowerRatio = computePowerRatioPercentForShowOfForce(civState.activePlayerI, players);
-	
+	analysis.rivalPowerRatioPercent = showOfForcePowerRatio;
 
 	const int targetNumMilitaryUnits = numMilitaryUnits * 100 / showOfForcePowerRatio;
 	const int numShowOfForceWanted = std::max(targetNumMilitaryUnits - numMilitaryUnits, 0);
@@ -662,22 +688,19 @@ void MilitaryAdvisor::update(
 	std::clog << "numMilitaryUnits = " << numMilitaryUnits << '\n';
 	std::clog << "numShowOfForceWanted = " << numShowOfForceWanted << '\n';
 
-	productionDemands.clear();
 	for (const Task* const task : result.unassignedTasks)
-	{
-		const ProductionDemand demand = std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task);
-		productionDemands.push_back(demand);
-	}
+		analysis.unitProductionDemands.push_back(std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task));
 
 	for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
 	{
-		const ProductionDemand demand{
-			.thing = unitPreference.attacker,
+		const UnitProductionDemand demand{
+			.klass = unitPreference.attacker,
 			.target = myCities.front().coord,
 			.turns = 0,
-			.count = 1,
-			.urgency = EProductionUrgency::ShowOfForce,
+			.urgency = EUnitProductionUrgency::ShowOfForce,
 		};
-		productionDemands.push_back(demand);
+		analysis.unitProductionDemands.push_back(demand);
 	}
+
+	return analysis;
 }

@@ -79,8 +79,10 @@
   <ItemGroup>
     <ClCompile Include="AssignmentProblem.cpp" />
     <ClCompile Include="Bot.cpp" />
+    <ClCompile Include="CityBuildingProductionAdvisor.cpp" />
+    <ClCompile Include="CityProduction.cpp" />
+    <ClCompile Include="DomesticAnalysis.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="DomesticAdvisor.cpp" />
     <ClCompile Include="MilitaryAdvisor.cpp" />
     <ClCompile Include="Pathing.cpp" />
     <ClCompile Include="ResearchAdvisor.cpp" />
@@ -96,13 +98,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssignmentProblem.h" />
+    <ClInclude Include="CityBuildingProductionAdvisor.h" />
+    <ClInclude Include="CityProduction.h" />
+    <ClInclude Include="DomesticAnalysis.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="DomesticAdvisor.h" />
     <ClInclude Include="DynamicArray2D.h" />
     <ClInclude Include="MapUnitLookup.h" />
     <ClInclude Include="MilitaryAdvisor.h" />
     <ClInclude Include="Pathing.h" />
-    <ClInclude Include="ProductionDemand.h" />
+    <ClInclude Include="UnitProductionDemand.h" />
     <ClInclude Include="ResearchAdvisor.h" />
     <ClInclude Include="SettlingAdvisor.h" />
   </ItemGroup>

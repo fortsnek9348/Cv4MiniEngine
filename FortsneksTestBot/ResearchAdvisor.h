@@ -51,6 +51,7 @@ namespace mybot
 			Span2D<const Plot> plots,
 			std::span<const City> myCities,
 			int barbThreatTurn,
+			int rivalPowerRatioPercent,
 			const GlobalInfo& globalInfo,
 			const GlobalInfoData& infos,
 			const IGame& game

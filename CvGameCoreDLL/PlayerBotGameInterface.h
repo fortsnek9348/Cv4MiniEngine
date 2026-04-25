@@ -105,6 +105,7 @@ namespace cvbot
 		// Will clamp to allowed values. Extra free specialists are assigned to citizen.
 		virtual void setSpecialistCounts(i16vec2, std::span<const int> counts) override;
 		virtual std::vector<CityBuildChoice> getCityProductionChoices(i16vec2) const override;
+		virtual int getCityProductionProgress(i16vec2 coord, ProductionChoice choice) const override;
 
 		// Diplo
 		virtual bool tryNegotiate(EPlayer them, TradeList& fromThem, TradeList& fromMe) override;

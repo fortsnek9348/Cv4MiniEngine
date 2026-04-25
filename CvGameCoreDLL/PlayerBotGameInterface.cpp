@@ -1113,6 +1113,10 @@ CivState Game::getCivState() const
 		if (gGlobals.getTechInfo(tech).getFirstFreeTechs() > 0)
 			state.techs[tech].hasMissedOutOnFirstToResearch |= game.countKnownTechNumTeams(tech) != 0;
 	}
+	
+	state.projectCounts.resize(gGlobals.getNumProjectInfos());
+	for (const ProjectTypes i : heck::range<ProjectTypes>(gGlobals.getNumProjectInfos()))
+		state.projectCounts[i] = activeTeam.getProjectCount(i);
 
 	state.techStatesReferenceSliderOutput = activePlayer.getCommerceRate(COMMERCE_RESEARCH);
 	state.totalTradeGoldPerTurn = activePlayer.getGoldPerTurn();
@@ -1179,7 +1183,7 @@ std::vector<EBuild> Game::getPlotBuildChoicesAt(ivec2 coord) const
 bool Game::hasFoundActionAt(ivec2 coord) const
 {
 	const CvPlot& plot = *gGlobals.getMap().plotINLINE(coord.x, coord.y);
-	return plot.isActiveVisible(false) && GET_PLAYER(gGlobals.getGame().getActivePlayer()).canFound(coord.x, coord.y, true);
+	return plot.isActiveVisible(false) && GET_PLAYER(gGlobals.getGame().getActivePlayer()).canFound(coord.x, coord.y, false);
 }
 
 static CvSelectionGroup* regroup(CommandUnitGroup group)
@@ -1189,39 +1193,47 @@ static CvSelectionGroup* regroup(CommandUnitGroup group)
 
 	CvPlayer& player = GET_PLAYER(gGlobals.getGame().getActivePlayer());
 
+	// Cound valid units.
+
+	auto unitsView = group
+		| std::views::transform([&](EUnitId id) { return player.getUnit(static_cast<int>(id)); })
+		| std::views::filter([](const CvUnit* unit) { return !!unit; });
+
+	const size_t numValidUnits = std::ranges::count_if(unitsView, std::identity());
+
+	if (numValidUnits <= 0)
+		return nullptr;
+
 	// Check if group is mirrored.
-	CvUnit& firstUnit = *player.getUnit(static_cast<int>(group[0]));
+	CvUnit& firstUnit = **unitsView.begin();
+	
+	if (CvSelectionGroup* const firstGroup = firstUnit.getGroup(); static_cast<size_t>(firstGroup->getNumUnits()) == numValidUnits)
+		if (std::ranges::all_of(unitsView, [&player, firstGroup](const CvUnit* unit) { return unit->getGroup() == firstGroup; }))
+			return firstGroup;
+
+
+	// Need to split and make a new group.
+	// If there's any unit in its own group, then join that group.
+	const auto it = std::ranges::find_if(unitsView, [&player](const CvUnit* unit) {
+		return unit->getGroup()->getNumUnits() == 1;
+		});
+
 	CvSelectionGroup* missionGroup{};
-	if (CvSelectionGroup* const firstGroup = firstUnit.getGroup(); static_cast<size_t>(firstGroup->getNumUnits()) == group.size())
+
+	if (it != unitsView.end())
+		missionGroup = (*it)->getGroup();
+	else
 	{
-		if (std::ranges::all_of(group, [&player, firstGroup](EUnitId id) {
-			return player.getUnit(static_cast<int>(id))->getGroup() == firstGroup;
-			}))
-			missionGroup = firstGroup;
+		// One of the groups may be a subset of the mission group, but let's just create a new group.
+		firstUnit.joinGroup(nullptr, true);
+		missionGroup = firstUnit.getGroup();
 	}
 
-	if (!missionGroup)
+	for (CvUnit* const unit : unitsView)
 	{
-		// Need to split and make a new group.
-		// If there's any unit in its own group, then join that group.
-		const auto it = std::ranges::find_if(group, [&player](EUnitId id) {
-			return player.getUnit(static_cast<int>(id))->getGroup()->getNumUnits() == 1;
-			});
-		if (it != group.end())
-			missionGroup = player.getUnit(static_cast<int>(*it))->getGroup();
-		else
-		{
-			// One of the groups may be a subset of the mission group, but let's just create a new group.
-			firstUnit.joinGroup(nullptr, true);
-			missionGroup = firstUnit.getGroup();
-		}
-		for (const EUnitId id : group)
-		{
-			CvUnit& unit = *player.getUnit(static_cast<int>(id));
-			unit.joinGroup(missionGroup, true); // Remove from UI selection too.
-			if (unit.getGroup() != missionGroup)
-				return nullptr; // Could not group units.
-		}
+		unit->joinGroup(missionGroup, true); // Remove from UI selection too.
+		if (unit->getGroup() != missionGroup)
+			return nullptr; // Could not group units.
 	}
 
 	return missionGroup;
@@ -1707,6 +1719,44 @@ std::vector<CityBuildChoice> Game::getCityProductionChoices(i16vec2 coord) const
 			out.push_back({ ProductionChoice(static_cast<EProcess>(i)), 0 });
 
 	return out;
+}
+
+int Game::getCityProductionProgress(i16vec2 coord, ProductionChoice choice) const
+{
+	struct Visitor
+	{
+		const CvCivilizationInfo& civ;
+		CvCity& city;
+
+		int operator()(std::monostate) const
+		{
+			return 0;
+		}
+
+		int operator()(EBuildingClass klass) const
+		{
+			return city.getBuildingProduction(static_cast<BuildingTypes>(civ.getCivilizationBuildings(klass)));
+		}
+
+		int operator()(EUnitClass klass) const
+		{
+			return city.getUnitProduction(static_cast<UnitTypes>(civ.getCivilizationUnits(klass)));
+		}
+
+		int operator()(EProcess) const
+		{
+			return 0;
+		}
+
+		int operator()(EProject type) const
+		{
+			return city.getProjectProduction(static_cast<ProjectTypes>(type));
+		}
+	};
+
+	CvCity& city = accessActivePlayerCity(coord);
+	Visitor visitor{ gGlobals.getCivilizationInfo(GET_PLAYER(city.getOwnerINLINE()).getCivilizationType()), city };
+	return std::visit(visitor, choice);
 }
 
 

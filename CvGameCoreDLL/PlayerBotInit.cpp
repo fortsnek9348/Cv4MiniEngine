@@ -104,6 +104,7 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 			.activeType = static_cast<EBuildingType>(activeCiv.getCivilizationBuildings(i)),
 			.defaultType = static_cast<EBuildingType>(gGlobals.getBuildingClassInfo(i).getDefaultBuildingIndex()),
 			.isWorldWonder = ::isWorldWonderClass(i),
+			.isNationalWonder = ::isNationalWonderClass(i),
 		};
 	}
 	
@@ -267,6 +268,8 @@ GlobalInfoData BotInit::buildGlobalInfoData() const
 		infos.projects[i] = {
 			.productionCost = activePlayer.getProductionNeeded(i),
 			.optVictoryPrereq = static_cast<EVictory>(info.getVictoryPrereq()),
+			.maxGlobalInstances = info.getMaxGlobalInstances() < 0 ? INT_MAX : info.getMaxGlobalInstances(),
+			.maxTeamInstances = info.getMaxTeamInstances() < 0 ? INT_MAX : info.getMaxTeamInstances(),
 		};
 	}
 

@@ -141,9 +141,10 @@ std::vector<int> mybot::computeOptimalAssignment(Span2D<const int> costs)
 		const std::vector<int> workerIndicesForTasks = computeOptimalAssignmentTasksToWorkers(costsT.view());
 		// task = [worker]
 		std::vector<int> taskIndicesForWorkers(costs.dim.y, -1);
-		for (int taskI = 0; taskI < costs.dim.x; ++taskI)
-			taskIndicesForWorkers[workerIndicesForTasks[taskI]] = taskI;
-		assert(std::ranges::count(taskIndicesForWorkers, -1) == 0);
+		for (int taskI = 0; taskI < costs.dim.y; ++taskI)
+			if (workerIndicesForTasks[taskI] >= 0)
+				taskIndicesForWorkers[workerIndicesForTasks[taskI]] = taskI;
+		assert(taskIndicesForWorkers.size() - std::ranges::count(taskIndicesForWorkers, -1) == static_cast<size_t>(costs.dim.x));
 		return taskIndicesForWorkers;
 	}
 }
