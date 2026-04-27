@@ -4,8 +4,8 @@
 #include "../inc/Cv4CommonEngineLib/CvInterface.h"
 #include "../CommonEngineGlobal.h"
 
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
 
 using namespace cvengine;
 

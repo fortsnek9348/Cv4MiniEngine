@@ -1,6 +1,6 @@
-#include "../inc/Cv4CommonEngineLib/CyPopupReturn.h"
+#include "CyPopupReturn.h"
 
-#include <CvPopupReturn.h>
+#include <CvGameCoreDLL/CvPopupReturn.h>
 
 void CyPopupReturn::registerWithPython(const pybind11::module& m)
 {

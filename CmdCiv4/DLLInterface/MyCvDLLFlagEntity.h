@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLFlagEntityIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLFlagEntityIFaceBase.h>
 
 class MyCvDLLFlagEntity : public CvDLLFlagEntityIFaceBase
 {

@@ -2,7 +2,7 @@
 
 #include <Cv4CommonEngineLib/CvEngine.h>
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <CommonStuff/vec.h>
 

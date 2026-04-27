@@ -5,13 +5,12 @@
 #include "CvApp.h"
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
-#include <Cv4CommonEngineLib/CvAppUtil.h>
 
-#include <CvGlobals.h>
-#include <CvInitCore.h>
-#include <CvDLLPythonIFaceBase.h>
-#include <CvDLLUtilityIFaceBase.h>
-#include <CvInfos.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvDLLPythonIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvInfos.h>
 
 #include <CommonStuff/range.h>
 

@@ -2,9 +2,9 @@
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
 
 #include <CommonStuff/range.h>
 

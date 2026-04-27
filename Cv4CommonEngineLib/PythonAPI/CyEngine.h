@@ -2,8 +2,8 @@
 
 #include "../inc/Cv4CommonEngineLib/CvEngine.h"
 
-#include <CommonShared.h>
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CommonShared.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <pybind11/pybind11.h>
 

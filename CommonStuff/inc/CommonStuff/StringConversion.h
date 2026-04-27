@@ -53,4 +53,14 @@ namespace heck
 	};
 
 	using ci_wstring_view = std::basic_string_view<wchar_t, ci_wchar_traits>;
+
+
+	std::wstring trim(std::wstring s);
+
+	struct StringHasher
+	{
+		using is_transparent = void;
+
+		size_t operator()(std::string_view) const noexcept;
+	};
 }

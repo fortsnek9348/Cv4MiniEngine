@@ -4,10 +4,10 @@
 
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
-#include <CvGameAI.h>
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <FInputDevice.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/FInputDevice.h>
 
 #include <HeckTextUI/Core.h>
 

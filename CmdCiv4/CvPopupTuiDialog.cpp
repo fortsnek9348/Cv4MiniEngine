@@ -4,12 +4,12 @@
 #include "UITheme.h"
 #include "TuiTextCode.h"
 
-#include <CvString.h>
-#include <CvPopupReturn.h>
-#include <CvGlobals.h>
-#include <CvGameAI.h>
-#include <CvInfos.h>
-#include <CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvString.h>
+#include <CvGameCoreDLL/CvPopupReturn.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Textbox.h>

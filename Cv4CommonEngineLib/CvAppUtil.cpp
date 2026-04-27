@@ -6,14 +6,14 @@
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
 
-#include <CvEventReporter.h>
-#include <CvGlobals.h>
-#include <CvInitCore.h>
-#include <CvGameAI.h>
-#include <CvMap.h>
-#include <CvTeamAI.h>
-#include <CvPlayerAI.h>
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 #include <CommonStuff/range.h>
 

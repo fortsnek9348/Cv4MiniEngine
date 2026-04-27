@@ -151,6 +151,68 @@
     <ClInclude Include="GiganticMapsOptimisationsLib\VectorisedPathStep.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\VersionedBitmap2D.h" />
     <ClInclude Include="GiganticMapsOptimisationsLib\WholeMapSimpleDijkstra.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CLinkListIterator.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CommonConfig.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CommonShared.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvArtFileMgr.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvCity.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDiplomacyScreen.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDiploParameters.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLButtonPopup.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLEngineIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLEntityIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLFAStarIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLFlagEntityIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLInterfaceIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLPlotBuilderIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLPythonIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLSymbolIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDllTranslator.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLUtilityIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLWidgetData.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvDLLXMLIFaceBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvEnums.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvEventReporter.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvFractal.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvGame.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvGameAI.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvGameCoreUtils.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvGameTextMgr.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvGlobals.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvInfos.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvInitCore.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvMap.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvMapGenerator.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvMessageControl.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvMessageData.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvPlayer.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvPlayerAI.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvPlot.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvPopupInfo.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvPopupReturn.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvRandom.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvReplayInfo.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvSelectionGroup.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvSelectionGroupAI.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvStatistics.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvString.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvStructs.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvTalkingHeadMessage.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvTeamAI.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvUnit.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CvXMLLoadUtility.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CyArgsList.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CyCity.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CyPlot.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CyReplayInfo.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\CyUnit.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\FAStarNode.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\FDataStreamBase.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\FInputDevice.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\FVariableSystem.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\FVariableSystem.inl.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\GeneratePlayerBotHeader.h" />
+    <ClInclude Include="inc\CvGameCoreDLL\LinkedList.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="PlayerBotEnablement.h" />
     <ClInclude Include="PlayerBotGameInterface.h" />
@@ -389,8 +451,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugStrict|x64'">
-    <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
-    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <UseStructuredOutput>false</UseStructuredOutput>
@@ -399,8 +461,8 @@
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEnhanced|x64'">
-    <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
-    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <UseStructuredOutput>false</UseStructuredOutput>
@@ -409,8 +471,8 @@
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseStrict|x64'">
-    <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
-    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <UseStructuredOutput>false</UseStructuredOutput>
@@ -419,8 +481,8 @@
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEnhanced|x64'">
-    <PublicIncludeDirectories>$(ProjectPath)</PublicIncludeDirectories>
-    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <PublicIncludeDirectories>inc</PublicIncludeDirectories>
+    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
     <LibraryPath>C:\Python27\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <UseStructuredOutput>false</UseStructuredOutput>

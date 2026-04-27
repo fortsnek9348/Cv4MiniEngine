@@ -1,7 +1,6 @@
 ﻿#include "TuiFileBrowser.h"
 #include "CvApp.h"
 
-#include <Cv4CommonEngineLib/Common.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <HeckTextUI/BasicControls.h>

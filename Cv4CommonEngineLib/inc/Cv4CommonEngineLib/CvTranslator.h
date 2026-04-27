@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
 
 #include <unordered_map>
 

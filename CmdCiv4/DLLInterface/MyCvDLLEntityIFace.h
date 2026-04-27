@@ -1,7 +1,7 @@
 #pragma once
 
-#include <CvDLLEntityIFaceBase.h>
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvDLLEntityIFaceBase.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 class CvEntity
 {

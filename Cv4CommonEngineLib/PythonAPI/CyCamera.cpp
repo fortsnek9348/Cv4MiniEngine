@@ -1,8 +1,8 @@
 #include "CyCamera.h"
 #include "CyCommon.h"
 
-#include <CyPlot.h>
-#include <CyUnit.h>
+#include <CvGameCoreDLL/CyPlot.h>
+#include <CvGameCoreDLL/CyUnit.h>
 
 void CyCamera::registerWithPython(const pybind11::module& m)
 {

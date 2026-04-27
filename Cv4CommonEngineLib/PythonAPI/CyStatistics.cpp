@@ -1,8 +1,7 @@
 #include "CyStatistics.h"
 
-
-#include <CvEventReporter.h>
-#include <CvStatistics.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvStatistics.h>
 
 void CyStatistics::registerWithPython(const pybind11::module& m)
 {

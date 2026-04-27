@@ -2,7 +2,7 @@
 
 #include "RawBinaryStream.h"
 
-#include <FDataStreamBase.h>
+#include <CvGameCoreDLL/FDataStreamBase.h>
 
 #include <CommonStuff/StringConversion.h>
 

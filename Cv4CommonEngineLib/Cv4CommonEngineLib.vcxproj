@@ -61,7 +61,7 @@
     <ClInclude Include="PythonAPI\CyInterface.h" />
     <ClInclude Include="PythonAPI\CyPopup.h" />
     <ClInclude Include="PythonAPI\CyPopupInfo.h" />
-    <ClInclude Include="inc\Cv4CommonEngineLib\CyPopupReturn.h" />
+    <ClInclude Include="PythonAPI\CyPopupReturn.h" />
     <ClInclude Include="PythonAPI\CyPythonMgr.h" />
     <ClInclude Include="PythonAPI\CyStatistics.h" />
     <ClInclude Include="PythonAPI\CyTranslator.h" />

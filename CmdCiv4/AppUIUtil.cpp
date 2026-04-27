@@ -1,7 +1,8 @@
 #include "AppUIUtil.h"
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
-#include <Cv4CommonEngineLib/Common.h>
+
+#include <CommonStuff/StringConversion.h>
 
 using namespace cvengine;
 
@@ -43,7 +44,7 @@ char const* UIInputError::what() const noexcept
 
 unsigned int cvengine::strictStringToUInt(std::wstring_view str, std::wstring_view inputName)
 {
-	std::wstring trimmedStr = trim(std::wstring(str));
+	std::wstring trimmedStr = heck::trim(std::wstring(str));
 
 	size_t endIndex{};
 	try

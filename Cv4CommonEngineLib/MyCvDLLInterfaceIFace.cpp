@@ -6,12 +6,12 @@
 #include "inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 #include "CommonEngineGlobal.h"
 
-#include <CvGameAI.h>
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvGameCoreUtils.h>
-#include <CvDLLButtonPopup.h>
-#include <CvPlayerAI.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvDLLButtonPopup.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
 
 #include <CommonStuff/range.h>
 

@@ -149,6 +149,7 @@
     <ClCompile Include="DLLInterface\MyCvDLLEntityIFace.cpp" />
     <ClCompile Include="DLLInterface\MyCvDLLFeature.cpp" />
     <ClCompile Include="DLLInterface\MyCvDLLFlagEntity.cpp" />
+    <ClCompile Include="OutputRedirection.cpp" />
     <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
     <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
     <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="DLLInterface\MyCvDLLEntityIFace.h" />
     <ClInclude Include="DLLInterface\MyCvDLLFeature.h" />
     <ClInclude Include="DLLInterface\MyCvDLLFlagEntity.h" />
+    <ClInclude Include="OutputRedirection.h" />
     <ClInclude Include="PythonAPI\CyGInterfaceScreen.h" />
     <ClInclude Include="PythonAPI\CyTuiDialog.h" />
     <ClInclude Include="FileDialogs.h" />

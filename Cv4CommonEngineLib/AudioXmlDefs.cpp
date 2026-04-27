@@ -1,7 +1,7 @@
 #include "inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 #include "MyCvDLLXml.h"
 
-#include <CvGlobals.h>
+#include <CvGameCoreDLL/CvGlobals.h>
 
 #include <ranges>
 

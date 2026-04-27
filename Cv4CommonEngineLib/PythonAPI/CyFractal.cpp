@@ -1,7 +1,7 @@
 #include "CyFractal.h"
 
-#include <CvFractal.h>
-#include <CvRandom.h>
+#include <CvGameCoreDLL/CvFractal.h>
+#include <CvGameCoreDLL/CvRandom.h>
 
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>

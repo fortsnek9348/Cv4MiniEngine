@@ -7,14 +7,13 @@
 
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
-#include <Cv4CommonEngineLib/Common.h>
 
-#include <CvDLLWidgetData.h>
-#include <CvInfos.h>
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
-#include <CvCity.h>
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CvDLLWidgetData.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 #include <iostream>
 
@@ -239,9 +238,9 @@ static std::wstring guessCommonString(const std::wstring& keyA, const std::wstri
 	const size_t commonEndLength = std::mismatch(textA.rbegin(), textA.rend(), textB.rbegin(), textB.rend()).first - textA.rbegin();
 
 	if (commonStartLength >= commonEndLength)
-		return cvengine::trim(textA.substr(0, commonStartLength));
+		return heck::trim(textA.substr(0, commonStartLength));
 	else
-		return cvengine::trim(textA.substr(textA.size() - commonEndLength));
+		return heck::trim(textA.substr(textA.size() - commonEndLength));
 }
 
 static std::wstring makeActionLabel(const CvWidgetDataStruct& widgetInfo)

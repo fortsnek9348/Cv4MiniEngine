@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLSymbolIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLSymbolIFaceBase.h>
 
 class MyCvDLLFeature : public CvDLLFeatureIFaceBase
 {

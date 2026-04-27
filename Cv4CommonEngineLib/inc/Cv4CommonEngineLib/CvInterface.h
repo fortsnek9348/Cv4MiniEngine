@@ -1,7 +1,7 @@
 #pragma once
 
-#include <CvPlayer.h>
-#include <CvSelectionGroupAI.h>
+#include <CvGameCoreDLL/CvPlayer.h>
+#include <CvGameCoreDLL/CvSelectionGroupAI.h>
 
 #include <CommonStuff/vec.h>
 

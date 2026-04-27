@@ -1,6 +1,6 @@
 #include "inc/Cv4CommonEngineLib/DLLMessageQueue.h"
 
-#include <CvMessageData.h>
+#include <CvGameCoreDLL/CvMessageData.h>
 
 //#include <CvGlobals.h>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <CvEnums.h>
-#include <CvStructs.h>
+#include <CvGameCoreDLL/CvEnums.h>
+#include <CvGameCoreDLL/CvStructs.h>
 
 #include <pybind11/pybind11.h>
 

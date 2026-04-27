@@ -14,12 +14,12 @@
 
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
 
-#include <CvXMLLoadUtility.h>
-#include <CvRandom.h>
-#include <CvInitCore.h>
-#include <CvGameTextMgr.h>
-#include <CvEventReporter.h>
-#include <CvArtFileMgr.h>
+#include <CvGameCoreDLL/CvXMLLoadUtility.h>
+#include <CvGameCoreDLL/CvRandom.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvArtFileMgr.h>
 
 #include <iostream>
 

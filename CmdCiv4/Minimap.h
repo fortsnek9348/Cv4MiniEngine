@@ -2,7 +2,7 @@
 
 #include <Cv4CommonEngineLib/CvEngineEnums.h>
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <HeckTextUI/Control.h>
 

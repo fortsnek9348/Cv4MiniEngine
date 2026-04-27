@@ -2,9 +2,9 @@
 
 #include "CvGInterfaceScreen.h"
 
-#include <CvStructs.h>
-#include <CvDiplomacyScreen.h>
-#include <LinkedList.h>
+#include <CvGameCoreDLL/CvStructs.h>
+#include <CvGameCoreDLL/CvDiplomacyScreen.h>
+#include <CvGameCoreDLL/LinkedList.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Window.h>

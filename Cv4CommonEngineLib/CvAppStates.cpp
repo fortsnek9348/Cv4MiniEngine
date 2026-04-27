@@ -9,15 +9,15 @@
 #include "CommonEngineGlobal.h"
 #include "CvAppUtil.h"
 
-#include <CvEventReporter.h>
-#include <CvPlayerAI.h>
-#include <CvTeamAI.h>
-#include <CvGameAI.h>
-#include <CvMap.h>
-#include <CvGlobals.h>
-#include <CvInitCore.h>
-#include <CvMapGenerator.h>
-#include <CvInfos.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvMapGenerator.h>
+#include <CvGameCoreDLL/CvInfos.h>
 
 #include <CommonStuff/range.h>
 

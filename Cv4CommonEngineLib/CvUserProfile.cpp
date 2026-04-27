@@ -1,8 +1,8 @@
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
 #include "CommonEngineGlobal.h"
 
-#include <CvGlobals.h>
-#include <CvInfos.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
 
 #include <CommonStuff/range.h>
 

@@ -2,7 +2,7 @@
 
 #include "CvPopup.h"
 
-#include <CvPopupInfo.h>
+#include <CvGameCoreDLL/CvPopupInfo.h>
 
 class CvButtonPopup : public CvPopup
 {

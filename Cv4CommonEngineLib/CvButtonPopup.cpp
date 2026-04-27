@@ -1,6 +1,6 @@
 #include "inc/Cv4CommonEngineLib/CvButtonPopup.h"
 
-#include <CvDLLButtonPopup.h>
+#include <CvGameCoreDLL/CvDLLButtonPopup.h>
 
 CvButtonPopup::CvButtonPopup(std::unique_ptr<CvPopupInfo> popupInfo) : mPopupInfo(std::move(popupInfo))
 {

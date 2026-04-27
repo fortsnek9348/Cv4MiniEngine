@@ -8,12 +8,12 @@
 #include <Cv4CommonEngineLib/CvButtonPopup.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CLinkListIterator.h>
-#include <CvDiploParameters.h>
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
-#include <CvDLLWidgetData.h>
-#include <CvGameTextMgr.h>
+#include <CvGameCoreDLL/CLinkListIterator.h>
+#include <CvGameCoreDLL/CvDiploParameters.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvDLLWidgetData.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
 
 #include <HeckTextUI/BasicControls.h>
 

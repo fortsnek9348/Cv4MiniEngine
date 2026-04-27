@@ -2,7 +2,7 @@
 
 #include "inc/Cv4CommonEngineLib/CvPopup.h"
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <pybind11/pytypes.h>
 

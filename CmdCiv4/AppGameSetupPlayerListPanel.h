@@ -2,7 +2,7 @@
 
 #include "AppUIUtil.h"
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Combobox.h>

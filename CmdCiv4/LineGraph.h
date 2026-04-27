@@ -2,7 +2,7 @@
 
 #include <HeckTextUI/BasicControls.h>
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 class LineGraph : public hecktui::Element
 {

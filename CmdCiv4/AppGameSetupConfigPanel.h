@@ -4,7 +4,7 @@
 
 #include <HeckTextUI/Textbox.h>
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 namespace cvengine
 {

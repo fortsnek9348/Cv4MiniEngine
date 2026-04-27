@@ -5,8 +5,8 @@
 #include "Common.h"
 #include "CommonEngineGlobal.h"
 
-#include <CvGlobals.h>
-#include <CvMap.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvMap.h>
 
 #include <CommonStuff/StringConversion.h>
 

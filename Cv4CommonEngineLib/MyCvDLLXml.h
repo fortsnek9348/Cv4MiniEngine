@@ -1,11 +1,10 @@
 #pragma once
 
-#include <CvDLLXMLIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLXMLIFaceBase.h>
 
 class MyCvDLLXml : public CvDLLXmlIFaceBase
 {
 public:
-
 	// Inherited via CvDLLXmlIFaceBase
 	virtual FXml* CreateFXml(FXmlSchemaCache* pSchemaCache) override;
 	virtual void DestroyFXml(FXml*& xml) override;

@@ -1,10 +1,8 @@
 ﻿#include "inc/Cv4CommonEngineLib/CvTranslator.h"
-//#include "DLLInterface/MyCvDLLUtility.h"
-//#include "TuiTextCode.h"
 
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvDllTranslator.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvDllTranslator.h>
 
 #include <CommonStuff/range.h>
 

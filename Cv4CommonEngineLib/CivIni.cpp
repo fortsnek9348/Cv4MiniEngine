@@ -1,7 +1,7 @@
 #include "inc/Cv4CommonEngineLib/CivIni.h"
 #include "CommonEngineGlobal.h"
 
-#include <CvGlobals.h>
+#include <CvGameCoreDLL/CvGlobals.h>
 
 #include <CommonStuff/range.h>
 

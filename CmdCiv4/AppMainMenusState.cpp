@@ -6,8 +6,8 @@
 #include <Cv4CommonEngineLib/CvTranslator.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
 
-#include <CvGlobals.h>
-#include <CvDLLPythonIFaceBase.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvDLLPythonIFaceBase.h>
 
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
 

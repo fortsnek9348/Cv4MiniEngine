@@ -5,7 +5,7 @@
 
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Combobox.h>

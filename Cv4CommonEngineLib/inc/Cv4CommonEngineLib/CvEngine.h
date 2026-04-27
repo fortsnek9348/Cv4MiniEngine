@@ -2,8 +2,8 @@
 
 #include "MyFFile.h"
 
-#include <CvEnums.h>
-#include <CommonShared.h>
+#include <CvGameCoreDLL/CvEnums.h>
+#include <CvGameCoreDLL/CommonShared.h>
 
 #include <CommonStuff/vec.h>
 

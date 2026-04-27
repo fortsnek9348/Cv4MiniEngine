@@ -3,8 +3,8 @@
 #include "WorldView.h"
 #include "Minimap.h"
 
-#include <CvSelectionGroupAI.h>
-#include <LinkedList.h>
+#include <CvGameCoreDLL/CvSelectionGroupAI.h>
+#include <CvGameCoreDLL/LinkedList.h>
 
 #include <CommonStuff/NoCopy.h>
 

@@ -6,11 +6,11 @@
 
 #include <Cv4CommonEngineLib/CvPopup.h>
 
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
-#include <CvCity.h>
-#include <CvGameAI.h>
-#include <CvMap.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
 
 #include <CommonStuff/range.h>
 

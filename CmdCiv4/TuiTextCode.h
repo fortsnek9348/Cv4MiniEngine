@@ -2,7 +2,7 @@
 
 #include <HeckTextUI/Core.h>
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 class NiColorA;
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <CommonShared.h>
-#include <CvEnums.h>
-#include <CvStructs.h>
+#include <CvGameCoreDLL/CommonShared.h>
+#include <CvGameCoreDLL/CvEnums.h>
+#include <CvGameCoreDLL/CvStructs.h>
 
 #include <CommonStuff/aabb.h>
 

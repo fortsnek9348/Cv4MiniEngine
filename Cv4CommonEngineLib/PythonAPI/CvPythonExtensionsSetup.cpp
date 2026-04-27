@@ -1,8 +1,8 @@
 #include "../inc/Cv4CommonEngineLib/CvPythonExtensionsSetup.h"
 #include "../inc/Cv4CommonEngineLib/CvEngineEnums.h"
 #include "../inc/Cv4CommonEngineLib/CvVFS.h"
-#include "../inc/Cv4CommonEngineLib/CyPopupReturn.h"
 #include "../CommonEngineGlobal.h"
+#include "CyPopupReturn.h"
 #include "CyCamera.h"
 #include "CyCommon.h"
 #include "CyDiplomacy.h"
@@ -17,8 +17,8 @@
 #include "CyTranslator.h"
 #include "CyUserProfile.h"
 
-#include <CommonShared.h>
-#include <CvRandom.h>
+#include <CvGameCoreDLL/CommonShared.h>
+#include <CvGameCoreDLL/CvRandom.h>
 
 #include <pybind11/stl.h>
 

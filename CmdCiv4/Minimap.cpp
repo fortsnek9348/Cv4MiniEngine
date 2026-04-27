@@ -7,13 +7,13 @@
 
 #include <Cv4CommonEngineLib\MyCvDLLPython.h>
 
-#include <CvGlobals.h>
-#include <CvMap.h>
-#include <CvGameAI.h>
-#include <CvPlayerAI.h>
-#include <CvInfos.h>
-#include <CyArgsList.h>
-#include <CvReplayInfo.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CyArgsList.h>
+#include <CvGameCoreDLL/CvReplayInfo.h>
 
 #include <CommonStuff/range.h>
 

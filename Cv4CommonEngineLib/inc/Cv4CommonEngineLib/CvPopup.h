@@ -1,7 +1,7 @@
 #pragma once
 
-#include <CvPopupReturn.h>
-#include <CvStructs.h>
+#include <CvGameCoreDLL/CvPopupReturn.h>
+#include <CvGameCoreDLL/CvStructs.h>
 
 //#include <HeckTextUI/Window.h>
 
@@ -11,8 +11,6 @@
 #include <memory>
 
 class PopupReturn;
-
-//class CvPopupTuiDialog;
 
 namespace cvengine
 {

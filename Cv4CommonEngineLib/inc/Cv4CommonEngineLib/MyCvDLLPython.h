@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLPythonIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLPythonIFaceBase.h>
 
 class MyCvDLLPython : public CvDLLPythonIFaceBase
 {

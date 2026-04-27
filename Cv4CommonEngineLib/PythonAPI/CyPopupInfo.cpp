@@ -1,6 +1,6 @@
 #include "CyPopupInfo.h"
 
-#include <CvPlayerAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
 
 #include <iostream>
 

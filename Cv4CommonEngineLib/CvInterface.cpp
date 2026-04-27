@@ -1,14 +1,12 @@
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 
-#include <CvEventReporter.h>
-#include <CvGameCoreUtils.h>
-#include <CvMessageControl.h>
-#include <CvGlobals.h>
-#include <CvGameAI.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvMessageControl.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameAI.h>
 
 #include <algorithm>
-
-//using namespace cvengine;
 
 CvInterface::CvInterface()
 {

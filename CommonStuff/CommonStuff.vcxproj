@@ -140,7 +140,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -165,7 +165,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

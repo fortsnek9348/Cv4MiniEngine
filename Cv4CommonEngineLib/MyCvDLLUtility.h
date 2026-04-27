@@ -1,9 +1,9 @@
 #pragma once
 
-#include <CvString.h>
-#include <CvEnums.h>
-#include <CvStructs.h>
-#include <CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvString.h>
+#include <CvGameCoreDLL/CvEnums.h>
+#include <CvGameCoreDLL/CvStructs.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
 
 #include <vector>
 #include <unordered_map>

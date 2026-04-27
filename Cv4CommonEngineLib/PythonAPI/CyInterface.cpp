@@ -5,15 +5,15 @@
 #include "../inc/Cv4CommonEngineLib/CvInterface.h"
 #include "../inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 
-#include <CvCity.h>
-#include <CvGameAI.h>
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvPlayerAI.h>
-#include <CvPlot.h>
-#include <CyCity.h>
-#include <CyPlot.h>
-#include <CyUnit.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvPlot.h>
+#include <CvGameCoreDLL/CyCity.h>
+#include <CvGameCoreDLL/CyPlot.h>
+#include <CvGameCoreDLL/CyUnit.h>
 
 #include <CommonStuff/range.h>
 

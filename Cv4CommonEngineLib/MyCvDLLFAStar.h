@@ -1,11 +1,10 @@
 #pragma once
 
-#include <CvDLLFAStarIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLFAStarIFaceBase.h>
 
 class MyCvDLLFAStar : public CvDLLFAStarIFaceBase
 {
 public:
-
 	// Inherited via CvDLLFAStarIFaceBase
 	virtual FAStar* create() override;
 	virtual void destroy(FAStar*& ptr, bool bSafeDelete) override;

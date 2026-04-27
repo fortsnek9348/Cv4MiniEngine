@@ -1,14 +1,12 @@
 #include "PythonPopup.h"
-
-#include "inc/Cv4CommonEngineLib/CyPopupReturn.h"
+#include "PythonAPI/CyPopupReturn.h"
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 
-#include <CvPopupReturn.h>
-
-#include <CvGameAI.h>
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvPopupReturn.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 #include <pybind11/cast.h>
 

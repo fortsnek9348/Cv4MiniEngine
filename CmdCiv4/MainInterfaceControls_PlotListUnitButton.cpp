@@ -6,10 +6,10 @@
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CvSelectionGroup.h>
-#include <CvGlobals.h>
-#include <CvUnit.h>
-#include <CvGameAI.h>
+#include <CvGameCoreDLL/CvSelectionGroup.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvUnit.h>
+#include <CvGameCoreDLL/CvGameAI.h>
 
 #include <ranges>
 

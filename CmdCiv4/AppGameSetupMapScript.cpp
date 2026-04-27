@@ -1,9 +1,9 @@
 #include "AppGameSetupMapScript.h"
 
-#include <CvDLLPythonIFaceBase.h>
-#include <CvDLLUtilityIFaceBase.h>
-#include <CvGlobals.h>
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CvDLLPythonIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 using namespace cvengine;
 

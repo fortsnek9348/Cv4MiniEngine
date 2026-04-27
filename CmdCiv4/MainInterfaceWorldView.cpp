@@ -10,12 +10,12 @@
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CvMap.h>
-#include <CvCity.h>
-#include <CvGlobals.h>
-#include <CvGameTextMgr.h>
-#include <CvGameCoreUtils.h>
-#include <CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvGameAI.h>
 
 #include <HeckTextUI/BasicControls.h>
 

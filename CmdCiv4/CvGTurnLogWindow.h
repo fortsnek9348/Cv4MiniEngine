@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CvEnums.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Window.h>

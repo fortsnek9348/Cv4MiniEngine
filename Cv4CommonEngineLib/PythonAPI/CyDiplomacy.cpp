@@ -1,9 +1,9 @@
 #include "CyDiplomacy.h"
 #include "../inc/Cv4CommonEngineLib/CvTranslator.h"
 
-#include <CvGlobals.h>
-#include <CvDiplomacyScreen.h>
-#include <CvDiploParameters.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvDiplomacyScreen.h>
+#include <CvGameCoreDLL/CvDiploParameters.h>
 
 #include <pybind11/stl.h>
 

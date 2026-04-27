@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLInterfaceIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLInterfaceIFaceBase.h>
 
 class MyCvDLLInterfaceIFace : public CvDLLInterfaceIFaceBase
 {

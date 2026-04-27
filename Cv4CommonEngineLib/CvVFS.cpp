@@ -1,8 +1,6 @@
 ﻿#include "inc/Cv4CommonEngineLib/CvVFS.h"
 #include "Common.h"
 
-#include <CvString.h>
-
 #include <CommonStuff/Hashing.h>
 #include <CommonStuff/StringConversion.h>
 

@@ -1,7 +1,7 @@
 #include "../inc/Cv4CommonEngineLib/CvEngineEnums.h"
 #include "CyCommon.h"
 
-#include <FInputDevice.h>
+#include <CvGameCoreDLL/FInputDevice.h>
 
 #include <pybind11/operators.h>
 

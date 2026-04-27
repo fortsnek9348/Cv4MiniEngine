@@ -8,18 +8,18 @@
 
 #include <Cv4CommonEngineLib/CvEngine.h>
 
-#include <CvGlobals.h>
-#include <CvMap.h>
-#include <CvPlot.h>
-#include <CvGameCoreUtils.h>
-#include <CvUnit.h>
-#include <CvCity.h>
-#include <CvGameAI.h>
-#include <CvTeamAI.h>
-#include <CvPlayerAI.h>
-#include <CvInfos.h>
-#include <CvGameTextMgr.h>
-#include <CvInitCore.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvPlot.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvUnit.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvInitCore.h>
 
 #include <CommonStuff/range.h>
 

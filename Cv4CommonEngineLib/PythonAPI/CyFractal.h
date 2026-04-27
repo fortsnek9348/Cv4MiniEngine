@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvFractal.h>
+#include <CvGameCoreDLL/CvFractal.h>
 
 #include <pybind11/pybind11.h>
 

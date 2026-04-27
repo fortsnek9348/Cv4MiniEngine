@@ -4,25 +4,25 @@
 #include "FileDialogs.h"
 #include "CvTuiInterface.h"
 #include "CvTuiEngine.h"
+#include "OutputRedirection.h"
 #include "DLLInterface/MyCvDLLEntityIFace.h"
 #include "DLLInterface/MyCvDLLFeature.h"
 #include "DLLInterface/MyCvDLLFlagEntity.h"
 #include "DLLInterface/MyCvDLLPlotBuilder.h"
 
-#include <Cv4CommonEngineLib/Common.h>
 #include <Cv4CommonEngineLib/CivIni.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
 #include <Cv4CommonEngineLib/CommonEngine.h>
 
-#include <CvGlobals.h>
-#include <CvInitCore.h>
-#include <CvGameAI.h>
-#include <CvMap.h>
-#include <CvTeamAI.h>
-#include <CvPlayerAI.h>
-#include <CvEventReporter.h>
-#include <CyArgsList.h>
-#include <GeneratePlayerBotHeader.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CyArgsList.h>
+#include <CvGameCoreDLL/GeneratePlayerBotHeader.h>
 
 
 
@@ -66,7 +66,7 @@ void CvApp::start(const AppStartupConfig& config)
 	IniData ini = loadINI(iniPath);
 
 	// Only have to do this before first drawing the UI.
-	redirectLoggingOutput();
+	initDebugOutput();
 
 	std::filesystem::path vanillaCiv4RootDir = ini.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L"");
 	if (vanillaCiv4RootDir.empty())
@@ -147,12 +147,6 @@ void CvApp::start(const AppStartupConfig& config)
 
 	audioSystem = std::make_unique<AudioSystem>(*mVFS);
 }
-
-void CvApp::redirectLoggingOutput()
-{
-	initDebugOutput();
-}
-
 
 const cvengine::CvVFS& CvApp::getVFS() const
 {

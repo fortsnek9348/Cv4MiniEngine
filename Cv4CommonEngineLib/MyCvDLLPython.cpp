@@ -3,9 +3,11 @@
 #include "Common.h"
 #include "CommonEngineGlobal.h"
 
-#include <CvEventReporter.h>
-#include <CvGlobals.h>
-#include <CvInitCore.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+
+#include <CommonStuff/StringConversion.h>
 
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
@@ -26,7 +28,7 @@ namespace
 		bool usingDefaultImpl = false;
 		//int mapSizeOverrideMultiplier = 1;
 
-		std::unordered_map<std::string, pybind11::module, cvengine::StringHasher, std::equal_to<>> modules;
+		std::unordered_map<std::string, pybind11::module, heck::StringHasher, std::equal_to<>> modules;
 
 		uint64_t serial = 0;
 

@@ -1,4 +1,5 @@
 #include "MyCvDLLUtility.h"
+#include "CvAppUtil.h"
 #include "MyCvDLLXml.h"
 #include "MyCvDLLFAStar.h"
 #include "MyCvDLLInterfaceIFace.h"
@@ -6,7 +7,6 @@
 #include "FMPIManager.h"
 #include "inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
-#include "inc/Cv4CommonEngineLib/CvAppUtil.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 #include "inc/Cv4CommonEngineLib/CvTranslator.h"
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
@@ -20,25 +20,25 @@
 
 #include <FAStar.h>
 
-#include <CvArtFileMgr.h>
-#include <CvGameTextMgr.h>
-#include <CvGlobals.h>
-#include <CvRandom.h>
-#include <CvDiplomacyScreen.h>
-#include <CvDLLPythonIFaceBase.h>
-#include <CvDLLPlotBuilderIFaceBase.h>
-#include <CvEventReporter.h>
-#include <CvXMLLoadUtility.h>
-#include <CvInitCore.h>
-#include <CvPlayerAI.h>
-#include <CvMessageData.h>
-#include <FVariableSystem.h>
-#include <FVariableSystem.inl> // Probably not supposed to include this, but it has the read write functions.
-#include <CvDLLEngineIFaceBase.h>
-#include <CvGameAI.h>
-#include <CvReplayInfo.h>
-#include <CvMap.h>
-#include <FAStarNode.h>
+#include <CvGameCoreDLL/CvArtFileMgr.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvRandom.h>
+#include <CvGameCoreDLL/CvDiplomacyScreen.h>
+#include <CvGameCoreDLL/CvDLLPythonIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLPlotBuilderIFaceBase.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvXMLLoadUtility.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvMessageData.h>
+#include <CvGameCoreDLL/FVariableSystem.h>
+#include <CvGameCoreDLL/FVariableSystem.inl.h> // Probably not supposed to include this, but it has the read write functions.
+#include <CvGameCoreDLL/CvDLLEngineIFaceBase.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvReplayInfo.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/FAStarNode.h>
 
 #include <CommonStuff/range.h>
 

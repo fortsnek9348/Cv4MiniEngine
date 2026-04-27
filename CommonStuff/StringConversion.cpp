@@ -2,7 +2,9 @@
 
 #include <SFML/System.hpp>
 
+#include <algorithm>
 #include <stdexcept>
+#include <ranges>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN 1
@@ -131,3 +133,22 @@ std::wstring heck::toWide(std::u16string_view s)
 	return out;
 }
 #endif
+
+std::wstring heck::trim(std::wstring s)
+{
+	const auto startIt = std::ranges::find_if_not(s, std::iswspace);
+	if (startIt != s.end())
+	{
+		const auto endIt = std::ranges::find_if_not(s | std::views::reverse, std::iswspace).base();
+		s.erase(endIt, s.end());
+		s.erase(s.begin(), startIt);
+	}
+	else
+		s.clear();
+	return s;
+}
+
+size_t heck::StringHasher::operator()(std::string_view s) const noexcept
+{
+	return std::hash<std::string_view>()(s);
+}

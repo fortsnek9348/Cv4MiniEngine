@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CvDLLPlotBuilderIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLPlotBuilderIFaceBase.h>
 
 namespace cvengine
 {

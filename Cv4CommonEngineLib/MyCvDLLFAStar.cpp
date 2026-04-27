@@ -1,7 +1,7 @@
 #include "MyCvDLLFAStar.h"
 #include <FAStar.h>
 
-#include <FAStarNode.h>
+#include <CvGameCoreDLL/FAStarNode.h>
 
 #include <cstdlib>
 

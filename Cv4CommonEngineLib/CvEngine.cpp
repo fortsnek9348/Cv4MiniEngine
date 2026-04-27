@@ -1,18 +1,17 @@
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
-#include "inc/Cv4CommonEngineLib/CvAppUtil.h"
-
 #include "Common.h"
 #include "CommonEngineGlobal.h"
+#include "CvAppUtil.h"
 
-#include <CvDLLUtilityIFaceBase.h>
-#include <CvTalkingHeadMessage.h>
-#include <CvGlobals.h>
-#include <CvGameTextMgr.h>
-#include <CvGameAI.h>
-#include <CvInitCore.h>
-#include <CvPlot.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvTalkingHeadMessage.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvPlot.h>
 
 #include <CommonStuff/range.h>
 

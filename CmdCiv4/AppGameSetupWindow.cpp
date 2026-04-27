@@ -3,14 +3,13 @@
 #include "AppGameSetupConfigPanel.h"
 #include "CvApp.h"
 
-#include <Cv4CommonEngineLib/CvAppUtil.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
 #include <Cv4CommonEngineLib/CivIni.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CvInitCore.h>
-#include <CvGlobals.h>
-#include <CvInfos.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
 
 #include <CommonStuff/System.h>
 #include <CommonStuff/range.h>

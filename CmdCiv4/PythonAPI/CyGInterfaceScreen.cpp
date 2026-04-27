@@ -1,5 +1,4 @@
 ﻿#include "CyGInterfaceScreen.h"
-#include "CyUnit.h"
 #include "../CvGInterfaceScreen.h"
 #include "../CvTuiInterface.h"
 #include "../CvTuiMainInterface.h"
@@ -12,12 +11,13 @@
 #include "../TuiTextCode.h"
 #include "../UITheme.h"
 
-#include <CvGameAI.h>
-#include <CvGlobals.h>
-#include <CvPlayerAI.h>
-#include <CvTeamAI.h>
-#include <CvMessageControl.h>
-#include <CyReplayInfo.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvMessageControl.h>
+#include <CvGameCoreDLL/CyReplayInfo.h>
+#include <CvGameCoreDLL/CyUnit.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Combobox.h>

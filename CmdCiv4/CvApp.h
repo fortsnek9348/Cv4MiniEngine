@@ -112,8 +112,6 @@ namespace cvengine
 
 		static std::filesystem::path getUserDataDir();
 
-		void redirectLoggingOutput();
-
 		const cvengine::CvVFS& getVFS() const;
 
 		const cvengine::AppStartupConfig& getCommandLineConfig() const;

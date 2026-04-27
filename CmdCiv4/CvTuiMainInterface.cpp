@@ -13,21 +13,20 @@
 #include <Cv4CommonEngineLib/DLLMessageQueue.h>
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
-#include <FAStar/FAStar.h>
-
-#include <CLinkListIterator.h>
-#include <CvDiploParameters.h>
-#include <CvDLLInterfaceIFaceBase.h>
-#include <CvDLLUtilityIFaceBase.h>
-#include <CvEventReporter.h>
-#include <CvGameAI.h>
-#include <CvGameCoreUtils.h>
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvMap.h>
-#include <CvMessageData.h>
-#include <CvPlayerAI.h>
-#include <FAStarNode.h>
+#include <CvGameCoreDLL/CLinkListIterator.h>
+#include <CvGameCoreDLL/CvDiploParameters.h>
+#include <CvGameCoreDLL/CvDLLInterfaceIFaceBase.h>
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
+#include <CvGameCoreDLL/CvEventReporter.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvGameCoreUtils.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvMessageData.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/FAStarNode.h>
+#include <CvGameCoreDLL/CvDLLFAStarIFaceBase.h>
 
 #include <CommonStuff/range.h>
 
@@ -174,7 +173,7 @@ void CvTuiMainInterface::makeSelectionListDirty()
 	// Need this too.
 	mInterfaceDirtyBits[InterfaceDirtyBits::Waypoints_DIRTY_BIT] = true;
 
-	gGlobals.getInterfacePathFinder().forceReset();
+	gGlobals.getDLLIFaceNonInl()->getFAStarIFace()->ForceReset(&gGlobals.getInterfacePathFinder());
 
 	// This is state used for unit cycling.
 	mOriginalPlotCurrentUnitIndex = -1;
@@ -1501,16 +1500,17 @@ void CvTuiMainInterface::updateWorldViewDisplayedPath()
 		const CvPlot* start = unit->plot();
 
 		const auto appendPathTo = [&](const CvPlot* dest, bool withTurnNumbering) {
+			auto& fastarIFace = *gGlobals.getDLLIFaceNonInl()->getFAStarIFace();
 			FAStar& pathFinder = gGlobals.getInterfacePathFinder();
-			pathFinder.setData(&mInterfaceSelectionList);
+			fastarIFace.SetData(&pathFinder, &mInterfaceSelectionList);
 
 			// Have to use MOVE_DECLARE_WAR for pathDestValid.
-			if (pathFinder.generatePath({ start->getX(), start->getY() }, { dest->getX(), dest->getY() }, false, MOVE_DECLARE_WAR, true))
+			if (fastarIFace.GeneratePath(&pathFinder, start->getX(), start->getY(), dest->getX(), dest->getY(), false, MOVE_DECLARE_WAR, true))
 			{
 				// Pathing succeeded.
 				const CvMap& map = gGlobals.getMap();
 				const PlayerTypes player = gGlobals.getGame().getActivePlayer();
-				const FAStarNode* node = pathFinder.getGoalNode();
+				const FAStarNode* node = fastarIFace.GetLastNode(&pathFinder);
 				do
 				{
 					const heck::ivec2 coord{ node->m_iX, node->m_iY };

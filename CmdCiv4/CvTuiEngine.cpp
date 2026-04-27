@@ -2,11 +2,9 @@
 #include "CvTuiInterface.h"
 #include "WorldView.h"
 
-#include <Cv4CommonEngineLib/Common.h>
-
-#include <CvGlobals.h>
-#include <CvGameAI.h>
-#include <CvMap.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvMap.h>
 
 using namespace cvengine;
 
@@ -22,7 +20,7 @@ void CvTuiEngine::doTurn()
 	clearColoredPlots(PLOT_LANDSCAPE_LAYER_ALL);
 
 	// Direct debug output for when logging AI autoplay to file.
-	outputDebugString(("CvTuiEngine::DoTurn: " + std::to_string(gGlobals.getGame().getGameTurn()) + '\n').c_str());
+	//outputDebugString(("CvTuiEngine::DoTurn: " + std::to_string(gGlobals.getGame().getGameTurn()) + '\n').c_str());
 }
 
 void CvTuiEngine::toggleGlobeview()

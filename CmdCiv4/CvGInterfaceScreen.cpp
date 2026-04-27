@@ -5,7 +5,7 @@
 #include "MainInterfaceControls.h"
 #include "CvApp.h"
 
-#include <CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Window.h>

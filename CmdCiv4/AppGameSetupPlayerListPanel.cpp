@@ -4,10 +4,10 @@
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
 
-#include <CvGlobals.h>
-#include <CvInitCore.h>
-#include <CvInfos.h>
-#include <CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInitCore.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
 
 #include <CommonStuff/range.h>
 

@@ -36,7 +36,7 @@
     <ClInclude Include="PythonAPI\CyPopupInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Cv4CommonEngineLib\CyPopupReturn.h">
+    <ClInclude Include="PythonAPI\CyPopupReturn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PythonAPI\CyPythonMgr.h">

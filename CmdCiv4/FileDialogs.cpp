@@ -1,8 +1,6 @@
 #include "FileDialogs.h"
 
-#include <Cv4CommonEngineLib/Common.h>
-
-#include <CvGlobals.h>
+#include <CvGameCoreDLL/CvGlobals.h>
 
 #include <CommonStuff/StringConversion.h>
 #include <CommonStuff/System.h>

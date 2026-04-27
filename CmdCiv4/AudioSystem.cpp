@@ -6,11 +6,11 @@
 #include <Cv4CommonEngineLib/MyFFile.h>
 #include <Cv4CommonEngineLib/CivIni.h>
 
-#include <CvGlobals.h>
-#include <CvRandom.h>
-#include <CvMap.h>
-#include <CvCity.h>
-#include <CvGameAI.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvRandom.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvCity.h>
+#include <CvGameCoreDLL/CvGameAI.h>
 
 #include <SFML/Audio.hpp>
 

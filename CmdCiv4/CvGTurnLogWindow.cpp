@@ -8,10 +8,10 @@
 
 #include <HeckTextUI/BasicControls.h>
 
-#include <CvGlobals.h>
-#include <CvGameAI.h>
-#include <CvPlayerAI.h>
-#include <CvGameTextMgr.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvGameAI.h>
+#include <CvGameCoreDLL/CvPlayerAI.h>
+#include <CvGameCoreDLL/CvGameTextMgr.h>
 
 #include <ranges>
 

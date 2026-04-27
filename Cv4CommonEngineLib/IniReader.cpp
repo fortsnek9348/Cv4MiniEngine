@@ -2,8 +2,8 @@
 
 #include <CommonStuff/StringConversion.h>
 
-#include <CvString.h>
-#include <CvGlobals.h>
+#include <CvGameCoreDLL/CvString.h>
+#include <CvGameCoreDLL/CvGlobals.h>
 
 #include <algorithm>
 #include <fstream>

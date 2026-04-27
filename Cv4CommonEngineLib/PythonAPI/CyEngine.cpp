@@ -3,11 +3,11 @@
 #include "../inc/Cv4CommonEngineLib/CvEngine.h"
 #include "../CommonEngineGlobal.h"
 
-#include <CvGlobals.h>
-#include <CvInfos.h>
-#include <CvMap.h>
-#include <CvPlot.h>
-#include <CyPlot.h>
+#include <CvGameCoreDLL/CvGlobals.h>
+#include <CvGameCoreDLL/CvInfos.h>
+#include <CvGameCoreDLL/CvMap.h>
+#include <CvGameCoreDLL/CvPlot.h>
+#include <CvGameCoreDLL/CyPlot.h>
 
 using cvengine::abortOnUnimplementedPythonFunction;
 using cvengine::logUnimplementedPythonFunction;

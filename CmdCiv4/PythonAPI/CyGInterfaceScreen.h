@@ -1,7 +1,8 @@
 #pragma once
 
-#include <CommonShared.h>
-#include <CvEnums.h>
+#include <CvGameCoreDLL/CommonShared.h>
+#include <CvGameCoreDLL/CvEnums.h>
+
 #include <pybind11/pybind11.h>
 
 #include <HeckTextUI/Layout.h>

@@ -1,7 +1,7 @@
 #include "MyCvDLLEntityIFace.h"
 #include "../CvTuiInterface.h"
 
-#include <CvUnit.h>
+#include <CvGameCoreDLL/CvUnit.h>
 
 #include <cstdlib>
 

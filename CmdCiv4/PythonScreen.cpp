@@ -2,7 +2,7 @@
 
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
-#include <CyArgsList.h>
+#include <CvGameCoreDLL/CyArgsList.h>
 
 using namespace cvengine;
 
