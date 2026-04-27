@@ -9,12 +9,6 @@
 #include <string>
 #include <vector>
 
-
-//class CyPlot;
-//class CyUnit;
-//class CyReplayInfo;
-
-
 class CyUnit;
 class CyReplayInfo;
 

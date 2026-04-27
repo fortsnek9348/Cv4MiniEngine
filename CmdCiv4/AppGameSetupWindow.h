@@ -9,11 +9,12 @@ namespace cvengine
 {
 	class AppGameSetupPlayerListPanel;
 	class AppGameSetupConfigPanel;
+	class CvApp;
 
 	class AppGameSetupWindow : public hecktui::Window
 	{
 	public:
-		AppGameSetupWindow();
+		explicit AppGameSetupWindow(CvApp& app);
 
 		virtual void drawThis(hecktui::ivec2 offset, hecktui::Framebuffer& fb) override;
 

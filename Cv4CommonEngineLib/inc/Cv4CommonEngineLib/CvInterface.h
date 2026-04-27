@@ -36,6 +36,7 @@ public:
 	
 	virtual const CvSelectionGroup* getSelectionList() const = 0;
 	virtual CvSelectionGroup* getSelectionList() = 0;
+	int getNumSelectedUnits() const;
 	CvUnit* getSelectionUnit(int iIndex) const;
 	bool isUnitSelected(const CvUnit& unit) const;
 	bool removeFromSelectionList(CvUnit* pUnit);

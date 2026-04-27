@@ -1,5 +1,5 @@
 #include "inc/Cv4CommonEngineLib/CivIni.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
+#include "CommonEngineGlobal.h"
 
 #include <CvGlobals.h>
 
@@ -38,7 +38,7 @@ constexpr IniDocKey cvengine::kCivilizationIVIniProp_WorldSizeMultiplier{ "World
 
 static const std::filesystem::path& getPath()
 {
-	static const std::filesystem::path kPath = cvengine::getUserConfigDir() / "Cv4MiniEngine.ini";
+	static const std::filesystem::path kPath = cvengine::gCommonEngineConfig.userConfigDirPath / cvengine::gCommonEngineConfig.iniFilename;
 	return kPath;
 }
 

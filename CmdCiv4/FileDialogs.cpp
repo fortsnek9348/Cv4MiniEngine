@@ -1,7 +1,6 @@
 #include "FileDialogs.h"
 
 #include <Cv4CommonEngineLib/Common.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvGlobals.h>
 
@@ -36,15 +35,6 @@ using namespace cvengine;
 static const std::filesystem::path kGameName = "Beyond the Sword";
 
 static constexpr const wchar_t* kSaveFileExtension = L"CivBeyondSwordSave";
-
-std::optional<std::filesystem::path> engine_specific::promptSaveGamePath(const std::filesystem::path& defPath)
-{
-	return cvengine::promptSaveFilePath(defPath);
-}
-std::optional<std::filesystem::path> engine_specific::promptLoadGamePath(const std::filesystem::path& defDir)
-{
-	return cvengine::promptLoadFilePath(defDir);
-}
 
 #ifndef CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
 static bool initNFD()

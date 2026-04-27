@@ -1,5 +1,5 @@
 ﻿#include "inc/Cv4CommonEngineLib/CvVFS.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
+#include "Common.h"
 
 #include <CvString.h>
 
@@ -22,8 +22,6 @@ using namespace cvengine;
 #ifndef _WIN32
 #define IS_CASE_SENSITIVE_PLATFORM 1
 #endif
-
-constinit const CvVFS* cvengine::gVFS = nullptr;
 
 // NOTE: BUILD_FILE_CATALOG == 1 doesn't sort file enumeration output by mount point index.
 #define BUILD_FILE_CATALOG 0
@@ -242,10 +240,29 @@ namespace
 	}
 }
 
+static fs::path forceAbsolute(const fs::path& path)
+{
+	if (path.empty())
+		return fs::current_path();
+	else
+		return fs::absolute(path);
+}
+
 struct CvVFS::Internals
 {
-	explicit Internals(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, fs::path optModRelPath)
+	explicit Internals(
+		fs::path vanillaCiv4RootDir,
+		fs::path userConfigDir,
+		const std::optional<fs::path>& optModRelPath,
+		const std::optional<fs::path>& optEngineAssetsOverrideDir
+	)
 	{
+		// Make all paths absolute so that file enumeration always returns absolute physical paths.
+		// And use the current path for empty paths.
+		vanillaCiv4RootDir = forceAbsolute(vanillaCiv4RootDir);
+		userConfigDir = forceAbsolute(userConfigDir);
+
+		
 		const fs::path btsRoot = vanillaCiv4RootDir / "Beyond the Sword";
 
 		// https://forums.civfanatics.com/threads/differences-between-assets-folders.685453/#post-16505661
@@ -256,34 +273,45 @@ struct CvVFS::Internals
 			vanillaCiv4RootDir / "Warlords" / cvengine::kPublicMapsDirName /**/,
 			btsRoot / "Assets"                                             /**/,
 			btsRoot / cvengine::kPublicMapsDirName                         /**/,
-			cvengine::getUserConfigDir() / cvengine::kCustomAssetsDirName  /**/,
-			cvengine::getUserConfigDir() / cvengine::kPublicMapsDirName    /**/,
+			userConfigDir / cvengine::kCustomAssetsDirName                 /**/,
+			userConfigDir / cvengine::kPublicMapsDirName                   /**/,
 		});
 
-		// Remove trailing slash.
-		if (optModRelPath.has_parent_path() && !optModRelPath.has_filename())
-			optModRelPath = optModRelPath.parent_path();
-
-		if (!optModRelPath.empty())
+		if (optModRelPath)
 		{
-			if (!fs::exists(btsRoot / optModRelPath))
+			fs::path modRelPath = *optModRelPath;
+			// Remove trailing slash.
+			if (modRelPath.has_parent_path() && !modRelPath.has_filename())
+				modRelPath = modRelPath.parent_path();
+
+			if (!modRelPath.has_filename() || !fs::exists(btsRoot / modRelPath))
 				throw std::runtime_error("Mod does not exist.");
+			
 			mMountings.insert(mMountings.end(), {
-				btsRoot / optModRelPath / "Assets",
-				btsRoot / optModRelPath / cvengine::kPublicMapsDirName,
-				btsRoot / optModRelPath / "PrivateMaps",
-			});
+				btsRoot / modRelPath / "Assets",
+				btsRoot / modRelPath / cvengine::kPublicMapsDirName,
+				btsRoot / modRelPath / "PrivateMaps",
+				});
+
+			mModName = optModRelPath->filename().wstring();
+			mModFullPath = (btsRoot / *optModRelPath).wstring();
+			mModRelPath = optModRelPath->wstring();
+			// Used for save files, we need a specific format.
+			std::ranges::replace(mModRelPath, L'/', L'\\');
+			mModRelPath += L'\\';
 		}
 
-		// Make this absolute so that file enumeration always returns absolute physical paths.
-		// And it looks like empty paths are unchanged by absolute.
-		const fs::path absCv4EngineRootDir = cv4EngineRootDir.empty() ? fs::current_path() : fs::absolute(cv4EngineRootDir);
+		
 
 		// Cv4MiniEngine overrides.
-		mMountings.insert(mMountings.end(), {
-			absCv4EngineRootDir / cvengine::kCustomAssetsDirName,
-			absCv4EngineRootDir / cvengine::kPublicMapsDirName,
-		});
+		if (optEngineAssetsOverrideDir)
+		{
+			const fs::path& engineAssetsOverrideDir = forceAbsolute(*optEngineAssetsOverrideDir);
+			mMountings.insert(mMountings.end(), {
+				engineAssetsOverrideDir / cvengine::kCustomAssetsDirName,
+				engineAssetsOverrideDir / cvengine::kPublicMapsDirName,
+				});
+		}
 
 		mPythonModuleLookup.reserve(200);
 
@@ -300,16 +328,6 @@ struct CvVFS::Internals
 		buildPythonModuleLookup("", false);
 		buildPythonModuleLookup("Python", true); // Let's hope there are no conflicts with maps.
 #endif
-
-		mModName = optModRelPath.filename().wstring();
-		if (!mModName.empty())
-		{
-			mModFullPath = (btsRoot / optModRelPath).wstring();
-			mModRelPath = optModRelPath.wstring();
-			// Used for save files, we need a specific format.
-			std::ranges::replace(mModRelPath, L'/', L'\\');
-			mModRelPath += L'\\';
-		}
 	}
 
 	// We'll now store these as wstrings. If anybody needs ASCII/codepage strings, they'll have to convert where used.
@@ -583,8 +601,13 @@ struct CvVFS::Internals
 
 
 
-CvVFS::CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const fs::path& optRelModPath)
-	: mInternals(std::make_unique<Internals>(cv4EngineRootDir, vanillaCiv4RootDir, optRelModPath))
+CvVFS::CvVFS(
+	const std::filesystem::path& vanillaCiv4RootDir,
+	const std::filesystem::path& userConfigDir,
+	const std::optional<std::filesystem::path>& optModRelPath,
+	const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir
+)
+	: mInternals(std::make_unique<Internals>(vanillaCiv4RootDir, userConfigDir, optModRelPath, optEngineAssetsOverrideDir))
 {
 }
 

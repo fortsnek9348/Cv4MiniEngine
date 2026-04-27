@@ -1,10 +1,10 @@
-#include "inc/Cv4CommonEngineLib/CvAppUtil.h"
+#include "CvAppUtil.h"
+#include "CommonEngineGlobal.h"
+#include "CompressionBinaryStream.h"
 #include "inc/Cv4CommonEngineLib/RawBinaryStream.h"
 #include "inc/Cv4CommonEngineLib/CvVFS.h"
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
-#include "CompressionBinaryStream.h"
 
 #include <CvEventReporter.h>
 #include <CvGlobals.h>
@@ -71,7 +71,7 @@ void cvengine::app::serialise(FFile<StdRawBinaryStream>& file)
 
 	file.Write(kU32Unk0);
 
-	engine_specific::getCvEngine().serialise(file);
+	gCommonEngineConfig.engine->serialise(file);
 
 	file.Write(uint8_t(0)); // unk
 
@@ -167,7 +167,7 @@ void cvengine::app::deserialise(FFile<StdRawBinaryStream>& file)
 	if (u32 != 0)
 		std::abort();
 
-	engine_specific::getCvEngine().deserialise(file);
+	gCommonEngineConfig.engine->deserialise(file);
 
 	uint8_t u8{};
 	file.Read(&u8); // unk
@@ -177,15 +177,3 @@ void cvengine::app::deserialise(FFile<StdRawBinaryStream>& file)
 	file.ReadString(str);
 }
 
-std::wstring cvengine::app::extractModRelPathFromSave(const std::filesystem::path& path)
-{
-	FFile<StdRawBinaryStream> file(path, std::ios::in);
-	uint32_t u32{};
-	file.Read(&u32);
-	// Can't check this until mod is determined...
-	//if (u32 != (unsigned)gGlobals.getDefineINT("SAVE_VERSION"))
-	//	std::abort();
-	CvString str;
-	file.ReadString(str);
-	return heck::convertAsciiToWide(str);
-}

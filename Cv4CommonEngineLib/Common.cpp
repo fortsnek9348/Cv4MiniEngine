@@ -1,4 +1,4 @@
-#include "inc/Cv4CommonEngineLib/Common.h"
+#include "Common.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
 
 #include <CvGlobals.h>
@@ -21,10 +21,10 @@ using namespace cvengine;
 #endif
 
 static const std::filesystem::path kGameName = "Beyond the Sword";
-const std::filesystem::path cvengine::kSavesDirName = "Saves (Cv4MiniEngine)";
+//const std::filesystem::path cvengine::kSavesDirName = "Saves (Cv4MiniEngine)";
 const std::filesystem::path cvengine::kSavesAutoDirName = "auto";
 const std::filesystem::path cvengine::kSavesSingleDirName = "single";
-const std::filesystem::path cvengine::kReplaysDirName = "Replays (Cv4MiniEngine)";
+//const std::filesystem::path cvengine::kReplaysDirName = "Replays (Cv4MiniEngine)";
 const std::filesystem::path cvengine::kCustomAssetsDirName = "CustomAssets";
 const std::filesystem::path cvengine::kPublicMapsDirName = "PublicMaps";
 
@@ -271,23 +271,23 @@ void cvengine::initDebugOutput()
 	std::wcerr << L" and [TEST WCERR OUTPUT]" << std::endl;
 }
 
-const fs::path& cvengine::getUserConfigDir()
-{
-	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Config);
-	return kPath;
-}
-
-const fs::path& cvengine::getUserDataDir()
-{
-	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Data);
-	return kPath;
-}
-
-const fs::path& cvengine::getUserCacheDir()
-{
-	static const fs::path kPath = heck::getUserGamesSpecialDirectory("Cv4MiniEngine", heck::EUserGamesSpecialDirectory::Cache);
-	return kPath;
-}
+//const fs::path& cvengine::getUserConfigDir()
+//{
+//	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Config);
+//	return kPath;
+//}
+//
+//const fs::path& cvengine::getUserDataDir()
+//{
+//	static const fs::path kPath = heck::getUserGamesSpecialDirectory(kGameName, heck::EUserGamesSpecialDirectory::Data);
+//	return kPath;
+//}
+//
+//const fs::path& cvengine::getUserCacheDir()
+//{
+//	static const fs::path kPath = heck::getUserGamesSpecialDirectory("Cv4MiniEngine", heck::EUserGamesSpecialDirectory::Cache);
+//	return kPath;
+//}
 
 std::wstring cvengine::trim(std::wstring s)
 {

@@ -1,15 +1,9 @@
 #include "MyCvDLLPlotBuilder.h"
 #include "MyCvDLLEntityIFace.h"
 
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
-
 using namespace cvengine;
 
-CvDLLPlotBuilderIFaceBase& cvengine::engine_specific::getPlotBuilderIFace()
-{
-	static constinit MyCvDLLPlotBuilder s;
-	return s;
-}
+constinit MyCvDLLPlotBuilder MyCvDLLPlotBuilder::gInstance;
 
 class ::CvPlotBuilder : public CvEntity
 {

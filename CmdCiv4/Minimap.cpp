@@ -549,7 +549,7 @@ void Minimap::drawThis(ivec2 offset, hecktui::Framebuffer& fb)
 	if (mReplayBaseTexture.empty())
 	{
 		drawMarker({
-			.coord = CvTuiInterface::getInstance().getWorldView().getLookAtPlotCoord(),
+			.coord = CvTuiInterface::getInstance().getWorldView()->getLookAtPlotCoord(),
 			.colourI = (ColorTypes)gGlobals.getInfoTypeForString("COLOR_WHITE"),
 			.c = L'@',
 			});

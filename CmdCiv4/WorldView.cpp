@@ -4,9 +4,9 @@
 #include "TuiTextCode.h"
 #include "WorldViewUtils.h"
 #include "CvTuiInterface.h"
+#include "CvTuiEngine.h"
 
 #include <Cv4CommonEngineLib/CvEngine.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvGlobals.h>
 #include <CvMap.h>
@@ -20,7 +20,6 @@
 #include <CvInfos.h>
 #include <CvGameTextMgr.h>
 #include <CvInitCore.h>
-#include <CvInfos.h>
 
 #include <CommonStuff/range.h>
 
@@ -1842,7 +1841,7 @@ WorldViewFramebuffer WorldView::draw() const
 	{
 		for (int xplots = visibleMinXPlot; xplots < visibleMaxXPlot; ++xplots)
 		{
-			if (const std::wstring_view label = engine_specific::getCvEngine().findSignTextAt(GC.getGame().getActivePlayer(), { xplots, yplots }); label.size())
+			if (const std::wstring_view label = CvTuiEngine::getInstance().findSignTextAt(GC.getGame().getActivePlayer(), { xplots, yplots }); label.size())
 			{
 				fb.drawText(mapCellToWindowCoord(mWindowDim, mCenterMapCellCoord, plotToTopLeftMapCellCoord({ xplots, yplots }, mZoom)),
 					plotOuterDim.x,

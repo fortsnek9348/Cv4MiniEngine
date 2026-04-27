@@ -1,8 +1,9 @@
 #include "MyCvDLLEngineIFace.h"
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
-#include "inc/Cv4CommonEngineLib/CvAppUtil.h"
+#include "CvAppUtil.h"
+
+#include "Common.h"
+#include "CommonEngineGlobal.h"
 
 #include <CvGlobals.h>
 #include <CvMap.h>
@@ -25,20 +26,20 @@ bool MyCvDLLEngineIFace::isCameraLocked() { return false; }
 void MyCvDLLEngineIFace::SetObeyEntityVisibleFlags([[maybe_unused]] bool bObeyHide) { std::abort(); }
 void MyCvDLLEngineIFace::AutoSave(bool bInitial)
 {
-	engine_specific::getCvEngine().autoSave(bInitial);
+	gCommonEngineConfig.engine->autoSave(bInitial);
 }
 void MyCvDLLEngineIFace::SaveReplay(PlayerTypes ePlayer)
 {
-	engine_specific::getCvEngine().saveReplay(ePlayer);
+	gCommonEngineConfig.engine->saveReplay(ePlayer);
 }
 void MyCvDLLEngineIFace::SaveGame(CvString& szFilename, [[maybe_unused]] SaveGameTypes eType)
 {
 	//std::abort();
 
 	// This is only called by player bot I think, so assume UTF8.
-	const std::filesystem::path defPath = getUserDataDir() / kSavesDirName / kSavesSingleDirName / heck::convertUtf8ToWide(szFilename);
+	const std::filesystem::path defPath = gCommonEngineConfig.userDataDirPath / gCommonEngineConfig.savesDirName / kSavesSingleDirName / heck::convertUtf8ToWide(szFilename);
 
-	if (const auto optPath = engine_specific::promptSaveGamePath(defPath))
+	if (const auto optPath = gCommonEngineConfig.callbackHandler->promptSaveGamePath(defPath))
 	{
 		FFile<StdRawBinaryStream> file{ StdRawBinaryStream(*optPath, std::ios::out | std::ios::binary) };
 		app::serialise(file);
@@ -53,7 +54,7 @@ void MyCvDLLEngineIFace::DoTurn()
 	// Direct debug output for when logging AI autoplay to file.
 	//cvengine::outputDebugString(("MyCvDLLEngineIFace::DoTurn: " + std::to_string(gGlobals.getGame().getGameTurn()) + '\n').c_str());
 
-	engine_specific::getCvEngine().doTurn();
+	gCommonEngineConfig.engine->doTurn();
 }
 void MyCvDLLEngineIFace::ClearMinimap()
 {
@@ -97,68 +98,68 @@ bool MyCvDLLEngineIFace::SetUpdateRate([[maybe_unused]] float fUpdateRate)
 }
 void MyCvDLLEngineIFace::toggleGlobeview()
 {
-	engine_specific::getCvEngine().toggleGlobeview();
+	gCommonEngineConfig.engine->toggleGlobeview();
 }
 bool MyCvDLLEngineIFace::isGlobeviewUp()
 {
-	return engine_specific::getCvEngine().isGlobeviewUp();
+	return gCommonEngineConfig.engine->isGlobeviewUp();
 }
 void MyCvDLLEngineIFace::toggleResourceLayer()
 {
-	engine_specific::getCvEngine().toggleResourceLayer();
+	gCommonEngineConfig.engine->toggleResourceLayer();
 }
 void MyCvDLLEngineIFace::toggleUnitLayer()
 {
-	engine_specific::getCvEngine().toggleUnitLayer();
+	gCommonEngineConfig.engine->toggleUnitLayer();
 }
 void MyCvDLLEngineIFace::setResourceLayer(bool bOn)
 {
-	engine_specific::getCvEngine().setResourceLayer(bOn);
+	gCommonEngineConfig.engine->setResourceLayer(bOn);
 }
 
 void MyCvDLLEngineIFace::MoveBaseTurnRight(float increment)
 {
-	engine_specific::getCvEngine().moveBaseTurnRight(increment);
+	gCommonEngineConfig.engine->moveBaseTurnRight(increment);
 }
 void MyCvDLLEngineIFace::MoveBaseTurnLeft(float increment)
 {
-	engine_specific::getCvEngine().moveBaseTurnLeft(increment);
+	gCommonEngineConfig.engine->moveBaseTurnLeft(increment);
 }
 void MyCvDLLEngineIFace::SetFlying(bool value)
 {
-	engine_specific::getCvEngine().setFlying(value);
+	gCommonEngineConfig.engine->setFlying(value);
 }
 void MyCvDLLEngineIFace::CycleFlyingMode(int displacement)
 {
-	engine_specific::getCvEngine().cycleFlyingMode(displacement);
+	gCommonEngineConfig.engine->cycleFlyingMode(displacement);
 }
 void MyCvDLLEngineIFace::SetMouseFlying(bool value)
 {
-	engine_specific::getCvEngine().setMouseFlying(value);
+	gCommonEngineConfig.engine->setMouseFlying(value);
 }
 void MyCvDLLEngineIFace::SetSatelliteMode(bool value)
 {
-	engine_specific::getCvEngine().setSatelliteMode(value);
+	gCommonEngineConfig.engine->setSatelliteMode(value);
 }
 void MyCvDLLEngineIFace::SetOrthoCamera(bool value)
 {
-	engine_specific::getCvEngine().setOrthoCamera(value);
+	gCommonEngineConfig.engine->setOrthoCamera(value);
 }
 bool MyCvDLLEngineIFace::GetFlying()
 {
-	return engine_specific::getCvEngine().getFlying();
+	return gCommonEngineConfig.engine->getFlying();
 }
 bool MyCvDLLEngineIFace::GetMouseFlying()
 {
-	return engine_specific::getCvEngine().getMouseFlying();
+	return gCommonEngineConfig.engine->getMouseFlying();
 }
 bool MyCvDLLEngineIFace::GetSatelliteMode()
 {
-	return engine_specific::getCvEngine().getSatelliteMode();
+	return gCommonEngineConfig.engine->getSatelliteMode();
 }
 bool MyCvDLLEngineIFace::GetOrthoCamera()
 {
-	return engine_specific::getCvEngine().getOrthoCamera();
+	return gCommonEngineConfig.engine->getOrthoCamera();
 }
 
 // landscape
@@ -214,7 +215,7 @@ float MyCvDLLEngineIFace::GetPointYSpacing()
 // This is a flat world; everything is on a plane.
 float MyCvDLLEngineIFace::GetHeightmapZ(const NiPoint3& pt3, bool bClampAboveWater)
 {
-	return engine_specific::getCvEngine().getHeightmapZ(pt3, bClampAboveWater);
+	return gCommonEngineConfig.engine->getHeightmapZ(pt3, bClampAboveWater);
 }
 
 // Invert int CvPlot::getFOWIndex() const
@@ -230,43 +231,43 @@ static heck::ivec2 decodeFOWIndex(unsigned int i)
 void MyCvDLLEngineIFace::LightenVisibility(unsigned int i)
 {
 	//CvInterface::getInstance().getWorldView().changePlotVisibility(decodeFOWIndex(i), WorldView::kLightened);
-	engine_specific::getCvEngine().lightenVisibility(decodeFOWIndex(i));
+	gCommonEngineConfig.engine->lightenVisibility(decodeFOWIndex(i));
 }
 void MyCvDLLEngineIFace::DarkenVisibility(unsigned int i)
 {
 	//CvInterface::getInstance().getWorldView().changePlotVisibility(decodeFOWIndex(i), WorldView::kDarkened);
-	engine_specific::getCvEngine().darkenVisibility(decodeFOWIndex(i));
+	gCommonEngineConfig.engine->darkenVisibility(decodeFOWIndex(i));
 }
 void MyCvDLLEngineIFace::BlackenVisibility(unsigned int i)
 {
 	//CvInterface::getInstance().getWorldView().changePlotVisibility(decodeFOWIndex(i), WorldView::kBlackened);
-	engine_specific::getCvEngine().blackenVisibility(decodeFOWIndex(i));
+	gCommonEngineConfig.engine->blackenVisibility(decodeFOWIndex(i));
 }
 void MyCvDLLEngineIFace::RebuildAllPlots()
 {
 	//CvInterface::getInstance().invalidateAllPlots();
-	engine_specific::getCvEngine().rebuildAllPlots();
+	gCommonEngineConfig.engine->rebuildAllPlots();
 }
 void MyCvDLLEngineIFace::RebuildPlot(int plotX, int plotY, bool bRebuildHeights, bool bRebuildTextures)
 {
 	//CvInterface::getInstance().invalidatePlot({ plotX, plotY });
-	engine_specific::getCvEngine().rebuildPlot({ plotX, plotY }, bRebuildHeights, bRebuildTextures);
+	gCommonEngineConfig.engine->rebuildPlot({ plotX, plotY }, bRebuildHeights, bRebuildTextures);
 }
 void MyCvDLLEngineIFace::RebuildRiverPlotTile(int plotX, int plotY, bool bRebuildHeights, bool bRebuildTextures)
 {
 	//// TODO: Invalidate adjacent?
 	//CvInterface::getInstance().invalidatePlot({ plotX, plotY });
-	engine_specific::getCvEngine().rebuildRiverPlotTile({ plotX, plotY }, bRebuildHeights, bRebuildTextures);
+	gCommonEngineConfig.engine->rebuildRiverPlotTile({ plotX, plotY }, bRebuildHeights, bRebuildTextures);
 }
 void MyCvDLLEngineIFace::RebuildTileArt(int plotX, int plotY)
 {
 	//CvInterface::getInstance().invalidatePlot({ plotX, plotY });
-	engine_specific::getCvEngine().rebuildTileArt({ plotX, plotY });
+	gCommonEngineConfig.engine->rebuildTileArt({ plotX, plotY });
 }
 void MyCvDLLEngineIFace::ForceTreeOffsets(int plotX, int plotY)
 {
 	// TODO: This is used to cut off trees at rivers.
-	engine_specific::getCvEngine().forceTreeOffsets({ plotX, plotY });
+	gCommonEngineConfig.engine->forceTreeOffsets({ plotX, plotY });
 }
 
 bool MyCvDLLEngineIFace::GetGridMode() { abort(); }
@@ -275,29 +276,29 @@ void MyCvDLLEngineIFace::SetGridMode([[maybe_unused]] bool bVal) { abort(); }
 void MyCvDLLEngineIFace::addColoredPlot(int plotX, int plotY, const NiColorA& color, PlotStyles plotStyle, PlotLandscapeLayers layer)
 {
 	//CvInterface::getInstance().getWorldView().setColouredPlot({ plotX, plotY }, { color, plotStyle, layer });
-	engine_specific::getCvEngine().addColoredPlot({ plotX, plotY }, color, plotStyle, layer);
+	gCommonEngineConfig.engine->addColoredPlot({ plotX, plotY }, color, plotStyle, layer);
 }
 void MyCvDLLEngineIFace::clearColoredPlots(PlotLandscapeLayers layer)
 {
 	//CvInterface::getInstance().getWorldView().clearColouredPlots(layer);
-	engine_specific::getCvEngine().clearColoredPlots(layer);
+	gCommonEngineConfig.engine->clearColoredPlots(layer);
 }
 void MyCvDLLEngineIFace::fillAreaBorderPlot(int plotX, int plotY, const NiColorA& color, AreaBorderLayers layer)
 {
-	engine_specific::getCvEngine().fillAreaBorderPlot({ plotX, plotY }, color, layer);
+	gCommonEngineConfig.engine->fillAreaBorderPlot({ plotX, plotY }, color, layer);
 }
 void MyCvDLLEngineIFace::clearAreaBorderPlots(AreaBorderLayers layer)
 {
-	engine_specific::getCvEngine().clearAreaBorderPlots(layer);
+	gCommonEngineConfig.engine->clearAreaBorderPlots(layer);
 }
 void MyCvDLLEngineIFace::updateFoundingBorder()
 {
-	engine_specific::getCvEngine().updateFoundingBorder();
+	gCommonEngineConfig.engine->updateFoundingBorder();
 }
 void MyCvDLLEngineIFace::addLandmark(CvPlot* plot, const wchar_t* caption)
 {
 	//abort();
-	engine_specific::getCvEngine().addLandmark(plot, caption);
+	gCommonEngineConfig.engine->addLandmark(plot, caption);
 }
 
 void MyCvDLLEngineIFace::TriggerEffect(int iEffect, NiPoint3 pt3Point, float rotation)
@@ -308,7 +309,7 @@ void MyCvDLLEngineIFace::TriggerEffect(int iEffect, NiPoint3 pt3Point, float rot
 	//	std::nullopt, InterfaceMessageTypes::MESSAGE_TYPE_INFO,
 	//	std::nullopt, NO_COLOR, -1, -1, false, false
 	//);
-	engine_specific::getCvEngine().triggerEffect(iEffect, pt3Point, rotation);
+	gCommonEngineConfig.engine->triggerEffect(iEffect, pt3Point, rotation);
 }
 void MyCvDLLEngineIFace::printProfileText()
 {
@@ -317,53 +318,53 @@ void MyCvDLLEngineIFace::printProfileText()
 
 void MyCvDLLEngineIFace::clearSigns()
 {
-	engine_specific::getCvEngine().clearSigns();
+	gCommonEngineConfig.engine->clearSigns();
 }
 CvPlot* MyCvDLLEngineIFace::pickPlot(int x, int y, NiPoint3& worldPoint)
 {
-	return engine_specific::getCvEngine().pickPlot({ x, y }, worldPoint);
+	return gCommonEngineConfig.engine->pickPlot({ x, y }, worldPoint);
 }
 
 // dirty bits
 void MyCvDLLEngineIFace::SetDirty(EngineDirtyBits eBit, bool bNewValue)
 {
-	engine_specific::getCvEngine().setDirty(eBit, bNewValue);
+	gCommonEngineConfig.engine->setDirty(eBit, bNewValue);
 }
 bool MyCvDLLEngineIFace::IsDirty(EngineDirtyBits eBit)
 {
-	return engine_specific::getCvEngine().isDirty(eBit);
+	return gCommonEngineConfig.engine->isDirty(eBit);
 }
 void MyCvDLLEngineIFace::PushFogOfWar(FogOfWarModeTypes eNewMode)
 {
-	engine_specific::getCvEngine().pushFogOfWar(eNewMode);
+	gCommonEngineConfig.engine->pushFogOfWar(eNewMode);
 }
 FogOfWarModeTypes MyCvDLLEngineIFace::PopFogOfWar() // used for debug mode
 {
-	return engine_specific::getCvEngine().popFogOfWar();
+	return gCommonEngineConfig.engine->popFogOfWar();
 }
 void MyCvDLLEngineIFace::setFogOfWarFromStack() // used for debug mode
 {
-	engine_specific::getCvEngine().setFogOfWarFromStack();
+	gCommonEngineConfig.engine->setFogOfWarFromStack();
 }
 void MyCvDLLEngineIFace::MarkBridgesDirty()
 {
-	engine_specific::getCvEngine().markBridgesDirty();
+	gCommonEngineConfig.engine->markBridgesDirty();
 }
 void MyCvDLLEngineIFace::AddLaunch(PlayerTypes playerType)
 {
 	//std::wclog << CvPlayerAI::getPlayerNonInl(playerType).getName() << L": Imagine your spaceship launching from somewhere" << std::endl;
-	engine_specific::getCvEngine().addLaunch(playerType);
+	gCommonEngineConfig.engine->addLaunch(playerType);
 }
 void MyCvDLLEngineIFace::AddGreatWall(CvCity* city)
 {
-	engine_specific::getCvEngine().addGreatWall(city);
+	gCommonEngineConfig.engine->addGreatWall(city);
 }
 void MyCvDLLEngineIFace::RemoveGreatWall(CvCity* city)
 {
-	engine_specific::getCvEngine().removeGreatWall(city);
+	gCommonEngineConfig.engine->removeGreatWall(city);
 }
 void MyCvDLLEngineIFace::MarkPlotTextureAsDirty(int plotX, int plotY)
 {
 	//CvInterface::getInstance().invalidatePlot({ plotX, plotY });
-	engine_specific::getCvEngine().markPlotTextureAsDirty({ plotX, plotY });
+	gCommonEngineConfig.engine->markPlotTextureAsDirty({ plotX, plotY });
 }

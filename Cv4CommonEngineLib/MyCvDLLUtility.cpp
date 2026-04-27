@@ -6,16 +6,17 @@
 #include "FMPIManager.h"
 #include "inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
 #include "inc/Cv4CommonEngineLib/CvAppUtil.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 #include "inc/Cv4CommonEngineLib/CvTranslator.h"
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
 #include "inc/Cv4CommonEngineLib/CvVFS.h"
 #include "inc/Cv4CommonEngineLib/DLLMessageQueue.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 #include "inc/Cv4CommonEngineLib/MyFFile.h"
+
+#include "Common.h"
+#include "CommonEngineGlobal.h"
 
 #include <FAStar.h>
 
@@ -58,7 +59,7 @@ MyCvDLLUtility& MyCvDLLUtility::getInstance()
 
 CvDLLEntityIFaceBase* MyCvDLLUtility::getEntityIFace()
 {
-	return &engine_specific::getEntityIFace();
+	return gCommonEngineConfig.entityIFace;
 }
 
 CvDLLInterfaceIFaceBase* MyCvDLLUtility::getInterfaceIFace()
@@ -78,17 +79,17 @@ CvDLLIniParserIFaceBase* MyCvDLLUtility::getIniParserIFace()
 
 CvDLLSymbolIFaceBase* MyCvDLLUtility::getSymbolIFace()
 {
-	return &engine_specific::getSymbolIFace();
+	return gCommonEngineConfig.symbolIFace;
 }
 
 CvDLLFeatureIFaceBase* MyCvDLLUtility::getFeatureIFace()
 {
-	return &engine_specific::getFeatureIFace();
+	return gCommonEngineConfig.featureIFace;
 }
 
 CvDLLRouteIFaceBase* MyCvDLLUtility::getRouteIFace()
 {
-	return &engine_specific::getRouteIFace();
+	return gCommonEngineConfig.routeIFace;
 }
 
 
@@ -113,12 +114,12 @@ CvDLLPlotBuilderIFaceBase* MyCvDLLUtility::getPlotBuilderIFace()
 	//	}
 	//} x;
 
-	return &engine_specific::getPlotBuilderIFace();
+	return gCommonEngineConfig.plotBuilderIFace;
 }
 
 CvDLLRiverIFaceBase* MyCvDLLUtility::getRiverIFace()
 {
-	return &engine_specific::getRiverIFace();
+	return gCommonEngineConfig.riverIFace;
 }
 
 CvDLLFAStarIFaceBase* MyCvDLLUtility::getFAStarIFace()
@@ -135,7 +136,7 @@ CvDLLXmlIFaceBase* MyCvDLLUtility::getXMLIFace()
 
 CvDLLFlagEntityIFaceBase* MyCvDLLUtility::getFlagEntityIFace()
 {
-	return &engine_specific::getFlagEntityIFace();
+	return gCommonEngineConfig.flagEntityIFace;
 }
 
 CvDLLPythonIFaceBase* MyCvDLLUtility::getPythonIFace()
@@ -578,7 +579,7 @@ void MyCvDLLUtility::stripSpecialCharacters(CvWString& szName)
 
 void MyCvDLLUtility::initGlobals()
 {
-	gGlobals.setInterface(&engine_specific::getCvInterface());
+	gGlobals.setInterface(gCommonEngineConfig.interface);
 	static FAStar gPathFinder{};
 	static FAStar gInterfacePathFinder{};
 	static FAStar gStepPathFinder{};
@@ -630,18 +631,18 @@ void MyCvDLLUtility::SetDone(bool bDone)
 	if (!bDone) // TODO: What does this mean?
 		std::abort();
 	//isDone = bDone;
-	engine_specific::exitApp();
+	gCommonEngineConfig.callbackHandler->exitApp();
 }
 
 bool MyCvDLLUtility::GetDone()
 {
-	return engine_specific::isAppExiting();
+	return gCommonEngineConfig.callbackHandler->isAppExiting();
 }
 
 bool MyCvDLLUtility::GetAutorun()
 {
 	//return isAutorun;
-	return engine_specific::isAutorun();
+	return gCommonEngineConfig.callbackHandler->isAutorun();
 }
 
 void MyCvDLLUtility::beginDiplomacy(CvDiploParameters* pDiploParams, PlayerTypes ePlayer)
@@ -754,7 +755,7 @@ void MyCvDLLUtility::Do3DSound(int iScriptId, NiPoint3 vPosition)
 	//	gGlobals.getMap().pointYToPlotY(vPosition.y),
 	//	});
 
-	engine_specific::getCvInterface().play3DSound(iScriptId, vPosition);
+	gCommonEngineConfig.interface->play3DSound(iScriptId, vPosition);
 }
 
 FDataStreamBase* MyCvDLLUtility::createFileStream()
@@ -780,7 +781,7 @@ public:
 	std::filesystem::file_time_type latestSourceTimestamp = std::filesystem::file_time_type::min(); // Linux has a year 2174 epoch!
 
 	explicit CvCacheObject(ReadFunc readFunc, WriteFunc writeFunc, const char* cacheFilename)
-		: readFunc(readFunc), writeFunc(writeFunc), cacheDataPath(getUserCacheDir() / cacheFilename)
+		: readFunc(readFunc), writeFunc(writeFunc), cacheDataPath(gCommonEngineConfig.cacheDirPath / cacheFilename)
 	{
 	}
 
@@ -1170,17 +1171,17 @@ unsigned int MyCvDLLUtility::getFrameCounter() const
 
 bool MyCvDLLUtility::altKey()
 {
-	return engine_specific::isAltDown();
+	return gCommonEngineConfig.callbackHandler->isAltDown();
 }
 
 bool MyCvDLLUtility::shiftKey()
 {
-	return engine_specific::isShiftDown();
+	return gCommonEngineConfig.callbackHandler->isShiftDown();
 }
 
 bool MyCvDLLUtility::ctrlKey()
 {
-	return engine_specific::isCtrlDown();
+	return gCommonEngineConfig.callbackHandler->isCtrlDown();
 }
 
 bool MyCvDLLUtility::scrollLock()
@@ -1259,9 +1260,9 @@ void MyCvDLLUtility::SaveGame([[maybe_unused]] SaveGameTypes eSaveGame)
 		+ L" turn " + std::to_wstring(turn) + L' ' + static_cast<const std::wstring&>(dateStr)
 		+ L".CivBeyondSwordSave";
 
-	const std::filesystem::path defPath = getUserDataDir() / kSavesDirName / kSavesSingleDirName / defFilename;
+	const std::filesystem::path defPath = gCommonEngineConfig.userDataDirPath / gCommonEngineConfig.savesDirName / kSavesSingleDirName / defFilename;
 
-	if (const auto optPath = engine_specific::promptSaveGamePath(defPath))
+	if (const auto optPath = gCommonEngineConfig.callbackHandler->promptSaveGamePath(defPath))
 	{
 		FFile<StdRawBinaryStream> file{ StdRawBinaryStream(*optPath, std::ios::out | std::ios::binary) };
 		app::serialise(file);
@@ -1270,13 +1271,13 @@ void MyCvDLLUtility::SaveGame([[maybe_unused]] SaveGameTypes eSaveGame)
 
 void MyCvDLLUtility::LoadGame()
 {
-	if (const auto optPath = engine_specific::promptLoadGamePath(getUserDataDir() / kSavesDirName / kSavesSingleDirName))
-		engine_specific::deferLoadGame(*optPath);
+	if (const auto optPath = gCommonEngineConfig.callbackHandler->promptLoadGamePath(gCommonEngineConfig.userDataDirPath / gCommonEngineConfig.savesDirName / kSavesSingleDirName))
+		gCommonEngineConfig.callbackHandler->deferLoadGame(*optPath);
 }
 
 int MyCvDLLUtility::loadReplays(std::vector<CvReplayInfo*>& listReplays)
 {
-	const std::filesystem::path& dir = getUserDataDir() / kReplaysDirName;
+	const std::filesystem::path& dir = gCommonEngineConfig.userDataDirPath / gCommonEngineConfig.replaysDirName;
 
 	for (const auto& dirEntry : std::filesystem::directory_iterator(dir))
 	{

@@ -145,6 +145,14 @@ void CvInterface::insertIntoSelectionList(CvUnit* pUnit, bool bClear, bool bTogg
 	}
 }
 
+int CvInterface::getNumSelectedUnits() const
+{
+	if (auto* const list = getSelectionList())
+		return list->getNumUnits();
+	else
+		return 0;
+}
+
 CvUnit* CvInterface::getSelectionUnit(int iIndex) const
 {
 	const CvSelectionGroup& list = *getSelectionList();
@@ -156,7 +164,7 @@ CvUnit* CvInterface::getSelectionUnit(int iIndex) const
 
 bool CvInterface::isUnitSelected(const CvUnit& unit) const
 {
-	return getSelectionList()->getUnitIndex(&unit) >= 0;
+	return getSelectionList() && getSelectionList()->getUnitIndex(&unit) >= 0;
 }
 
 void CvInterface::resetInterfaceMode()

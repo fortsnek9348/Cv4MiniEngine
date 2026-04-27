@@ -146,3 +146,4 @@ public:
 
 // fortsnek: New function for the engine to use to get the config string of this DLL.
 DllExportForInterface std::span<const std::string_view> getCvGameCoreDLLConfigStrings();
+DllExportForInterface bool hasCvGameCoreDLLPlayerBotSupport();

@@ -1,5 +1,4 @@
 ﻿#include "inc/Cv4CommonEngineLib/CvTranslator.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
 //#include "DLLInterface/MyCvDLLUtility.h"
 //#include "TuiTextCode.h"
 
@@ -9,6 +8,7 @@
 
 #include <CommonStuff/range.h>
 
+#include <algorithm>
 #include <unordered_map>
 #include <cwctype>
 #include <expected>

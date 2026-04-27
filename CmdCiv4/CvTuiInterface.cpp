@@ -5,7 +5,6 @@
 #include "DXT.h"
 
 #include <Cv4CommonEngineLib/CvPopup.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvGlobals.h>
 #include <CvPlayerAI.h>
@@ -20,11 +19,6 @@
 using namespace cvengine;
 
 using heck::range;
-
-CvInterface& engine_specific::getCvInterface()
-{
-	return CvTuiInterface::getInstance();
-}
 
 CvTuiInterface& CvTuiInterface::getInstance()
 {
@@ -55,9 +49,17 @@ CvTuiMainInterface* CvTuiInterface::getTuiMainInterface()
 	return mMainInterface.get();
 }
 
-WorldView& CvTuiInterface::getWorldView()
+WorldView* CvTuiInterface::getWorldView()
 {
-	return mMainInterface->getWorldView();
+	if (mMainInterface)
+		return &mMainInterface->getWorldView();
+	else
+		return nullptr;
+}
+
+bool CvTuiInterface::isAIAutorunActive() const
+{
+	return mMainInterface && mMainInterface->isAIAutorunActive();
 }
 
 bool CvTuiInterface::isInMainMenu() const
@@ -615,12 +617,4 @@ bool CvTuiInterface::isSpaceshipScreenUp() const
 void CvTuiInterface::setBusy([[maybe_unused]] bool bBusy)
 {
 	// Just a busy cursor?
-}
-
-
-
-bool engine_specific::isAutorun()
-{
-	CvTuiMainInterface* const mainInterface = CvTuiInterface::getInstance().getTuiMainInterface();
-	return mainInterface && mainInterface->isAIAutorunActive();
 }

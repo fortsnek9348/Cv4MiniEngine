@@ -5,6 +5,8 @@
 class MyCvDLLFeature : public CvDLLFeatureIFaceBase
 {
 public:
+	static MyCvDLLFeature gInstance;
+
 	// Inherited via CvDLLFeatureIFaceBase
 	virtual CvFeature* createFeature() override;
 	virtual void init(CvFeature*, int iID, int iOffset, int iType, CvPlot* pPlot) override;
@@ -19,6 +21,8 @@ public:
 class MyCvDLLSymbol : public CvDLLSymbolIFaceBase
 {
 public:
+	static MyCvDLLSymbol gInstance;
+
 	// Inherited via CvDLLSymbolIFaceBase
 	virtual void init(CvSymbol*, int iID, int iOffset, int iType, CvPlot* pPlot) override;
 	virtual CvSymbol* createSymbol() override;
@@ -36,6 +40,8 @@ public:
 class MyCvDLLRoute : public CvDLLRouteIFaceBase
 {
 public:
+	static MyCvDLLRoute gInstance;
+
 	// Inherited via CvDLLRouteIFaceBase
 	virtual CvRoute* createRoute() override;
 	virtual void init(CvRoute*, int iID, int iOffset, int iType, CvPlot* pPlot) override;
@@ -47,6 +53,8 @@ public:
 class MyCvDLLRiver : public CvDLLRiverIFaceBase
 {
 public:
+	static MyCvDLLRiver gInstance;
+
 	// Inherited via CvDLLRiverIFaceBase
 	virtual CvRiver* createRiver() override;
 	virtual void init(CvRiver*, int iID, int iOffset, int iType, CvPlot* pPlot) override;

@@ -117,7 +117,7 @@
     <ClCompile Include="AppGameSetupMapScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CvTUIDiplomacyScreen.cpp">
+    <ClCompile Include="CvTuiDiplomacyScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TuiFileBrowser.cpp">
@@ -136,9 +136,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PythonAPI\CyTuiDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\PythonRegistration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileDialogs.cpp">
@@ -251,7 +248,7 @@
     <ClInclude Include="AppGameSetupMapScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CvTUIDiplomacyScreen.h">
+    <ClInclude Include="CvTuiDiplomacyScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TuiFileBrowser.h">

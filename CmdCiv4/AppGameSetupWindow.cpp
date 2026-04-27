@@ -22,10 +22,10 @@ namespace tui = hecktui;
 using heck::range;
 using namespace cvengine;
 
-static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts()
+static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts(const CvVFS& vfs)
 {
 	// If the map script doesn't exist, just pick anything.
-	const auto files = gVFS->enumeratePhysExtNonRecursive(L"", L".py");
+	const auto files = vfs.enumeratePhysExtNonRecursive(L"", L".py");
 	if (files.empty())
 		throw std::runtime_error("There are no map scripts!");
 
@@ -93,7 +93,7 @@ static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameS
 	initCore.setLeaderName(static_cast<PlayerTypes>(0), gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Alias, userName));
 }
 
-AppGameSetupWindow::AppGameSetupWindow()
+AppGameSetupWindow::AppGameSetupWindow(CvApp& app)
 	: Window{ L"", tui::WindowConfig{
 		.isDefaultFocus = true,
 		.isFullscreen = true,
@@ -101,7 +101,7 @@ AppGameSetupWindow::AppGameSetupWindow()
 		.canClose = true,
 		.borderStyle = tui::EBorderStyle::None,
 	} }
-	, mMapScriptsList(enumerateMapScripts())
+	, mMapScriptsList(enumerateMapScripts(app.getVFS()))
 {
 	loadInitCoreFromIni(gGlobals.getIniInitCore(), mMapScriptsList);
 	CvInitCore& initCore = gGlobals.getInitCore();
@@ -130,8 +130,8 @@ AppGameSetupWindow::AppGameSetupWindow()
 	//	.linesCrosswiseJustilign = tui::EJustilign::Stretch,
 	//	}));
 
-	client->addChild(std::make_shared<tui::Button>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_GO_BACK"), [this] {
-		CvApp::getInstance().getUI().removeWindow(this);
+	client->addChild(std::make_shared<tui::Button>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_GO_BACK"), [&app, this] {
+		app.getUI().removeWindow(this);
 		}));
 
 	client->addChild(std::make_shared<tui::Button>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LAUNCH"), [this] {

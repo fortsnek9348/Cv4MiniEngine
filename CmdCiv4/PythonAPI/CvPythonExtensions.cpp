@@ -1,4 +1,6 @@
 #include <Cv4CommonEngineLib/CvPythonExtensionsSetup.h>
+#include "CyTuiDialog.h"
+#include "CyGInterfaceScreen.h"
 
 #include <pybind11/embed.h>
 
@@ -6,4 +8,6 @@
 PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
 {
 	cvengine::setupCvPythonExtensionsModule(m);
+	cvengine::CyGInterfaceScreen::registerWithPython(m);
+	cvengine::CyTuiDialog::registerWithPython(m);
 }

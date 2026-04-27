@@ -1,9 +1,10 @@
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
 #include "inc/Cv4CommonEngineLib/CvAppUtil.h"
+
+#include "Common.h"
+#include "CommonEngineGlobal.h"
 
 #include <CvDLLUtilityIFaceBase.h>
 #include <CvTalkingHeadMessage.h>
@@ -47,9 +48,9 @@ void CvEngine::autoSave(bool bInitial)
 		// Not sure where the message goes. CvPlayer::addMessage is not called.
 		CvTalkingHeadMessage msg(GC.getGame().getGameTurn(), 10, gDLL->getText("TXT_KEY_AUTOSAVING").c_str(), nullptr, MESSAGE_TYPE_DISPLAY_ONLY, nullptr, NO_COLOR, -1, -1, false, false);
 		msg.setShown(true);
-		engine_specific::getCvInterface().addTurnMessageDisplayEntry(std::move(msg));
+		cvengine::gCommonEngineConfig.interface->addTurnMessageDisplayEntry(std::move(msg));
 
-		const std::filesystem::path autosavesDirPath = getUserDataDir() / kSavesDirName / kSavesSingleDirName / kSavesAutoDirName;
+		const std::filesystem::path autosavesDirPath = cvengine::gCommonEngineConfig.userDataDirPath / cvengine::gCommonEngineConfig.savesDirName / kSavesSingleDirName / kSavesAutoDirName;
 
 		try
 		{
@@ -95,7 +96,7 @@ void CvEngine::saveReplay(PlayerTypes ePlayer)
 {
 	CvWString timeStr;
 	CvGameTextMgr::GetInstance().setTimeStr(timeStr, gGlobals.getGame().getGameTurn(), true);
-	const std::filesystem::path dir = cvengine::getUserDataDir() / cvengine::kReplaysDirName;
+	const std::filesystem::path dir = cvengine::gCommonEngineConfig.userDataDirPath / cvengine::gCommonEngineConfig.replaysDirName;
 	std::filesystem::path path;
 	for (int i = 0; i < 1000; ++i)
 	{

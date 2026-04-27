@@ -1,7 +1,8 @@
 #include "MyCvDLLXml.h"
 #include "inc/Cv4CommonEngineLib/CvVFS.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
+
+#include "CommonEngineGlobal.h"
 
 #include <CommonStuff/StringConversion.h>
 

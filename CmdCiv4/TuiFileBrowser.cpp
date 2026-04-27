@@ -1,4 +1,5 @@
 ﻿#include "TuiFileBrowser.h"
+#include "CvApp.h"
 
 #include <Cv4CommonEngineLib/Common.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
@@ -33,7 +34,7 @@ namespace
 	{
 		std::vector<Root> roots;
 
-		roots.emplace_back(L"User Data", cvengine::getUserDataDir());
+		roots.emplace_back(L"User Data", cvengine::CvApp::getUserDataDir());
 
 #ifdef _WIN32
 		// C:\, D:\, etc.

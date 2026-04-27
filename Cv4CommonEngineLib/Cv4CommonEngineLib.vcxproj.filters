@@ -57,10 +57,10 @@
     <ClInclude Include="inc\Cv4CommonEngineLib\CvVFS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Cv4CommonEngineLib\EngineSpecificsHeader.h">
+    <ClInclude Include="inc\Cv4CommonEngineLib\CommonEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Cv4CommonEngineLib\Common.h">
+    <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\Cv4CommonEngineLib\CivIni.h">
@@ -102,7 +102,7 @@
     <ClInclude Include="inc\Cv4CommonEngineLib\AudioXmlDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Cv4CommonEngineLib\CvAppUtil.h">
+    <ClInclude Include="inc\Cv4CommonEngineLib\CvAppStates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\Cv4CommonEngineLib\CvEngine.h">
@@ -136,6 +136,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PythonAPI\CyPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonEngineGlobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CvAppUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -255,6 +261,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PythonAPI\CyPopup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

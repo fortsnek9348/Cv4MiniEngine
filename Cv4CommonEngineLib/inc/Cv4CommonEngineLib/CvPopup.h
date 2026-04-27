@@ -14,7 +14,7 @@ class PopupReturn;
 
 //class CvPopupTuiDialog;
 
-namespace cvengine::engine_specific
+namespace cvengine
 {
 	class IPopupUIWindow;
 }
@@ -68,7 +68,7 @@ public:
 	// This behaviour appears to be hard-coded in the EXE, not controlled by the DLL.
 	bool enableEscCancel = false;
 
-	std::shared_ptr<cvengine::engine_specific::IPopupUIWindow> window;
+	std::shared_ptr<cvengine::IPopupUIWindow> window;
 
 	Control& findControl(EControlType type, int iGroup);
 

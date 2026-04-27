@@ -1,10 +1,8 @@
 #include "../inc/Cv4CommonEngineLib/CvPythonExtensionsSetup.h"
-#include "../inc/Cv4CommonEngineLib/Common.h"
 #include "../inc/Cv4CommonEngineLib/CvEngineEnums.h"
 #include "../inc/Cv4CommonEngineLib/CvVFS.h"
 #include "../inc/Cv4CommonEngineLib/CyPopupReturn.h"
-#include "../inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
-
+#include "../CommonEngineGlobal.h"
 #include "CyCamera.h"
 #include "CyCommon.h"
 #include "CyDiplomacy.h"
@@ -55,7 +53,7 @@ void cvengine::setupCvPythonExtensionsModule(pybind11::module m)
 	});
 
 	m.def("getUserProfileDirectory", [] {
-		return cvengine::getUserConfigDir().native();
+		return cvengine::gCommonEngineConfig.userConfigDirPath.native();
 		});
 
 	cvengine::registerEnumsWithPython(m);
@@ -94,7 +92,5 @@ void cvengine::setupCvPythonExtensionsModule(pybind11::module m)
 	CyStatistics::registerWithPython(m);
 
 	DLLPublishToPython(m);
-
-	cvengine::engine_specific::registerEngineSpecificPythonBindings(m);
 }
 

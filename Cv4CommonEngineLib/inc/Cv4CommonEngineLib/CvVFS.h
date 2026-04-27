@@ -13,7 +13,12 @@ namespace cvengine
 	class CvVFS
 	{
 	public:
-		explicit CvVFS(const std::filesystem::path& cv4EngineRootDir, const std::filesystem::path& vanillaCiv4RootDir, const std::filesystem::path& optRelModPath);
+		explicit CvVFS(
+			const std::filesystem::path& vanillaCiv4RootDir,
+			const std::filesystem::path& userConfigDir,
+			const std::optional<std::filesystem::path>& optModRelPath,
+			const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir
+		);
 		~CvVFS() noexcept;
 
 		std::filesystem::path resolve(const std::filesystem::path& path) const;
@@ -39,7 +44,4 @@ namespace cvengine
 		struct Internals;
 		std::unique_ptr<Internals> mInternals;
 	};
-
-	// Set once in main.
-	extern const CvVFS* gVFS;
 }

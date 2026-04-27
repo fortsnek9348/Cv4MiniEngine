@@ -44,7 +44,6 @@ namespace GiganticMapsOptimisationsLib
 }
 #endif
 
-#if ENABLE_PLAYER_BOT
 namespace cvbot
 {
 	class IBot;
@@ -52,7 +51,6 @@ namespace cvbot
 	struct UnitKilledTurnMessage;
 	struct GreatPersonTurnMessage;
 }
-#endif
 
 class CvPlayer
 {
@@ -64,8 +62,8 @@ public:
 	DllExport void setupGraphical();
 	DllExport void reset(PlayerTypes eID = NO_PLAYER, bool bConstructorCall = false);
 
-#if ENABLE_PLAYER_BOT
 	DllExportForInterface void createPlayerBot(const cvbot::IPlayerBotPlugin& plugin);
+#if ENABLE_PLAYER_BOT
 	void setPlayerBotToRunNextTurn();
 #endif
 

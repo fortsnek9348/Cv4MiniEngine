@@ -2,11 +2,17 @@
 #include "AppMainMenusState.h"
 #include "CommandLine.h"
 #include "FileDialogs.h"
+#include "CvTuiInterface.h"
+#include "CvTuiEngine.h"
+#include "DLLInterface/MyCvDLLEntityIFace.h"
+#include "DLLInterface/MyCvDLLFeature.h"
+#include "DLLInterface/MyCvDLLFlagEntity.h"
+#include "DLLInterface/MyCvDLLPlotBuilder.h"
 
 #include <Cv4CommonEngineLib/Common.h>
 #include <Cv4CommonEngineLib/CivIni.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
+#include <Cv4CommonEngineLib/CommonEngine.h>
 
 #include <CvGlobals.h>
 #include <CvInitCore.h>
@@ -16,8 +22,9 @@
 #include <CvPlayerAI.h>
 #include <CvEventReporter.h>
 #include <CyArgsList.h>
+#include <GeneratePlayerBotHeader.h>
 
-#include <PlayerBotGameBinding/IPlayerBotPlugin.h>
+
 
 #include <HeckTextUI/Core.h>
 
@@ -37,31 +44,31 @@ CvApp& CvApp::getInstance()
 	return x;
 }
 
-CvApp::CvApp()
+std::filesystem::path CvApp::getUserDataDir()
 {
+	return heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Data);
 }
 
 void CvApp::start(const AppStartupConfig& config)
 {
 	mCmdLineConfig = config;
 
-	std::clog << "User config directory: " << getUserConfigDir() << std::endl;
-	std::clog << "User data directory: " << getUserDataDir() << std::endl;
-	std::clog << "User cache directory: " << getUserCacheDir() << std::endl;
+	const std::filesystem::path userDataDirPath = getUserDataDir();
+	const std::filesystem::path userConfigDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Config);
+	const std::filesystem::path cacheDirPath = heck::getUserGamesSpecialDirectory("Cv4MiniEngine", heck::EUserGamesSpecialDirectory::Cache);
+	const std::filesystem::path replaysDirName = L"Replays (Cv4MiniEngine)";
+	const std::filesystem::path savesDirName = L"Saves (Cv4MiniEngine)";
+	const std::filesystem::path iniFilename = L"Cv4MiniEngine.ini";
+	const std::filesystem::path profileFilename = L"Cv4MiniEngine Profile.txt";
 
-	std::clog << "Creating directories..." << std::endl;
-	std::filesystem::create_directories(getUserDataDir() / kSavesDirName / kSavesSingleDirName / kSavesAutoDirName);
-	std::filesystem::create_directories(getUserDataDir() / kSavesDirName / kSavesSingleDirName);
-	std::filesystem::create_directories(getUserDataDir() / kReplaysDirName);
-	std::filesystem::create_directories(getUserConfigDir() / kCustomAssetsDirName);
-	std::filesystem::create_directories(getUserConfigDir() / kPublicMapsDirName);
-
-	loadCivIni();
+	const std::filesystem::path iniPath = userConfigDirPath / iniFilename;
+	IniData::createIfNew(iniPath);
+	IniData ini = loadINI(iniPath);
 
 	// Only have to do this before first drawing the UI.
 	redirectLoggingOutput();
 
-	std::filesystem::path vanillaCiv4RootDir = gCivilizationIVIni.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L"");
+	std::filesystem::path vanillaCiv4RootDir = ini.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L"");
 	if (vanillaCiv4RootDir.empty())
 	{
 		std::cout << "First start-up. Specify the root of your Civilization 4 installation." << std::endl;
@@ -84,53 +91,62 @@ void CvApp::start(const AppStartupConfig& config)
 				std::exit(EXIT_FAILURE);
 			}
 		}
-		gCivilizationIVIni.set(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, vanillaCiv4RootDir.wstring());
+		ini.set(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, vanillaCiv4RootDir.wstring());
 	}
 
-	gCivilizationIVIni.setDefault(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_EnableRightClickToShiftClickRemap, "1");
+	ini.setDefault(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_EnableRightClickToShiftClickRemap, "1");
 
-	audioSystem = std::make_unique<AudioSystem>();
-
-	loadEnhancedDLLConfigFromINI();
+	if (ini.isChanged())
+		saveINI(iniPath, ini);
 
 	const std::filesystem::path dataDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L"");
-	//std::cout << "Building VFS file catalog with CV4MiniEngine data directory " << dataDir << std::endl;
-	std::cout << "Initialising VFS with Cv4MiniEngine data directory " << dataDir << std::endl;
-	// File cataloging is ~3x slower.
-	const auto t0 = std::chrono::steady_clock::now();
-	mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, std::filesystem::path(config.modRelPath));
-	const auto t1 = std::chrono::steady_clock::now();
-	std::clog << "VFS initialisation took " << std::chrono::duration<double, std::milli>(t1 - t0) << std::endl;
-	//mVFS = std::make_unique<CvVFS>(dataDir, vanillaCiv4RootDir, L"Next War\\");
-	gVFS = mVFS.get();
-
-	// Add defaults.
-	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
-	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
-	(void)gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_CheatCode, "");
-
-	saveCivilizationIniIfChanged();
-
-	audioSystem->loadXmlDefs();
 
 	// Load player bot DLL.
 	if (!config.botPath.empty())
 	{
+		if (!hasCvGameCoreDLLPlayerBotSupport())
+			throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
+
 		heck::DynamicLibrary lib(config.botPath.c_str());
 
 		mPlayerBotPlugin = &reinterpret_cast<const cvbot::IPlayerBotPlugin&(*)()>(lib.resolve("getPlayerBotPlugin"))();
-
-		if (mPlayerBotPlugin->getModName() != gVFS->getModName(false))
-			throw std::runtime_error("Bot requires mod '" + heck::convertWideToUtf8(mPlayerBotPlugin->getModName()) + "'.");
 	}
-}
 
-CvApp::~CvApp()
-{
-	// Clear this pointer out.
-	gVFS = nullptr;
-}
+	
+	const CommonEngineInitResult initResult = initialiseCommonEngine(std::wcout, CommonEngineConfig{
+		.civ4InstallationRoot = vanillaCiv4RootDir,
+		.optModRelPath = !config.modRelPath.empty() ? std::optional(config.modRelPath) : std::nullopt,
+		.optEngineAssetsOverrideDir = dataDir,
+		.userDataDirPath = userDataDirPath,
+		.userConfigDirPath = userDataDirPath,
+		.cacheDirPath = cacheDirPath,
+		.replaysDirName = replaysDirName,
+		.savesDirName = savesDirName,
+		.iniFilename = iniFilename,
+		.profileFilename = profileFilename,
+		.interface = &CvTuiInterface::getInstance(),
+		.engine = &CvTuiEngine::getInstance(),
+		.entityIFace = &MyCvDLLEntityIFace::gInstance,
+		.symbolIFace = &MyCvDLLSymbol::gInstance,
+		.featureIFace = &MyCvDLLFeature::gInstance,
+		.routeIFace = &MyCvDLLRoute::gInstance,
+		.plotBuilderIFace = &MyCvDLLPlotBuilder::gInstance,
+		.riverIFace = &MyCvDLLRiver::gInstance,
+		.flagEntityIFace = &MyCvDLLFlagEntity::gInstance,
+		.optPlayerBotPlugin = mPlayerBotPlugin,
+		.callbackHandler = this,
+		});
 
+	mVFS = initResult.vfs;
+
+	// -generate_player_bot_game_binding "..\PlayerBotGameBinding"
+	if (!config.generatePlayerBotGameDefsDir.empty())
+	{
+		cvbot::generatePlayerBotGameBindingHeaders(std::filesystem::path(config.generatePlayerBotGameDefsDir));
+	}
+
+	audioSystem = std::make_unique<AudioSystem>(*mVFS);
+}
 
 void CvApp::redirectLoggingOutput()
 {
@@ -148,17 +164,10 @@ const cvengine::AppStartupConfig& CvApp::getCommandLineConfig() const
 	return mCmdLineConfig;
 }
 
-#if ENABLE_PLAYER_BOT
-const cvbot::IPlayerBotPlugin* engine_specific::getPlayerBotPlugin()
-{
-	return CvApp::getInstance().getPlayerBotPlugin();
-}
-
 const cvbot::IPlayerBotPlugin* CvApp::getPlayerBotPlugin() const
 {
 	return mPlayerBotPlugin;
 }
-#endif
 
 ICvAppUI& CvApp::getUI() noexcept
 {
@@ -168,19 +177,6 @@ ICvAppUI& CvApp::getUI() noexcept
 bool CvApp::isShiftClickHackEnabled() const
 {
 	return mIsShiftClickHackEnabled;
-}
-
-bool engine_specific::isShiftDown()
-{
-	return CvApp::getInstance().getLastModifierKeysState().shift;
-}
-bool engine_specific::isAltDown()
-{
-	return CvApp::getInstance().getLastModifierKeysState().alt;
-}
-bool engine_specific::isCtrlDown()
-{
-	return CvApp::getInstance().getLastModifierKeysState().ctrl;
 }
 
 hecktui::ModifierKeyState CvApp::getLastModifierKeysState() const noexcept
@@ -198,11 +194,6 @@ void CvApp::deferMainMenu()
 	deferAppState(std::make_unique<AppMainMenusState>());
 }
 
-void CvApp::deferLoadGame(const std::filesystem::path& path)
-{
-	deferAppState(std::make_unique<LoadGameCvAppState>(path));
-}
-
 void CvApp::deferNewGameStartup(cvengine::app::SimplifiedInitCore config)
 {
 	deferAppState(std::make_unique<NewGameStartupCvAppState>(std::move(config)));
@@ -211,24 +202,6 @@ void CvApp::deferNewGameStartup(cvengine::app::SimplifiedInitCore config)
 void CvApp::deferInGameUI()
 {
 	deferAppState(std::make_unique<InGameCvAppState>());
-}
-
-void engine_specific::exitApp()
-{
-	CvApp::getInstance().setWantExit();
-}
-bool engine_specific::isAppExiting()
-{
-	return CvApp::getInstance().isExiting();
-}
-
-void CvApp::setWantExit()
-{
-	mWantExit = true;
-}
-bool CvApp::isExiting() const
-{
-	return mWantExit;
 }
 
 int CvApp::run()
@@ -250,4 +223,45 @@ int CvApp::run()
 	}
 
 	return 0;
+}
+
+bool CvApp::isShiftDown() const
+{
+	return getLastModifierKeysState().shift;
+}
+bool CvApp::isAltDown() const
+{
+	return getLastModifierKeysState().alt;
+}
+bool CvApp::isCtrlDown() const
+{
+	return getLastModifierKeysState().ctrl;
+}
+
+std::optional<std::filesystem::path> CvApp::promptSaveGamePath(const std::filesystem::path& defPath)
+{
+	return cvengine::promptSaveFilePath(defPath);
+}
+std::optional<std::filesystem::path> CvApp::promptLoadGamePath(const std::filesystem::path& defDir)
+{
+	return cvengine::promptLoadFilePath(defDir);
+}
+
+void CvApp::deferLoadGame(const std::filesystem::path& path)
+{
+	deferAppState(std::make_unique<LoadGameCvAppState>(path));
+}
+
+bool CvApp::isAutorun() const
+{
+	return CvTuiInterface::getInstance().isAIAutorunActive();
+}
+
+void CvApp::exitApp()
+{
+	mWantExit = true;
+}
+bool CvApp::isAppExiting() const
+{
+	return mWantExit;
 }

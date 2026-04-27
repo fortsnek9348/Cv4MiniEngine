@@ -3,7 +3,6 @@
 
 #include <Cv4CommonEngineLib/AudioXmlDefs.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
-#include <Cv4CommonEngineLib/Common.h>
 #include <Cv4CommonEngineLib/MyFFile.h>
 #include <Cv4CommonEngineLib/CivIni.h>
 
@@ -481,7 +480,8 @@ namespace
 
 struct AudioSystem::Internals
 {
-	cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
+	AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
+	const CvVFS& vfs;
 
 	int maxConcurrentSounds = kDefaultSimultaneouslyStartedSoundLimit;
 	double maxConcurrentSoundTimeSeconds = 0.2;
@@ -550,7 +550,7 @@ struct AudioSystem::Internals
 	std::map<heck::ivec2, PlayingSoundscape, heck::VectorComparator> playingSoundscapes;
 
 
-	Internals()
+	Internals(const CvVFS& vfs) : vfs(vfs)
 	{
 		const int defaultMaxConcurrentSoundTimeMilliseconds = std::lround(maxConcurrentSoundTimeSeconds * 1000);
 		maxConcurrentSounds = gCivilizationIVIni.grab(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_MaxConcurrentSounds, maxConcurrentSounds);
@@ -574,7 +574,7 @@ struct AudioSystem::Internals
 		int n = 0;
 		while (n < 100)
 		{
-			if (!gVFS->exists(std::format("{}-{:03d}.wav", soundData->filename, n)))
+			if (!vfs.exists(std::format("{}-{:03d}.wav", soundData->filename, n)))
 				break;
 			++n;
 		}
@@ -587,11 +587,11 @@ struct AudioSystem::Internals
 		{
 			// No variants, try the default.
 			std::string path = soundData->filename + ".wav";
-			if (gVFS->exists(path))
-				it = loadedSounds.emplace(soundData, loadWaveFile(gVFS->resolve(path)));
-			else if (gVFS->exists(path = soundData->filename + ".mp3"))
+			if (vfs.exists(path))
+				it = loadedSounds.emplace(soundData, loadWaveFile(vfs.resolve(path)));
+			else if (vfs.exists(path = soundData->filename + ".mp3"))
 			{
-				if (auto optBuf = tryLoadFileUsingSFML(gVFS->resolve(path)))
+				if (auto optBuf = tryLoadFileUsingSFML(vfs.resolve(path)))
 					it = loadedSounds.emplace(soundData, std::move(*optBuf));
 				else
 				{
@@ -609,7 +609,7 @@ struct AudioSystem::Internals
 		{
 			// Load the variants.
 			for (const int i : range(n))
-				it = loadedSounds.emplace(soundData, loadWaveFile(gVFS->resolve(std::format("{}-{:03d}.wav", soundData->filename, i))));
+				it = loadedSounds.emplace(soundData, loadWaveFile(vfs.resolve(std::format("{}-{:03d}.wav", soundData->filename, i))));
 		}
 
 		return it->second;
@@ -790,7 +790,7 @@ struct AudioSystem::Internals
 	}
 };
 
-AudioSystem::AudioSystem()
+AudioSystem::AudioSystem(const CvVFS& vfs)
 {
 	if constexpr (!kEnable)
 		std::clog << "Not compiled with audio support." << std::endl;
@@ -803,7 +803,7 @@ AudioSystem::AudioSystem()
 		if (const auto optDevice = sf::PlaybackDevice::getDevice())
 		{
 			std::clog << "SFML is using " << *optDevice << std::endl;
-			mInternals = std::make_unique<Internals>();
+			mInternals = std::make_unique<Internals>(vfs);
 		}
 		else
 			std::clog << "SFML failed to init an audio device. Continuing with no audio." << std::endl;
@@ -813,11 +813,6 @@ AudioSystem::AudioSystem()
 AudioSystem::AudioSystem(AudioSystem&&) noexcept = default;
 AudioSystem& AudioSystem::operator=(AudioSystem&&) noexcept = default;
 AudioSystem::~AudioSystem() noexcept = default;
-
-void AudioSystem::loadXmlDefs()
-{
-	mInternals->xmlDefs.loadXmlDefs();
-}
 
 void AudioSystem::playSound(std::string_view name)
 {
@@ -841,7 +836,7 @@ void AudioSystem::updateListener()
 {
 	if (mInternals)
 	{
-		const WorldView& worldView = CvTuiInterface::getInstance().getWorldView();
+		const WorldView& worldView = *CvTuiInterface::getInstance().getWorldView();
 		const heck::ivec2 center = worldView.getLookAtPlotCoord();
 		const int zoom = worldView.getZoom();
 		// TODO: Difficult to check whether Y and Z sign are correct.

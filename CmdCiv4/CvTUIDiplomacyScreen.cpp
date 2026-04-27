@@ -41,14 +41,14 @@ namespace
 	}
 }
 
-struct CvTUIDiplomacyScreen::Internals
+struct CvTuiDiplomacyScreen::Internals
 {
 	struct UserCommentButton : hecktui::Button
 	{
-		CvTUIDiplomacyScreen& ui;
+		CvTuiDiplomacyScreen& ui;
 		CvDiplomacyController::UserComment userComment;
 
-		explicit UserCommentButton(CvTUIDiplomacyScreen& ui, CvDiplomacyController::UserComment userComment)
+		explicit UserCommentButton(CvTuiDiplomacyScreen& ui, CvDiplomacyController::UserComment userComment)
 			: Button(std::move(userComment.text))
 			, ui(ui)
 			, userComment(std::move(userComment))
@@ -68,7 +68,7 @@ struct CvTUIDiplomacyScreen::Internals
 
 	struct TradeItemButton : hecktui::EmptyButton
 	{
-		CvTUIDiplomacyScreen& ui;
+		CvTuiDiplomacyScreen& ui;
 		//PlayerTypes fromPlayerI{};
 		//PlayerTypes toPlayerI{};
 		TradeData tradeData{};
@@ -78,7 +78,7 @@ struct CvTUIDiplomacyScreen::Internals
 		bool isDenial{};
 		int dealId = -1;
 
-		explicit TradeItemButton(CvTUIDiplomacyScreen& ui, TradeData tradeData, std::wstring label, bool isOffer, bool isAIPlayer, int dealId = -1)
+		explicit TradeItemButton(CvTuiDiplomacyScreen& ui, TradeData tradeData, std::wstring label, bool isOffer, bool isAIPlayer, int dealId = -1)
 			: ui(ui), tradeData(tradeData), label(std::move(label)), isOffer(isOffer), isAIPlayer(isAIPlayer), dealId(dealId)
 		{
 			setBorderStyle(hecktui::EBorderStyle::None);
@@ -188,7 +188,7 @@ struct CvTUIDiplomacyScreen::Internals
 	};
 };
 
-struct CvTUIDiplomacyScreen::TradePanel : hecktui::Element
+struct CvTuiDiplomacyScreen::TradePanel : hecktui::Element
 {
 	std::shared_ptr<hecktui::Element> invListPanel;
 	std::shared_ptr<hecktui::Element> offerListContainer;
@@ -242,7 +242,7 @@ struct CvTUIDiplomacyScreen::TradePanel : hecktui::Element
 	}
 };
 
-CvTUIDiplomacyScreen::CvTUIDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams)
+CvTuiDiplomacyScreen::CvTuiDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams)
 	: CvDiplomacyScreen(std::move(diploParams))
 	, CvGInterfaceScreen("Diplomacy Screen", cvengine::ECvScreen::DIPLOMACY_SCREEN)
 {
@@ -310,7 +310,7 @@ CvTUIDiplomacyScreen::CvTUIDiplomacyScreen(std::unique_ptr<CvDiploParameters> di
 	//getTuiRoot()->setLayout(std::make_unique<hecktui::FillLayout>());
 }
 
-void CvTUIDiplomacyScreen::startTrade()
+void CvTuiDiplomacyScreen::startTrade()
 {
 	for (auto& panel : mTradePanels)
 	{
@@ -337,7 +337,7 @@ void CvTUIDiplomacyScreen::startTrade()
 		.gap = 1,
 		}));
 }
-void CvTUIDiplomacyScreen::setTradeInventory(int side, const CLinkList<TradeData>& items, const std::vector<std::wstring>& labels)
+void CvTuiDiplomacyScreen::setTradeInventory(int side, const CLinkList<TradeData>& items, const std::vector<std::wstring>& labels)
 {
 	auto& tradePanel = *mTradePanels[side];
 	tradePanel.invListPanel->removeAllChildren();
@@ -395,7 +395,7 @@ void CvTUIDiplomacyScreen::setTradeInventory(int side, const CLinkList<TradeData
 		tradePanel.tradeCategoryGroupBoxes[item.m_eItemType]->setVisible(true);
 	}
 }
-void CvTUIDiplomacyScreen::updateTradeInventory(int side, const std::vector<DynamicTradeProps>& props)
+void CvTuiDiplomacyScreen::updateTradeInventory(int side, const std::vector<DynamicTradeProps>& props)
 {
 	auto& tradePanel = *mTradePanels[side];
 
@@ -416,7 +416,7 @@ void CvTUIDiplomacyScreen::updateTradeInventory(int side, const std::vector<Dyna
 		}
 	}
 }
-void CvTUIDiplomacyScreen::setTradeOffer(int side, const CLinkList<TradeData>& items, const std::vector<std::wstring>& labels, const std::vector<int>& dealIds)
+void CvTuiDiplomacyScreen::setTradeOffer(int side, const CLinkList<TradeData>& items, const std::vector<std::wstring>& labels, const std::vector<int>& dealIds)
 {
 	auto& tradePanel = *mTradePanels[side];
 	tradePanel.offerListPanel->removeAllChildren();
@@ -443,19 +443,19 @@ void CvTUIDiplomacyScreen::setTradeOffer(int side, const CLinkList<TradeData>& i
 //	}
 //}
 
-void CvTUIDiplomacyScreen::setCeaseFireVisible(bool visible)
+void CvTuiDiplomacyScreen::setCeaseFireVisible(bool visible)
 {
 	mTradePanels[0]->ceaseFireHeader->setVisible(visible);
 	mTradePanels[1]->ceaseFireHeader->setVisible(visible);
 }
 
-void CvTUIDiplomacyScreen::setInventoriesVisible(bool visible)
+void CvTuiDiplomacyScreen::setInventoriesVisible(bool visible)
 {
 	mTradePanels[0]->invListPanel->setVisible(visible);
 	mTradePanels[1]->invListPanel->setVisible(visible);
 }
 
-void CvTUIDiplomacyScreen::endTrade()
+void CvTuiDiplomacyScreen::endTrade()
 {
 	for (auto& panel : mTradePanels)
 	{
@@ -484,11 +484,11 @@ void CvTUIDiplomacyScreen::endTrade()
 		}));
 }
 
-void CvTUIDiplomacyScreen::rebuildPythonScreen()
+void CvTuiDiplomacyScreen::rebuildPythonScreen()
 {
 }
 
-void CvTUIDiplomacyScreen::updateFromGameState(hecktui::Window& wnd)
+void CvTuiDiplomacyScreen::updateFromGameState(hecktui::Window& wnd)
 {
 	//if (mUI)
 	//	mUI->updateFromGameState(*this);
@@ -498,7 +498,7 @@ void CvTUIDiplomacyScreen::updateFromGameState(hecktui::Window& wnd)
 	wnd.setWindowTitle(std::move(text));
 }
 
-std::shared_ptr<hecktui::Window> CvTUIDiplomacyScreen::createTuiWindow(bool passInput) const
+std::shared_ptr<hecktui::Window> CvTuiDiplomacyScreen::createTuiWindow(bool passInput) const
 {
 	const hecktui::WindowConfig config{
 		.isDefaultFocus = passInput,
@@ -547,19 +547,19 @@ std::shared_ptr<hecktui::Window> CvTUIDiplomacyScreen::createTuiWindow(bool pass
 	return wnd;
 }
 
-void CvTUIDiplomacyScreen::regreet()
+void CvTuiDiplomacyScreen::regreet()
 {
 	CvDiplomacyScreen::regreet();
 	updateUI();
 }
 
-void CvTUIDiplomacyScreen::endDiplomacy()
+void CvTuiDiplomacyScreen::endDiplomacy()
 {
 	CvDiplomacyScreen::endDiplomacy();
 	updateUI();
 }
 
-void CvTUIDiplomacyScreen::updateUI()
+void CvTuiDiplomacyScreen::updateUI()
 {
 	if (mAreTradePanelsActive != getController().isTradeScreenActive())
 	{
@@ -596,7 +596,7 @@ static std::vector<std::wstring> getTradeItemLabels(PlayerTypes ownerPlayerI, Pl
 	};
 }
 
-void CvTUIDiplomacyScreen::rebuildTradeInventory()
+void CvTuiDiplomacyScreen::rebuildTradeInventory()
 {
 	const bool isShowCurrent = !getController().isShowAllTrade();
 
@@ -609,7 +609,7 @@ void CvTUIDiplomacyScreen::rebuildTradeInventory()
 	}
 }
 
-void CvTUIDiplomacyScreen::updateTradePanels()
+void CvTuiDiplomacyScreen::updateTradePanels()
 {
 	const bool isShowCurrent = !getController().isShowAllTrade();
 
@@ -622,7 +622,7 @@ void CvTUIDiplomacyScreen::updateTradePanels()
 
 		//GET_PLAYER(us.playerI).updateTradeList(them.playerI, us.inventory, us.offer, them.offer);
 		updateTradeInventory(i, { std::from_range, viewCLinkList(us.inventory) | std::views::transform([&](TradeData item) {
-			return CvTUIDiplomacyScreen::DynamicTradeProps{
+			return CvTuiDiplomacyScreen::DynamicTradeProps{
 				.denial = GET_PLAYER(us.playerI).getTradeDenial(them.playerI, item) != NO_DENIAL,
 				.hidden = item.m_bHidden || item.m_bOffering,
 			};
@@ -635,7 +635,7 @@ void CvTUIDiplomacyScreen::updateTradePanels()
 		!CvDiplomacyController::Side::findMatchingTradeItem(getController().getSide(kSideActive).offer, peaceItem)));
 }
 
-void CvTUIDiplomacyScreen::updateComments()
+void CvTuiDiplomacyScreen::updateComments()
 {
 	mLblAIComment->setLabel(std::wstring(getController().getAICommentText()));
 
@@ -651,7 +651,7 @@ void CvTUIDiplomacyScreen::updateComments()
 	}
 }
 
-void CvTUIDiplomacyScreen::updateLeaderHead()
+void CvTuiDiplomacyScreen::updateLeaderHead()
 {
 	mLblLeaderheadText->widgetData = {
 		.m_iData1 = getController().getSide(kSideAI).playerI,

@@ -1,14 +1,11 @@
 #pragma once
 
-#include "MyFFile.h"
-
 #include <CvEnums.h>
 
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
-
-class FDataStreamBase;
 
 namespace cvengine::app
 {
@@ -43,16 +40,6 @@ namespace cvengine::app
 		unsigned int mapSeed = 0;
 		unsigned int syncSeed = 0;
 	};
-
-	//void updatePlayersAreHuman();
-	//void loadPostMenuGlobals();
-	void initCommon();
-	//void setupNewGame(const SimplifiedInitCore& config);
-	//void startNewGame(const std::function<void(const std::wstring&)>& progressCallback);
-	//void setPlayerOptions();
-	//void setupGraphical();
-	//void preGameStart();
-	//void loadGame(const std::filesystem::path& path);
 
 	using ProgressCallback = std::function<void(const std::wstring&)>;
 
@@ -92,7 +79,4 @@ namespace cvengine::app
 	};
 
 	std::wstring extractModRelPathFromSave(const std::filesystem::path& path);
-
-	void serialise(FFile<StdRawBinaryStream>& file);
-	void deserialise(FFile<StdRawBinaryStream>& file);
 }

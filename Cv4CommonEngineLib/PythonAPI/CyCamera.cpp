@@ -1,5 +1,5 @@
 #include "CyCamera.h"
-#include "CvPythonExtensions.h"
+#include "CyCommon.h"
 
 #include <CyPlot.h>
 #include <CyUnit.h>

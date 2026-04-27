@@ -1,5 +1,5 @@
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
+#include "CommonEngineGlobal.h"
 
 #include <CvGlobals.h>
 #include <CvInfos.h>
@@ -15,7 +15,7 @@ CvUserProfile& CvUserProfile::getInstance()
 	return g;
 }
 
-CvUserProfile::CvUserProfile() : mPath(cvengine::getUserConfigDir() / "Cv4MiniEngine Profile.txt"), mPlayerOptions(GC.getNumPlayerOptionInfos())
+CvUserProfile::CvUserProfile() : mPath(cvengine::gCommonEngineConfig.userConfigDirPath / cvengine::gCommonEngineConfig.profileFilename), mPlayerOptions(GC.getNumPlayerOptionInfos())
 {
 }
 

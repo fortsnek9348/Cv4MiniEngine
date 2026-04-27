@@ -65,7 +65,7 @@ namespace
 	class BackgroundWindow : public tui::Window
 	{
 	public:
-		BackgroundWindow(const CvApp& app) : Window{ L"", tui::WindowConfig{
+		explicit BackgroundWindow(CvApp& app) : Window{ L"", tui::WindowConfig{
 			.isDefaultFocus = false,
 			.isFullscreen = true,
 			.isModal = false,
@@ -96,13 +96,13 @@ namespace
 				buildString += L'\n';
 				buildString += L"Mod: " + s;
 			}
-#if ENABLE_PLAYER_BOT
+
 			if (const cvbot::IPlayerBotPlugin* const plugin = app.getPlayerBotPlugin())
 			{
 				buildString += L'\n';
 				buildString += L"Bot: " + plugin->getName();
 			}
-#endif
+
 			auto lblBuildString = std::make_shared<tui::Label>(buildString);
 			lblBuildString->enableWrapping = true;
 			lblBuildString->setLabelAlignment(tui::EAlign::Center);
@@ -118,8 +118,8 @@ namespace
 
 			static constexpr const wchar_t* kPadding = L"  ";
 
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_NEW_GAME") + kPadding, [] {
-				CvApp::getInstance().getUI().pushWindow(std::make_shared<AppGameSetupWindow>());
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_NEW_GAME") + kPadding, [&] {
+				app.getUI().pushWindow(std::make_shared<AppGameSetupWindow>(app));
 				}));
 			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOAD_GAME") + kPadding, [] {
 				gGlobals.getDLLIFaceNonInl()->LoadGame();
@@ -127,11 +127,11 @@ namespace
 			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OPTIONS") + kPadding, [] {
 				gDLL->getPythonIFace()->callFunction("CvScreensInterface", "showOptionsScreen");
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_ABOUT") + kPadding, [] {
-				CvApp::getInstance().getUI().pushWindow(std::make_shared<AboutWindow>());
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_ABOUT") + kPadding, [&] {
+				app.getUI().pushWindow(std::make_shared<AboutWindow>());
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_EXIT_GAME") + kPadding, [] {
-				CvApp::getInstance().setWantExit();
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_EXIT_GAME") + kPadding, [&] {
+				app.exitApp();
 				}));
 			menuPanel->setLayout(std::make_unique<tui::FlowLayout>(tui::FlowConfig{
 				.axis = tui::EAxis::Vertical,

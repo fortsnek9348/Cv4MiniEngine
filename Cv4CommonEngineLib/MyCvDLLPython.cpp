@@ -1,22 +1,16 @@
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 #include "inc/Cv4CommonEngineLib/CvVFS.h"
-#include "inc/Cv4CommonEngineLib/Common.h"
+#include "Common.h"
+#include "CommonEngineGlobal.h"
 
+#include <CvEventReporter.h>
 #include <CvGlobals.h>
 #include <CvInitCore.h>
-#include <CvMap.h>
-#include <CvGameAI.h>
-#include <CvPlayerAI.h>
-#include <CvTeamAI.h>
-#include <CvInfos.h>
-#include <CvEventReporter.h>
 
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 #include <pybind11/iostream.h>
 
-#include <variant>
-#include <optional>
 #include <iostream>
 #include <ranges>
 

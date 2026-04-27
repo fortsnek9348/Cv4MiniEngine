@@ -19,6 +19,8 @@ public:
 class MyCvDLLEntityIFace : public CvDLLEntityIFaceBase
 {
 public:
+	static MyCvDLLEntityIFace gInstance;
+
 	virtual void removeEntity(CvEntity*) override;
 	virtual void addEntity(CvEntity*, unsigned int uiEntAddFlags) override;
 	virtual void setup(CvEntity*) override;

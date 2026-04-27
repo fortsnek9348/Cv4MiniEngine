@@ -66,7 +66,6 @@ namespace cvengine
 
 	enum class ECvScreen
 	{
-		// Cv4MiniEngine
 		NO_SCREEN = -1,
 
 		DOMESTIC_ADVISOR = 0,

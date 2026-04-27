@@ -1,27 +1,23 @@
-#include "inc/Cv4CommonEngineLib/CvAppUtil.h"
+#include "inc/Cv4CommonEngineLib/CvAppStates.h"
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 #include "inc/Cv4CommonEngineLib/CvTranslator.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 #include "inc/Cv4CommonEngineLib/CivIni.h"
 #include "inc/Cv4CommonEngineLib/DLLMessageQueue.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
-#include "MyCvDLLUtility.h"
-#include "MyCvDLLXml.h"
+#include "CommonEngineGlobal.h"
+#include "CvAppUtil.h"
 
+#include <CvEventReporter.h>
 #include <CvPlayerAI.h>
 #include <CvTeamAI.h>
 #include <CvGameAI.h>
 #include <CvMap.h>
 #include <CvGlobals.h>
-#include <CvXMLLoadUtility.h>
-#include <CvGameTextMgr.h>
-#include <CvArtFileMgr.h>
-#include <CvEventReporter.h>
 #include <CvInitCore.h>
-#include <CvRandom.h>
 #include <CvMapGenerator.h>
+#include <CvInfos.h>
 
 #include <CommonStuff/range.h>
 
@@ -32,7 +28,7 @@ using heck::range;
 using namespace cvengine;
 using namespace cvengine::app;
 
-constexpr int kASyncSeed = 9347;
+
 
 // This just updates the human status bit based on init core slot info.
 static void updatePlayersAreHuman()
@@ -41,93 +37,7 @@ static void updatePlayersAreHuman()
 		CvPlayerAI::getPlayerNonInl(playerI).updateHuman();
 }
 
-static void loadPostMenuGlobals()
-{
-	CvXMLLoadUtility xmlUtility{};
-	if (!xmlUtility.SetupGlobalLandscapeInfo())
-		std::abort();
-	if (!xmlUtility.LoadPostMenuGlobals())
-		std::abort();
-}
 
-void app::initCommon()
-{
-	gGlobals.setDLLIFace(&MyCvDLLUtility::getInstance());
-	CvXMLLoadUtility xmlUtility{};
-	xmlUtility.LoadPlayerOptions();
-	xmlUtility.LoadGraphicOptions();
-
-	// This needs player options in case we need to create a new profile.
-	// Note sure when this happens first, but let's just do it here deterministically.
-	// Importantly, this reads the language, which is needed when loading text.
-	CvUserProfile::getInstance().readFromFile();
-
-	// fullscreen prompt here
-
-	gGlobals.init();
-	auto& gameTextMgr = CvGameTextMgr::GetInstance();
-	gameTextMgr.Initialize();
-	updatePlayersAreHuman();
-	gGlobals.getASyncRand().init(kASyncSeed);
-	CvArtFileMgr::GetInstance().Init();
-	MyCvDLLPython().initialisePython(); // CvEventReporter::init, CvAppInterface::init
-
-	xmlUtility.SetGlobalDefines();
-	xmlUtility.LoadGlobalText();
-	xmlUtility.SetGlobalTypes();
-	xmlUtility.SetGlobalArtDefines();
-	CvArtFileMgr::GetInstance().buildArtFileInfoMaps();
-	xmlUtility.LoadBasicInfos();
-	xmlUtility.LoadPreMenuGlobals();
-	xmlUtility.SetPostGlobalsGlobalDefines();
-	CvEventReporter& eventReporter = CvEventReporter::getInstance();
-	eventReporter.windowActivation(true);
-	CvTranslator::getInstance().symbols.resize(MAX_NUM_SYMBOLS, L'�'); // probably
-	gameTextMgr.assignFontIds(CvTranslator::getInstance().firstSymbolCode, 25);
-	engine_specific::getCvInterface().reset();
-	CvInitCore& mainInitCore = gGlobals.getInitCore();
-	CvInitCore& loadedInitCore = gGlobals.getLoadedInitCore();
-	CvInitCore& iniInitCore = gGlobals.getIniInitCore();
-	mainInitCore.init(GAMEMODE_NORMAL);
-	loadedInitCore.init(GAMEMODE_NORMAL);
-	iniInitCore.init(GAMEMODE_NORMAL);
-	eventReporter.resetStatistics();
-	gGlobals.SetGraphicsInitialized(true);
-
-	// Default game settings from the INI, as if we read from the INI.
-	//iniInitCore.setGameName(L"Fluffy's Game");
-	//iniInitCore.setWorldSize(L"WORLDSIZE_HUGE");
-	//iniInitCore.setClimate(L"CLIMATE_TROPICAL");
-	//iniInitCore.setSeaLevel(L"SEALEVEL_LOW");
-	//iniInitCore.setEra(L"ERA_ANCIENT");
-	//iniInitCore.setGameSpeed(L"GAMESPEED_NORMAL");
-	//for (const auto i : range<VictoryTypes>(gGlobals.getNumVictoryInfos()))
-	//	iniInitCore.setVictory(i, true);
-	//for (const auto i : range<GameOptionTypes>(gGlobals.getNumGameOptions()))
-	//	iniInitCore.setOption(i, false);
-	//iniInitCore.setSyncRandSeed(kSyncSeed);
-	//iniInitCore.setMapRandSeed(kMapSeed);
-	//iniInitCore.setType(GAME_SP_NEW);
-	//iniInitCore.setMapScriptName(L"Donut");
-	//
-	//loadedInitCore.resetGame(&iniInitCore);
-	//loadedInitCore.resetPlayers(&iniInitCore);
-	//loadedInitCore.setPitbossTurnTime(0);
-	//loadedInitCore.setSyncRandSeed(kSyncSeed);
-	//loadedInitCore.setMapRandSeed(kMapSeed);
-	//loadedInitCore.setType(GAME_SP_NEW);
-	//
-	//mainInitCore.resetGame(&iniInitCore);
-	//mainInitCore.setPitbossTurnTime(0);
-	//mainInitCore.setSyncRandSeed(kSyncSeed);
-	//mainInitCore.setMapRandSeed(kMapSeed);
-	//mainInitCore.setType(GAME_SP_NEW);
-
-	// This is probably a static variable in the EXE as it's called at different times.
-	CvTranslator::getInstance().initialiseTextCodeTags();
-
-	loadPostMenuGlobals();
-}
 
 static void setupNewGame(const SimplifiedInitCore& config)
 {
@@ -306,9 +216,9 @@ static void updateINI()
 }
 
 template<class... Args>
-static void yieldProgress(const ProgressCallback& callback, std::wstring_view textKey, const Args&... args)
+static void yieldProgress(const ProgressCallback& callback, const std::wstring& textKey, const Args&... args)
 {
-	const std::wstring text = MyCvDLLUtility::getInstance().getTextGeneric(textKey, std::array<CvDLLUtilityIFaceBase::TextArg, sizeof...(args)>{ CvDLLUtilityIFaceBase::TextArg(args)... });
+	const std::wstring text = CvTranslator::getInstance().getText(textKey, std::array<CvDLLUtilityIFaceBase::TextArg, sizeof...(args)>{ CvDLLUtilityIFaceBase::TextArg(args)... });
 	callback(text);
 }
 
@@ -614,7 +524,7 @@ static void preGameStart()
 		Hack::getTime(info) = std::min(Hack::getTime(info), 1);
 	}
 
-	engine_specific::getCvInterface().reset();
+	cvengine::gCommonEngineConfig.interface->reset();
 
 	auto& game = gGlobals.getGame();
 	game.initSelection();
@@ -656,7 +566,7 @@ void NewGameStartupState::onEnter(const ProgressCallback& progressCallback)
 	// We have no networking though, so we simply reset the message queue at some early point.
 	DLLMessageQueue::getInstance().reset();
 
-	engine_specific::getCvEngine().reset();
+	gCommonEngineConfig.engine->reset();
 
 	setupNewGame(mSimplifiedInitCore);
 	updateINI();
@@ -686,7 +596,7 @@ void LoadGameState::onEnter(const ProgressCallback& progressCallback)
 
 	// Reset the autosave state
 	// And reset before loading the save.
-	engine_specific::getCvEngine().reset();
+	gCommonEngineConfig.engine->reset();
 
 	yieldProgress(progressCallback, L"TXT_KEY_MAIN_MENU_LOADING_SAVEGAME", mPath.wstring());
 	loadGame(mPath);
@@ -707,7 +617,7 @@ void InGameState::onEnter(const ProgressCallback& progressCallback)
 {
 	yieldProgress(progressCallback, L"TXT_KEY_INIT_SETUP_INTERFACE");
 
-	engine_specific::getCvInterface().reset();
+	gCommonEngineConfig.interface->reset();
 
 	preGameStart();
 
@@ -722,30 +632,28 @@ void InGameState::onEnter(const ProgressCallback& progressCallback)
 	// Call this before starting the main interface. BUG needs to register some stuff.
 	(void)MyCvDLLPython().callFunction(PYCivModule, "preGameStart", nullptr);
 
-	engine_specific::getCvInterface().startMainInterface();
+	gCommonEngineConfig.interface->startMainInterface();
 
 	// This happens after preGameStart and interface init.
 	if (gGlobals.getInitCore().getType() == GameType::GAME_SP_NEW)
 		CvEventReporter::getInstance().gameStart();
 
 	if (CvCity* const capital = CvPlayerAI::getPlayerNonInl(gGlobals.getGame().getActivePlayer()).getCapitalCity())
-		engine_specific::getCvInterface().lookAtPlot({ capital->getX(), capital->getY() });
+		gCommonEngineConfig.interface->lookAtPlot({ capital->getX(), capital->getY() });
 
 	CvMap& map = gGlobals.getMap();
 	map.updateMinimapColor();
 	map.updateCenterUnit();
 
-#if ENABLE_PLAYER_BOT
-	if (const cvbot::IPlayerBotPlugin* const botLib = engine_specific::getPlayerBotPlugin())
+	if (const cvbot::IPlayerBotPlugin* const botLib = gCommonEngineConfig.optPlayerBotPlugin)
 	{
 		std::clog << "Creating player bot..." << std::endl;
 		GET_PLAYER(gGlobals.getGame().getActivePlayer()).createPlayerBot(*botLib);
 	}
-#endif
 }
 void InGameState::onLeave()
 {
-	engine_specific::getCvInterface().uninit();
+	gCommonEngineConfig.interface->uninit();
 
 	// An unusual crash occurs if you don't do this.
 	// If you start a game, settle your first city (and don't move your warrior/scout),
@@ -766,4 +674,17 @@ void InGameState::onLeave()
 
 	// Reset this too.
 	gGlobals.clearGiganticMapsOptimisationsLibContext();
+}
+
+std::wstring cvengine::app::extractModRelPathFromSave(const std::filesystem::path& path)
+{
+	FFile<StdRawBinaryStream> file(path, std::ios::in);
+	uint32_t u32{};
+	file.Read(&u32);
+	// Can't check this until mod is determined...
+	//if (u32 != (unsigned)gGlobals.getDefineINT("SAVE_VERSION"))
+	//	std::abort();
+	CvString str;
+	file.ReadString(str);
+	return heck::convertAsciiToWide(str);
 }

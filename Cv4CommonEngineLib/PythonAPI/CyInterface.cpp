@@ -1,19 +1,19 @@
 #include "CyInterface.h"
-#include "CvPythonExtensions.h"
+#include "CyCommon.h"
+#include "../CommonEngineGlobal.h"
 #include "../MyCvDLLInterfaceIFace.h"
 #include "../inc/Cv4CommonEngineLib/CvInterface.h"
-#include "../inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 #include "../inc/Cv4CommonEngineLib/AudioXmlDefs.h"
 
 #include <CvCity.h>
-#include <CyCity.h>
-#include <CyUnit.h>
-#include <CyPlot.h>
-#include <CvGlobals.h>
 #include <CvGameAI.h>
-#include <CvPlayerAI.h>
+#include <CvGlobals.h>
 #include <CvInfos.h>
+#include <CvPlayerAI.h>
 #include <CvPlot.h>
+#include <CyCity.h>
+#include <CyPlot.h>
+#include <CyUnit.h>
 
 #include <CommonStuff/range.h>
 
@@ -25,7 +25,7 @@
 using heck::range;
 
 using cvengine::abortOnUnimplementedPythonFunction;
-using cvengine::engine_specific::getCvInterface;
+using cvengine::gCommonEngineConfig;
 
 void CyInterface::registerWithPython(const pybind11::module& m)
 {
@@ -153,7 +153,7 @@ bool CyInterface::DoSoundtrack(const std::string& szSoundtrackScript)
 	const cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
 	const auto it = xmlDefs.tagIndexLookup.find(szSoundtrackScript);
 	if (it->second.type == xmlDefs.scriptType2D)
-		getCvInterface().doSoundtrack(it->second.index);
+		gCommonEngineConfig.interface->doSoundtrack(it->second.index);
 	else if (it == xmlDefs.tagIndexLookup.end())
 		std::clog << "Sound '" << szSoundtrackScript << "' does not exist.\n";
 	else
@@ -166,7 +166,7 @@ bool CyInterface::DoSoundtrack(const std::string& szSoundtrackScript)
 void CyInterface::addCombatMessage(PlayerTypes ePlayer, const std::wstring& szString)
 {
 	// Example message: CreateDestroy CvTalkingHeadMessage(1, 10, Barbarian's Wolf (1.00) vs Axolotl's Warrior (3.40), , 5, , -1, -1, -1, false, false)
-	//getCvInterface().addCombatMessage(ePlayer, szString);
+	//gCommonEngineConfig.interface->addCombatMessage(ePlayer, szString);
 	addMessage(ePlayer, false, 10, szString.c_str(), std::nullopt,
 		InterfaceMessageTypes::MESSAGE_TYPE_COMBAT_MESSAGE,
 		std::nullopt, NO_COLOR, -1, -1, false, false
@@ -175,7 +175,7 @@ void CyInterface::addCombatMessage(PlayerTypes ePlayer, const std::wstring& szSt
 
 void CyInterface::addImmediateMessage(const std::wstring& szString, const std::string& szSound)
 {
-	//getCvInterface().addImmediateMessage(szString, szSound);
+	//gCommonEngineConfig.interface->addImmediateMessage(szString, szSound);
 	addMessage(gGlobals.getGame().getActivePlayer(), false, 0, szString, szSound.c_str(),
 		InterfaceMessageTypes::MESSAGE_TYPE_DISPLAY_ONLY, {},
 		NO_COLOR, -1, -1, false, false
@@ -186,7 +186,7 @@ void CyInterface::addMessage(PlayerTypes ePlayer, bool bForce, int iLength, cons
 	InterfaceMessageTypes eTypes, const std::optional<std::string>& szIcon,
 	ColorTypes eFlashColor, int iFlashX, int iFlashY, bool bShowOffScreenArrows, bool bShowOnScreenArrows)
 {
-	getCvInterface().addMessage(ePlayer, bForce, iLength, szString, szSound.value_or("").c_str(),
+	gCommonEngineConfig.interface->addMessage(ePlayer, bForce, iLength, szString, szSound.value_or("").c_str(),
 		eTypes, szIcon.value_or("").c_str(),
 		eFlashColor, iFlashX, iFlashY, bShowOffScreenArrows, bShowOnScreenArrows
 	);
@@ -200,14 +200,14 @@ void CyInterface::addQuestMessage([[maybe_unused]] PlayerTypes ePlayer, [[maybe_
 
 void CyInterface::addSelectedCity(CyCity pNewValue)
 {
-	getCvInterface().addSelectedCity(pNewValue.getCity(), false);
+	gCommonEngineConfig.interface->addSelectedCity(pNewValue.getCity(), false);
 }
 
 void CyInterface::cacheInterfacePlotUnits(CyPlot* pyPlot)
 {
 	if (pyPlot)
 		if (auto* const plot = pyPlot->getPlot())
-			getCvInterface().cacheInterfacePlotUnits(*plot);
+			gCommonEngineConfig.interface->cacheInterfacePlotUnits(*plot);
 }
 
 bool CyInterface::canCreateGroup()
@@ -217,12 +217,12 @@ bool CyInterface::canCreateGroup()
 
 bool CyInterface::canDeleteGroup()
 {
-	return getCvInterface().getSelectionList()->getNumUnits() > 1 && mirrorsSelectionGroup();
+	return gCommonEngineConfig.interface->getSelectionList()->getNumUnits() > 1 && mirrorsSelectionGroup();
 }
 
 bool CyInterface::canHandleAction(int iAction, bool bTestVisible)
 {
-	return gGlobals.getGame().canHandleAction(iAction, getCvInterface().getGotoPlot(), bTestVisible, false);
+	return gGlobals.getGame().canHandleAction(iAction, gCommonEngineConfig.interface->getGotoPlot(), bTestVisible, false);
 }
 
 bool CyInterface::canSelectHeadUnit()
@@ -243,22 +243,22 @@ bool CyInterface::checkFlashUpdate()
 
 void CyInterface::clearSelectedCities()
 {
-	getCvInterface().clearSelectedCities();
+	gCommonEngineConfig.interface->clearSelectedCities();
 }
 
 void CyInterface::clearSelectionList()
 {
-	getCvInterface().clearSelectionList();
+	gCommonEngineConfig.interface->clearSelectionList();
 }
 
 int CyInterface::countEntities(int iI)
 {
-	return getCvInterface().countEntities(static_cast<UnitTypes>(iI));
+	return gCommonEngineConfig.interface->countEntities(static_cast<UnitTypes>(iI));
 }
 
 int CyInterface::determineWidth(const std::wstring& szBuffer)
 {
-	return getCvInterface().determineWidth(szBuffer);
+	return gCommonEngineConfig.interface->determineWidth(szBuffer);
 }
 
 void CyInterface::doPing([[maybe_unused]] int iX, [[maybe_unused]] int iY, [[maybe_unused]] PlayerTypes ePlayer)
@@ -276,12 +276,12 @@ void CyInterface::exitingToMainMenu([[maybe_unused]] const std::string& szLoadFi
 {
 	if (!szLoadFile.empty())
 		std::abort();
-	getCvInterface().exitToMainMenu();
+	gCommonEngineConfig.interface->exitToMainMenu();
 }
 
 static bool isPlayableAction(int index)
 {
-	return gGlobals.getActionInfo(index).isVisible() && gGlobals.getGame().canHandleAction(index, getCvInterface().getGotoPlot(), true, true);
+	return gGlobals.getActionInfo(index).isVisible() && gGlobals.getGame().canHandleAction(index, gCommonEngineConfig.interface->getGotoPlot(), true, true);
 }
 
 static std::vector<int> buildListOfActionsToShow()
@@ -297,12 +297,12 @@ std::vector<int> CyInterface::getActionsToShow()
 
 CyUnit CyInterface::getCachedInterfacePlotUnit(int iIndex)
 {
-	return getCvInterface().getCachedInterfacePlotUnit(iIndex);
+	return gCommonEngineConfig.interface->getCachedInterfacePlotUnit(iIndex);
 }
 
 int CyInterface::getCityTabSelectionRow()
 {
-	return getCvInterface().getCityTabSelectionRow();
+	return gCommonEngineConfig.interface->getCityTabSelectionRow();
 }
 
 CyPlot CyInterface::getCursorPlot()
@@ -313,7 +313,7 @@ CyPlot CyInterface::getCursorPlot()
 
 EndTurnButtonStates CyInterface::getEndTurnState()
 {
-	if (getCvInterface().isEndTurnMessage())
+	if (gCommonEngineConfig.interface->isEndTurnMessage())
 		return END_TURN_OVER_HIGHLIGHT;
 	else
 		return gGlobals.getGame().getEndTurnState();
@@ -321,19 +321,19 @@ EndTurnButtonStates CyInterface::getEndTurnState()
 
 CyPlot CyInterface::getGotoPlot()
 {
-	return getCvInterface().getGotoPlot();
+	return gCommonEngineConfig.interface->getGotoPlot();
 }
 
 std::unique_ptr<CyCity> CyInterface::getHeadSelectedCity()
 {
-	if (auto* const x = getCvInterface().getHeadSelectedCity())
+	if (auto* const x = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return std::make_unique<CyCity>(x);
 	return nullptr;
 }
 
 std::unique_ptr<CyUnit> CyInterface::getHeadSelectedUnit()
 {
-	if (auto* const x = getCvInterface().getSelectionUnit(0))
+	if (auto* const x = gCommonEngineConfig.interface->getSelectionUnit(0))
 		return std::make_unique<CyUnit>(x);
 	return nullptr;
 }
@@ -351,7 +351,7 @@ CyPlot CyInterface::getHighlightPlot()
 
 InterfaceModeTypes CyInterface::getInterfaceMode()
 {
-	return getCvInterface().getInterfaceMode();
+	return gCommonEngineConfig.interface->getInterfaceMode();
 }
 
 CyUnit CyInterface::getInterfacePlotUnit(CyPlot plot, int index)
@@ -361,22 +361,22 @@ CyUnit CyInterface::getInterfacePlotUnit(CyPlot plot, int index)
 
 int CyInterface::getLengthSelectionList()
 {
-	return getCvInterface().getSelectionList()->getNumUnits();
+	return gCommonEngineConfig.interface->getSelectionList()->getNumUnits();
 }
 
 CyPlot CyInterface::getMouseOverPlot()
 {
-	return getCvInterface().getMouseOverPlot();
+	return gCommonEngineConfig.interface->getMouseOverPlot();
 }
 
 int CyInterface::getNumCachedInterfacePlotUnits()
 {
-	return getCvInterface().getNumCachedInterfacePlotUnits();
+	return gCommonEngineConfig.interface->getNumCachedInterfacePlotUnits();
 }
 
 int CyInterface::getNumOrdersQueued()
 {
-	if (const CvCity* const city = getCvInterface().getHeadSelectedCity())
+	if (const CvCity* const city = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return city->getNumOrdersQueued();
 	else
 		return 0;
@@ -384,12 +384,12 @@ int CyInterface::getNumOrdersQueued()
 
 int CyInterface::getNumVisibleUnits()
 {
-	return getCvInterface().getNumVisibleUnits();
+	return gCommonEngineConfig.interface->getNumVisibleUnits();
 }
 
 int CyInterface::getOrderNodeData1(int iNode)
 {
-	if (const CvCity* const city = getCvInterface().getHeadSelectedCity())
+	if (const CvCity* const city = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return city->getOrderData(iNode).iData1;
 	else
 		return -1;
@@ -397,7 +397,7 @@ int CyInterface::getOrderNodeData1(int iNode)
 
 int CyInterface::getOrderNodeData2(int iNode)
 {
-	if (const CvCity* const city = getCvInterface().getHeadSelectedCity())
+	if (const CvCity* const city = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return city->getOrderData(iNode).iData2;
 	else
 		return -1;
@@ -405,7 +405,7 @@ int CyInterface::getOrderNodeData2(int iNode)
 
 bool CyInterface::getOrderNodeSave(int iNode)
 {
-	if (const CvCity* const city = getCvInterface().getHeadSelectedCity())
+	if (const CvCity* const city = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return city->getOrderData(iNode).bSave;
 	else
 		return false;
@@ -413,7 +413,7 @@ bool CyInterface::getOrderNodeSave(int iNode)
 
 OrderTypes CyInterface::getOrderNodeType(int iNode)
 {
-	if (const CvCity* const city = getCvInterface().getHeadSelectedCity())
+	if (const CvCity* const city = gCommonEngineConfig.interface->getHeadSelectedCity())
 		return city->getOrderData(iNode).eOrderType;
 	else
 		return OrderTypes::NO_ORDER;
@@ -421,18 +421,18 @@ OrderTypes CyInterface::getOrderNodeType(int iNode)
 
 int CyInterface::getPlotListColumn()
 {
-	return getCvInterface().getPlotListColumn();
+	return gCommonEngineConfig.interface->getPlotListColumn();
 }
 
 int CyInterface::getPlotListOffset()
 {
-	return getCvInterface().getPlotListOffset();
+	return gCommonEngineConfig.interface->getPlotListOffset();
 }
 
 std::unique_ptr<CyPlot> CyInterface::getSelectionPlot()
 {
 	// Used by CvMainInterface plot list, which also accepts the selected city plot.
-	if (auto* const plot = getCvInterface().getSelectedCityOrUnitPlot())
+	if (auto* const plot = gCommonEngineConfig.interface->getSelectedCityOrUnitPlot())
 		return std::make_unique<CyPlot>(plot);
 	else
 		return nullptr;
@@ -440,7 +440,7 @@ std::unique_ptr<CyPlot> CyInterface::getSelectionPlot()
 
 std::unique_ptr<CyUnit> CyInterface::getSelectionUnit(int index)
 {
-	if (auto* const x = getCvInterface().getSelectionUnit(index)) // O(N)! Quadratic time when listing a stack!
+	if (auto* const x = gCommonEngineConfig.interface->getSelectionUnit(index)) // O(N)! Quadratic time when listing a stack!
 		return std::make_unique<CyUnit>(x);
 	else
 		return nullptr;
@@ -448,32 +448,32 @@ std::unique_ptr<CyUnit> CyInterface::getSelectionUnit(int index)
 
 InterfaceVisibility CyInterface::getShowInterface()
 {
-	return getCvInterface().getShowInterface();
+	return gCommonEngineConfig.interface->getShowInterface();
 }
 
 void CyInterface::insertIntoSelectionList(CyUnit pUnit, bool bClear, bool bToggle, bool bGroup, bool bSound)
 {
-	getCvInterface().insertIntoSelectionList(pUnit.getUnit(), bClear, bToggle, bGroup, bSound, false);
+	gCommonEngineConfig.interface->insertIntoSelectionList(pUnit.getUnit(), bClear, bToggle, bGroup, bSound, false);
 }
 
 bool CyInterface::isCityScreenUp()
 {
-	return getCvInterface().isCityScreenUp();
+	return gCommonEngineConfig.interface->isCityScreenUp();
 }
 
 bool CyInterface::isCitySelected(CyCity pCity)
 {
-	return getCvInterface().isCitySelected(pCity.getCity());
+	return gCommonEngineConfig.interface->isCitySelected(pCity.getCity());
 }
 
 bool CyInterface::isCitySelection()
 {
-	return getCvInterface().isCitySelection();
+	return gCommonEngineConfig.interface->isCitySelection();
 }
 
 bool CyInterface::isDirty(InterfaceDirtyBits eDirty)
 {
-	return getCvInterface().getInterfaceDirtyBit(eDirty);
+	return gCommonEngineConfig.interface->getInterfaceDirtyBit(eDirty);
 }
 
 bool CyInterface::isFlashing()
@@ -488,22 +488,22 @@ bool CyInterface::isFlashingPlayer([[maybe_unused]] int iPlayer)
 
 bool CyInterface::isFocusedWidget()
 {
-	return getCvInterface().isFocusedWidget();
+	return gCommonEngineConfig.interface->isFocusedWidget();
 }
 
 bool CyInterface::isInAdvancedStart()
 {
-	return getCvInterface().isInAdvancedStart();
+	return gCommonEngineConfig.interface->isInAdvancedStart();
 }
 
 bool CyInterface::isInMainMenu()
 {
-	return getCvInterface().isInMainMenu();
+	return gCommonEngineConfig.interface->isInMainMenu();
 }
 
 bool CyInterface::isLeftMouseDown()
 {
-	return getCvInterface().isLeftMouseDown();
+	return gCommonEngineConfig.interface->isLeftMouseDown();
 }
 
 bool CyInterface::isNetStatsVisible()
@@ -518,23 +518,23 @@ bool CyInterface::isOOSVisible()
 
 bool CyInterface::isOneCitySelected()
 {
-	auto* const head = getCvInterface().headSelectedCitiesNode();
-	return head && !getCvInterface().nextSelectedCitiesNode(head);
+	auto* const head = gCommonEngineConfig.interface->headSelectedCitiesNode();
+	return head && !gCommonEngineConfig.interface->nextSelectedCitiesNode(head);
 }
 
 bool CyInterface::isRightMouseDown()
 {
-	return getCvInterface().isRightMouseDown();
+	return gCommonEngineConfig.interface->isRightMouseDown();
 }
 
 bool CyInterface::isScoresMinimized()
 {
-	return getCvInterface().isScoresMinimized();
+	return gCommonEngineConfig.interface->isScoresMinimized();
 }
 
 bool CyInterface::isScoresVisible()
 {
-	return getCvInterface().isScoresVisible();
+	return gCommonEngineConfig.interface->isScoresVisible();
 }
 
 bool CyInterface::isScreenUp([[maybe_unused]] int iEnumVal)
@@ -557,7 +557,7 @@ bool CyInterface::isYieldVisibleMode()
 
 void CyInterface::lookAtCityBuilding(int iCity, int iBuilding)
 {
-	return getCvInterface().lookAtCityBuilding(iCity, static_cast<BuildingTypes>(iBuilding));
+	return gCommonEngineConfig.interface->lookAtCityBuilding(iCity, static_cast<BuildingTypes>(iBuilding));
 }
 
 void CyInterface::lookAtCityOffset(int iCity)
@@ -573,12 +573,12 @@ void CyInterface::makeInterfaceDirty()
 
 bool CyInterface::mirrorsSelectionGroup()
 {
-	return getCvInterface().mirrorsSelectionGroup();
+	return gCommonEngineConfig.interface->mirrorsSelectionGroup();
 }
 
 bool CyInterface::noTechSplash()
 {
-	return getCvInterface().noTechSplash();
+	return gCommonEngineConfig.interface->noTechSplash();
 }
 
 void CyInterface::playAdvisorSound([[maybe_unused]] const std::string& pszSound)
@@ -592,7 +592,7 @@ void CyInterface::playGeneralSound(const std::string& pszSound)
 	const cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
 	const auto it = xmlDefs.tagIndexLookup.find(pszSound);
 	if (it->second.type == xmlDefs.scriptType2D)
-		getCvInterface().play2DSound(it->second.index);
+		gCommonEngineConfig.interface->play2DSound(it->second.index);
 	else if (it == xmlDefs.tagIndexLookup.end())
 		std::clog << "Sound '" << pszSound << "' does not exist.\n";
 	else
@@ -602,7 +602,7 @@ void CyInterface::playGeneralSound(const std::string& pszSound)
 void CyInterface::playGeneralSoundAtPlot([[maybe_unused]] int iScriptID, [[maybe_unused]] CyPlot pPlot)
 {
 	//if (pPlot.getPlot())
-	//	return getCvInterface().playGeneralSoundAtPlot(iScriptID, *pPlot.getPlot());
+	//	return gCommonEngineConfig.interface->playGeneralSoundAtPlot(iScriptID, *pPlot.getPlot());
 
 	// Possibly used by mods?
 	abortOnUnimplementedPythonFunction();
@@ -616,7 +616,7 @@ void CyInterface::playGeneralSoundByID([[maybe_unused]] int iScriptID)
 
 void CyInterface::removeFromSelectionList(CyUnit pUnit)
 {
-	getCvInterface().removeFromSelectionList(pUnit.getUnit());
+	gCommonEngineConfig.interface->removeFromSelectionList(pUnit.getUnit());
 }
 
 void CyInterface::selectAll(CyPlot pPlot)
@@ -627,7 +627,7 @@ void CyInterface::selectAll(CyPlot pPlot)
 // This is called when clicking "Examine City" on a warning popup.
 void CyInterface::selectCity(CyCity pNewValue, bool bTestProduction)
 {
-	getCvInterface().selectCity(pNewValue.getCity(), bTestProduction);
+	gCommonEngineConfig.interface->selectCity(pNewValue.getCity(), bTestProduction);
 }
 
 void CyInterface::selectGroup(CyUnit pUnit, bool bShift, bool bCtrl, bool bAlt)
@@ -648,22 +648,22 @@ void CyInterface::selectUnit(CyUnit pUnit, bool bClear, bool bToggle, bool bSoun
 
 void CyInterface::setBusy(bool bBusy)
 {
-	getCvInterface().setBusy(bBusy);
+	gCommonEngineConfig.interface->setBusy(bBusy);
 }
 
 void CyInterface::setCityTabSelectionRow(CityTabTypes eIndex)
 {
-	getCvInterface().setCityTabSelectionRow(eIndex);
+	gCommonEngineConfig.interface->setCityTabSelectionRow(eIndex);
 }
 
 void CyInterface::setDirty(InterfaceDirtyBits eDirty, bool bDirty)
 {
-	getCvInterface().setInterfaceDirtyBit(eDirty, bDirty);
+	gCommonEngineConfig.interface->setInterfaceDirtyBit(eDirty, bDirty);
 }
 
 void CyInterface::setInterfaceMode(InterfaceModeTypes eMode)
 {
-	getCvInterface().setInterfaceMode(eMode);
+	gCommonEngineConfig.interface->setInterfaceMode(eMode);
 }
 
 void CyInterface::setPausedPopups([[maybe_unused]] bool bPausedPopups)
@@ -674,29 +674,29 @@ void CyInterface::setPausedPopups([[maybe_unused]] bool bPausedPopups)
 
 void CyInterface::setShowInterface(InterfaceVisibility eInterfaceVisibility)
 {
-	getCvInterface().setShowInterface(eInterfaceVisibility);
+	gCommonEngineConfig.interface->setShowInterface(eInterfaceVisibility);
 }
 
 void CyInterface::setSoundSelectionReady(bool bReady)
 {
 	// Called by CvDawnOfMan.
 	//cvengine::logWarning("({}). Unimplemented.", bReady);
-	getCvInterface().setSoundSelectionReady(bReady);
+	gCommonEngineConfig.interface->setSoundSelectionReady(bReady);
 }
 
 void CyInterface::setWorldBuilder(bool bTurnOn)
 {
-	getCvInterface().setWorldBuilder(bTurnOn);
+	gCommonEngineConfig.interface->setWorldBuilder(bTurnOn);
 }
 
 bool CyInterface::shiftKey()
 {
-	return cvengine::engine_specific::isShiftDown();
+	return gCommonEngineConfig.callbackHandler->isShiftDown();
 }
 
 bool CyInterface::shouldDisplayEndTurn()
 {
-	return getCvInterface().shouldDisplayEndTurn();
+	return gCommonEngineConfig.interface->shouldDisplayEndTurn();
 }
 
 bool CyInterface::shouldDisplayEndTurnButton()
@@ -706,17 +706,17 @@ bool CyInterface::shouldDisplayEndTurnButton()
 
 bool CyInterface::shouldDisplayFlag()
 {
-	return getCvInterface().shouldDisplayFlag();
+	return gCommonEngineConfig.interface->shouldDisplayFlag();
 }
 
 bool CyInterface::shouldDisplayReturn()
 {
-	return getCvInterface().shouldDisplayReturn();
+	return gCommonEngineConfig.interface->shouldDisplayReturn();
 }
 
 bool CyInterface::shouldDisplayUnitModel()
 {
-	return getCvInterface().shouldDisplayUnitModel();
+	return gCommonEngineConfig.interface->shouldDisplayUnitModel();
 }
 
 bool CyInterface::shouldDisplayWaitingOthers()
@@ -748,7 +748,7 @@ bool CyInterface::shouldShowChangeResearchButton()
 
 bool CyInterface::shouldShowResearchButtons()
 {
-	return getCvInterface().shouldShowResearchButtons();
+	return gCommonEngineConfig.interface->shouldShowResearchButtons();
 }
 
 bool CyInterface::shouldShowSelectionButtons()
@@ -783,7 +783,7 @@ void CyInterface::stopAdvisorSound()
 
 void CyInterface::toggleBareMapMode()
 {
-	getCvInterface().toggleBareMapMode();
+	gCommonEngineConfig.interface->toggleBareMapMode();
 }
 
 void CyInterface::toggleMusicOn()
@@ -799,15 +799,15 @@ void CyInterface::toggleNetStatsVisible()
 
 void CyInterface::toggleScoresMinimized()
 {
-	getCvInterface().toggleScoresMinimized();
+	gCommonEngineConfig.interface->toggleScoresMinimized();
 }
 
 void CyInterface::toggleScoresVisible()
 {
-	getCvInterface().toggleScoresVisible();
+	gCommonEngineConfig.interface->toggleScoresVisible();
 }
 
 void CyInterface::toggleYieldVisibleMode()
 {
-	getCvInterface().toggleYieldVisibleMode();
+	gCommonEngineConfig.interface->toggleYieldVisibleMode();
 }

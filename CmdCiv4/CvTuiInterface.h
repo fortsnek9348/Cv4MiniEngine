@@ -1,27 +1,7 @@
 #pragma once
 
-//#include "WorldView.h"
-//#include "CvGInterfaceScreen.h"
-//#include "Minimap.h"
-
 #include <Cv4CommonEngineLib/CvEngineEnums.h>
-//#include <Cv4CommonEngineLib/CvPopup.h>
 #include <Cv4CommonEngineLib/CvInterface.h>
-
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
-
-//#include <CvTalkingHeadMessage.h>
-
-//#include <HeckTextUI/UIScene.h>
-
-//#include <bitset>
-//#include <memory>
-//#include <list>
-//#include <map>
-
-//class CvDiplomacyScreen;
-//class CvGTurnLogWindow;
-//class CvGDebugMenu;
 
 namespace cvengine
 {
@@ -39,8 +19,10 @@ namespace cvengine
 		virtual void uninit() override;
 		virtual void reset() override;
 
+		// NOTE: Because CvTuiMainInterface is only created when in-game, callers must consider that these may be null if not yet in-game.
 		CvTuiMainInterface* getTuiMainInterface();
-		WorldView& getWorldView();
+		WorldView* getWorldView();
+		bool isAIAutorunActive() const;
 
 		virtual bool isInMainMenu() const override;
 		virtual bool isLeftMouseDown() const override;

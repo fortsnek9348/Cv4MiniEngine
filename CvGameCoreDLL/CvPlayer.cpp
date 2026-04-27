@@ -768,13 +768,16 @@ void CvPlayer::reset(PlayerTypes eID, bool bConstructorCall)
 	}
 }
 
-#if ENABLE_PLAYER_BOT
-void CvPlayer::createPlayerBot(const cvbot::IPlayerBotPlugin& plugin)
+
+void CvPlayer::createPlayerBot([[maybe_unused]] const cvbot::IPlayerBotPlugin& plugin)
 {
+#if ENABLE_PLAYER_BOT
 	if (!cvbot::checkAPI())
 		throw cvbot::BotFailure("Mod is not compatible with the bot API built into this CvGameCoreDLL.");
 	m_playerBot = plugin.createBot(cvbot::BotInit::getInstance());
+#endif
 }
+#if ENABLE_PLAYER_BOT
 void CvPlayer::setPlayerBotToRunNextTurn()
 {
 	if (m_playerBot)

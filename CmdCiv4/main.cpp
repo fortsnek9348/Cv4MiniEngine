@@ -1,47 +1,17 @@
 ﻿#include "CvApp.h"
 #include "CommandLine.h"
-#include "GeneratePlayerBotHeader.h"
 #include "AppGameSetupWindow.h"
 
-#include <Cv4CommonEngineLib/CvTranslator.h>
-#include <Cv4CommonEngineLib/MyCvDLLPython.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
-
-#include <CvGlobals.h>
-#include <CvXMLLoadUtility.h>
-#include <CvGameTextMgr.h>
-#include <CvPlayerAI.h>
-#include <CvRandom.h>
-#include <CvInitCore.h>
-#include <CvArtFileMgr.h>
-#include <CvEventReporter.h>
-#include <CvGameAI.h>
-#include <CvTeamAI.h>
-#include <CvMap.h>
-#include <CvMapGenerator.h>
-#include <GeneratePlayerBotHeader.h>
-
-#include <HeckTextUI/BasicControls.h>
-
 #include <CommonStuff/StringConversion.h>
-#include <CommonStuff/range.h>
 
 #include <iostream>
-#include <sstream>
-#include <chrono>
 
 #ifndef _WIN32
 #include <linux/prctl.h>
 #include <sys/prctl.h>
 #endif
 
-using heck::range;
 using namespace cvengine;
-
-void engine_specific::deferLoadGame(const std::filesystem::path& path)
-{
-	CvApp::getInstance().deferLoadGame(path);
-}
 
 int main(int argc, char* argv[])
 {
@@ -71,44 +41,38 @@ int main(int argc, char* argv[])
 		std::wclog << L"Overriding mod with " << std::quoted(appStartConfig.modRelPath) << L" from save file." << std::endl;
 	}
 
+	CvApp& app = CvApp::getInstance();
+
 	// Start CvApp now.
-	CvApp::getInstance().start(appStartConfig);
+	app.start(appStartConfig);
 
-	cvengine::app::initCommon(); // python initialised here
-
-	// -generate_player_bot_game_binding "..\PlayerBotGameBinding"
-	if (!appStartConfig.generatePlayerBotGameDefsDir.empty())
-	{
-		cvbot::generatePlayerBotGameBindingHeaders(std::filesystem::path(appStartConfig.generatePlayerBotGameDefsDir));
-	}
 
 	//gGlobals.getLogging() = true;
 	//gGlobals.getRandLogging() = true;
 	//gGlobals.getSynchLogging() = true;
 	
-	const struct PythonDestroyer
+	const struct CommonEngineDestroyer
 	{
-		~PythonDestroyer()
+		~CommonEngineDestroyer()
 		{
-			// Python needs to be shutdown before main ends, for some reason. Probably static destruction order issues.
-			MyCvDLLPython::shutdownPython();
+			shutdownCommonEngine();
 		}
 	} dtor{};
 
-	CvApp::getInstance().startUI();
+	app.startUI();
 
 	if (appStartConfig.save.empty())
 	{
 		if (appStartConfig.isAutostart)
 		{
 			// Bit of a hack. Invoke UI and immediately destroy the UI.
-			AppGameSetupWindow{}.launch();
+			AppGameSetupWindow{app}.launch();
 		}
 		else
-			CvApp::getInstance().deferMainMenu();
+			app.deferMainMenu();
 	}
 	else
-		CvApp::getInstance().deferLoadGame(appStartConfig.save);
+		app.deferLoadGame(appStartConfig.save);
 
-	return CvApp::getInstance().run();
+	return app.run();
 }

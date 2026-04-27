@@ -1,17 +1,11 @@
 #include "MyCvDLLEntityIFace.h"
 #include "../CvTuiInterface.h"
 
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
-
 #include <CvUnit.h>
 
 #include <cstdlib>
 
-CvDLLEntityIFaceBase& cvengine::engine_specific::getEntityIFace()
-{
-    static constinit MyCvDLLEntityIFace s;
-    return s;
-}
+constinit MyCvDLLEntityIFace MyCvDLLEntityIFace::gInstance;
 
 class CvUnitEntity : public CvEntity
 {

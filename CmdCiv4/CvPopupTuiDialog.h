@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Cv4CommonEngineLib/CvPopup.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
+#include <Cv4CommonEngineLib/CommonEngine.h>
 
 #include <HeckTextUI/Window.h>
 
 namespace cvengine
 {
-	class CvPopupTuiDialog : public hecktui::Window, public engine_specific::IPopupUIWindow
+	class CvPopupTuiDialog : public hecktui::Window, public IPopupUIWindow
 	{
 	public:
 		explicit CvPopupTuiDialog(CvPopup* popup);
@@ -22,7 +22,7 @@ namespace cvengine
 		virtual bool isWantClose() const override;
 	
 	private:
-		CvPopup* mPopup;
+		CvPopup* mPopup{};
 		// Same indices.
 		std::vector<hecktui::Element*> mPopupElements;
 	

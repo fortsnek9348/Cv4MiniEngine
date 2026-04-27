@@ -1,10 +1,10 @@
 #include "MyCvDLLInterfaceIFace.h"
 #include "MyCvDLLUtility.h"
-#include "inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 #include "inc/Cv4CommonEngineLib/CvTranslator.h"
 #include "inc/Cv4CommonEngineLib/CvButtonPopup.h"
 #include "inc/Cv4CommonEngineLib/AudioXmlDefs.h"
+#include "CommonEngineGlobal.h"
 
 #include <CvGameAI.h>
 #include <CvGlobals.h>
@@ -18,7 +18,7 @@
 #include <iostream>
 
 using heck::range;
-using cvengine::engine_specific::getCvInterface;
+using cvengine::gCommonEngineConfig;
 
 MyCvDLLInterfaceIFace& MyCvDLLInterfaceIFace::getInstance()
 {
@@ -30,7 +30,7 @@ void MyCvDLLInterfaceIFace::lookAtSelectionPlot(bool bRelease)
 {
 	if (bRelease) // Always seems to be false.
 		std::abort();
-	cvengine::engine_specific::getCvInterface().lookAtSelectionPlot();
+	gCommonEngineConfig.interface->lookAtSelectionPlot();
 }
 
 bool MyCvDLLInterfaceIFace::canHandleAction(int iAction, CvPlot* pPlot, bool bTestVisible)
@@ -51,12 +51,12 @@ bool MyCvDLLInterfaceIFace::canDoInterfaceMode(InterfaceModeTypes eInterfaceMode
 
 CvPlot* MyCvDLLInterfaceIFace::getLookAtPlot()
 {
-	return getCvInterface().getLookAtPlot();
+	return gCommonEngineConfig.interface->getLookAtPlot();
 }
 
 CvPlot* MyCvDLLInterfaceIFace::getSelectionPlot()
 {
-	return getCvInterface().getSelectedCityOrUnitPlot();
+	return gCommonEngineConfig.interface->getSelectedCityOrUnitPlot();
 }
 
 CvUnit* MyCvDLLInterfaceIFace::getInterfacePlotUnit(const CvPlot* pPlot, int iIndex)
@@ -73,7 +73,7 @@ CvUnit* MyCvDLLInterfaceIFace::getInterfacePlotUnit(const CvPlot* pPlot, int iIn
 
 CvUnit* MyCvDLLInterfaceIFace::getSelectionUnit(int iIndex)
 { 
-	return getCvInterface().getSelectionUnit(iIndex);
+	return gCommonEngineConfig.interface->getSelectionUnit(iIndex);
 }
 
 CvUnit* MyCvDLLInterfaceIFace::getHeadSelectedUnit()
@@ -100,25 +100,25 @@ void MyCvDLLInterfaceIFace::selectAll(CvPlot* pPlot)
 
 bool MyCvDLLInterfaceIFace::removeFromSelectionList(CvUnit* unit)
 {
-	return getCvInterface().removeFromSelectionList(unit);
+	return gCommonEngineConfig.interface->removeFromSelectionList(unit);
 }
 
 
 
 void MyCvDLLInterfaceIFace::makeSelectionListDirty()
 {
-	getCvInterface().makeSelectionListDirty();
+	gCommonEngineConfig.interface->makeSelectionListDirty();
 }
 
 bool MyCvDLLInterfaceIFace::mirrorsSelectionGroup()
 {
-	return getCvInterface().mirrorsSelectionGroup();
+	return gCommonEngineConfig.interface->mirrorsSelectionGroup();
 }
 
 bool MyCvDLLInterfaceIFace::canSelectionListFound()
 {
 	// Used in CvGame::updateColoredPlots()
-	CvSelectionGroup& group = *getCvInterface().getSelectionList();
+	CvSelectionGroup& group = *gCommonEngineConfig.interface->getSelectionList();
 	// TODO: Correct coord?
 	return group.canStartMission(MISSION_FOUND, -1, -1);
 }
@@ -143,37 +143,37 @@ bool MyCvDLLInterfaceIFace::isPopupQueued()
 
 bool MyCvDLLInterfaceIFace::isDiploOrPopupWaiting()
 {
-	return getCvInterface().isDiploOrPopupWaiting();
+	return gCommonEngineConfig.interface->isDiploOrPopupWaiting();
 }
 
 CvUnit* MyCvDLLInterfaceIFace::getLastSelectedUnit()
 {
-	return getCvInterface().getLastSelectedUnit();
+	return gCommonEngineConfig.interface->getLastSelectedUnit();
 }
 
 void MyCvDLLInterfaceIFace::setLastSelectedUnit(CvUnit* pUnit)
 {
-	getCvInterface().setLastSelectedUnit(pUnit);
+	gCommonEngineConfig.interface->setLastSelectedUnit(pUnit);
 }
 
 void MyCvDLLInterfaceIFace::changePlotListColumn([[maybe_unused]] int iChange)
 {
-	getCvInterface().changePlotListColumn(iChange);
+	gCommonEngineConfig.interface->changePlotListColumn(iChange);
 }
 
 CvPlot* MyCvDLLInterfaceIFace::getGotoPlot()
 {
-	return getCvInterface().getGotoPlot();
+	return gCommonEngineConfig.interface->getGotoPlot();
 }
 
 CvPlot* MyCvDLLInterfaceIFace::getSingleMoveGotoPlot()
 {
-	return getCvInterface().getSingleMoveGotoPlot();
+	return gCommonEngineConfig.interface->getSingleMoveGotoPlot();
 }
 
 CvPlot* MyCvDLLInterfaceIFace::getOriginalPlot()
 {
-	return getCvInterface().getOriginalUnitSelectionPlot();
+	return gCommonEngineConfig.interface->getOriginalUnitSelectionPlot();
 }
 
 void MyCvDLLInterfaceIFace::playGeneralSound(const TCHAR* pszSound, NiPoint3 vPos)
@@ -181,9 +181,9 @@ void MyCvDLLInterfaceIFace::playGeneralSound(const TCHAR* pszSound, NiPoint3 vPo
 	const cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
 	const auto it = xmlDefs.tagIndexLookup.find(pszSound);
 	if (it->second.type == xmlDefs.scriptType2D)
-		getCvInterface().play2DSound(it->second.index);
+		gCommonEngineConfig.interface->play2DSound(it->second.index);
 	else if (it->second.type == xmlDefs.scriptType3D)
-		getCvInterface().play3DSound(it->second.index, vPos);
+		gCommonEngineConfig.interface->play3DSound(it->second.index, vPos);
 	else if (it == xmlDefs.tagIndexLookup.end())
 		std::clog << "Sound '" << pszSound << "' does not exist.\n";
 	else
@@ -194,37 +194,37 @@ void MyCvDLLInterfaceIFace::playGeneralSound([[maybe_unused]] int iSoundId, [[ma
 {
 	// Not used?
 	std::abort();
-	//getCvInterface().playGeneralSound(iSoundId, iSoundType, vPos);
+	//gCommonEngineConfig.interface->playGeneralSound(iSoundId, iSoundType, vPos);
 }
 
 void MyCvDLLInterfaceIFace::clearQueuedPopups()
 {
-	getCvInterface().clearQueuedPopups();
+	gCommonEngineConfig.interface->clearQueuedPopups();
 }
 
 CvSelectionGroup* MyCvDLLInterfaceIFace::getSelectionList()
 {
-	return getCvInterface().getSelectionList();
+	return gCommonEngineConfig.interface->getSelectionList();
 }
 
 void MyCvDLLInterfaceIFace::clearSelectionList()
 {
-	getCvInterface().clearSelectionList();
+	gCommonEngineConfig.interface->clearSelectionList();
 }
 
 void MyCvDLLInterfaceIFace::insertIntoSelectionList(CvUnit* pUnit, bool bClear, bool bToggle, bool bGroup, bool bSound, bool bMinimalChange)
 {
-	getCvInterface().insertIntoSelectionList(pUnit, bClear, bToggle, bGroup, bSound, bMinimalChange);
+	gCommonEngineConfig.interface->insertIntoSelectionList(pUnit, bClear, bToggle, bGroup, bSound, bMinimalChange);
 }
 
 void MyCvDLLInterfaceIFace::selectionListPostChange()
 {
-	getCvInterface().selectionListPostChange();
+	gCommonEngineConfig.interface->selectionListPostChange();
 }
 
 void MyCvDLLInterfaceIFace::selectionListPreChange()
 {
-	getCvInterface().selectionListPreChange();
+	gCommonEngineConfig.interface->selectionListPreChange();
 }
 
 int MyCvDLLInterfaceIFace::getSymbolID(int iSymbol)
@@ -234,54 +234,54 @@ int MyCvDLLInterfaceIFace::getSymbolID(int iSymbol)
 
 CLLNode<IDInfo>* MyCvDLLInterfaceIFace::deleteSelectionListNode(CLLNode<IDInfo>* pNode)
 {
-	return getCvInterface().getSelectionList()->deleteUnitNode(pNode);
+	return gCommonEngineConfig.interface->getSelectionList()->deleteUnitNode(pNode);
 }
 
 CLLNode<IDInfo>* MyCvDLLInterfaceIFace::nextSelectionListNode(CLLNode<IDInfo>* pNode)
 {
-	return getCvInterface().getSelectionList()->nextUnitNode(pNode);
+	return gCommonEngineConfig.interface->getSelectionList()->nextUnitNode(pNode);
 }
 
 int MyCvDLLInterfaceIFace::getLengthSelectionList()
 {
-	return getCvInterface().getSelectionList()->getNumUnits();
+	return gCommonEngineConfig.interface->getNumSelectedUnits();
 }
 
 CLLNode<IDInfo>* MyCvDLLInterfaceIFace::headSelectionListNode()
 {
-	return getCvInterface().getSelectionList()->headUnitNode();
+	return gCommonEngineConfig.interface->getSelectionList()->headUnitNode();
 }
 
 void MyCvDLLInterfaceIFace::selectCity(CvCity* pNewValue, bool bTestProduction)
 {
 	// Okay, what happens here is that `bTestProduction` is deferred until exit city screen.
 	//CvInterface::getInstance().enterCityScreen(pNewValue, bTestProduction);
-	return getCvInterface().selectCity(pNewValue, bTestProduction);
+	return gCommonEngineConfig.interface->selectCity(pNewValue, bTestProduction);
 }
 
 void MyCvDLLInterfaceIFace::selectLookAtCity(bool bAdd)
 {
-	getCvInterface().selectLookAtCity(bAdd);
+	gCommonEngineConfig.interface->selectLookAtCity(bAdd);
 }
 
 void MyCvDLLInterfaceIFace::addSelectedCity(CvCity* pNewValue, bool bToggle)
 {
-	getCvInterface().addSelectedCity(pNewValue, bToggle);
+	gCommonEngineConfig.interface->addSelectedCity(pNewValue, bToggle);
 }
 
 void MyCvDLLInterfaceIFace::clearSelectedCities()
 {
-	getCvInterface().clearSelectedCities();
+	gCommonEngineConfig.interface->clearSelectedCities();
 }
 
 bool MyCvDLLInterfaceIFace::isCitySelected(CvCity* city)
 {
-	return getCvInterface().isCitySelected(city);
+	return gCommonEngineConfig.interface->isCitySelected(city);
 }
 
 CvCity* MyCvDLLInterfaceIFace::getHeadSelectedCity()
 {
-	return getCvInterface().getHeadSelectedCity();
+	return gCommonEngineConfig.interface->getHeadSelectedCity();
 }
 
 bool MyCvDLLInterfaceIFace::isCitySelection()
@@ -291,19 +291,19 @@ bool MyCvDLLInterfaceIFace::isCitySelection()
 
 CLLNode<IDInfo>* MyCvDLLInterfaceIFace::nextSelectedCitiesNode(CLLNode<IDInfo>* pNode)
 {
-	return getCvInterface().nextSelectedCitiesNode(pNode);
+	return gCommonEngineConfig.interface->nextSelectedCitiesNode(pNode);
 }
 
 CLLNode<IDInfo>* MyCvDLLInterfaceIFace::headSelectedCitiesNode()
 {
-	return getCvInterface().headSelectedCitiesNode();
+	return gCommonEngineConfig.interface->headSelectedCitiesNode();
 }
 
 void MyCvDLLInterfaceIFace::addMessage(PlayerTypes ePlayer, bool bForce, int iLength, CvWString szString, const TCHAR* pszSound,
 	InterfaceMessageTypes eType, const char* pszIcon, ColorTypes eFlashColor, int iFlashX, int iFlashY,
 	bool bShowOffScreenArrows, bool bShowOnScreenArrows)
 {
-	getCvInterface().addMessage(ePlayer, bForce, iLength, std::move(szString), pszSound,
+	gCommonEngineConfig.interface->addMessage(ePlayer, bForce, iLength, std::move(szString), pszSound,
 		eType, pszIcon, eFlashColor, iFlashX, iFlashY,
 		bShowOffScreenArrows, bShowOnScreenArrows
 	);
@@ -317,7 +317,7 @@ void MyCvDLLInterfaceIFace::addCombatMessage([[maybe_unused]] PlayerTypes ePlaye
 
 void MyCvDLLInterfaceIFace::addQuestMessage(PlayerTypes ePlayer, CvWString szString, int iQuestId)
 {
-	getCvInterface().addQuestMessage(ePlayer, szString, iQuestId);
+	gCommonEngineConfig.interface->addQuestMessage(ePlayer, szString, iQuestId);
 }
 
 void MyCvDLLInterfaceIFace::showMessage([[maybe_unused]] CvTalkingHeadMessage& msg)
@@ -328,7 +328,7 @@ void MyCvDLLInterfaceIFace::showMessage([[maybe_unused]] CvTalkingHeadMessage& m
 
 void MyCvDLLInterfaceIFace::flushTalkingHeadMessages()
 {
-	getCvInterface().flushTalkingHeadMessages();
+	gCommonEngineConfig.interface->flushTalkingHeadMessages();
 }
 
 void MyCvDLLInterfaceIFace::clearEventMessages()
@@ -354,7 +354,7 @@ void MyCvDLLInterfaceIFace::addPopup(CvPopupInfo* pInfo, PlayerTypes ePlayer, bo
 		{
 			if (bImmediate)
 			{
-				//getCvInterface().createAndLaunchButtonPopup(std::move(pInfoOwner));
+				//gCommonEngineConfig.interface->createAndLaunchButtonPopup(std::move(pInfoOwner));
 				// Unfortunately, ownership of this pointer passes through a raw pointer API.
 				CvButtonPopup* const popup = new CvButtonPopup(std::move(pInfoOwner));
 				if (!CvDLLButtonPopup::getInstance().launchButtonPopup(popup, popup->getPopupInfo()))
@@ -373,43 +373,43 @@ void MyCvDLLInterfaceIFace::getDisplayedButtonPopups(CvPopupQueue&)
 
 int MyCvDLLInterfaceIFace::getCycleSelectionCounter()
 {
-	return getCvInterface().getCycleSelectionCounter();
+	return gCommonEngineConfig.interface->getCycleSelectionCounter();
 }
 
 void MyCvDLLInterfaceIFace::setCycleSelectionCounter(int iNewValue)
 {
-	return getCvInterface().setCycleSelectionCounter(iNewValue);
+	return gCommonEngineConfig.interface->setCycleSelectionCounter(iNewValue);
 }
 
 void MyCvDLLInterfaceIFace::changeCycleSelectionCounter(int iChange)
 {
-	return getCvInterface().changeCycleSelectionCounter(iChange);
+	return gCommonEngineConfig.interface->changeCycleSelectionCounter(iChange);
 }
 
 int MyCvDLLInterfaceIFace::getEndTurnCounter()
 {
-	return getCvInterface().getEndTurnCounter();
+	return gCommonEngineConfig.interface->getEndTurnCounter();
 }
 
 void MyCvDLLInterfaceIFace::setEndTurnCounter(int iNewValue)
 {
-	return getCvInterface().setEndTurnCounter(iNewValue);
+	return gCommonEngineConfig.interface->setEndTurnCounter(iNewValue);
 }
 
 void MyCvDLLInterfaceIFace::changeEndTurnCounter(int iChange)
 {
-	return getCvInterface().changeEndTurnCounter(iChange);
+	return gCommonEngineConfig.interface->changeEndTurnCounter(iChange);
 }
 
 bool MyCvDLLInterfaceIFace::isCombatFocus()
 {
-	return getCvInterface().isCombatFocus();
+	return gCommonEngineConfig.interface->isCombatFocus();
 }
 
 void MyCvDLLInterfaceIFace::setCombatFocus(bool bNewValue)
 {
 	//std::clog << "Ignoring " << __FUNCTION__ << std::endl;
-	return getCvInterface().setCombatFocus(bNewValue);
+	return gCommonEngineConfig.interface->setCombatFocus(bNewValue);
 }
 
 void MyCvDLLInterfaceIFace::setDiploQueue(CvDiploParameters* pDiploParams, PlayerTypes ePlayer)
@@ -420,12 +420,12 @@ void MyCvDLLInterfaceIFace::setDiploQueue(CvDiploParameters* pDiploParams, Playe
 
 bool MyCvDLLInterfaceIFace::isDirty(InterfaceDirtyBits eDirtyItem)
 {
-	return getCvInterface().getInterfaceDirtyBit(eDirtyItem);
+	return gCommonEngineConfig.interface->getInterfaceDirtyBit(eDirtyItem);
 }
 
 void MyCvDLLInterfaceIFace::setDirty(InterfaceDirtyBits eDirtyItem, bool bNewValue)
 {
-	getCvInterface().setInterfaceDirtyBit(eDirtyItem, bNewValue);
+	gCommonEngineConfig.interface->setInterfaceDirtyBit(eDirtyItem, bNewValue);
 }
 
 void MyCvDLLInterfaceIFace::makeInterfaceDirty()
@@ -438,7 +438,7 @@ bool MyCvDLLInterfaceIFace::updateCursorType()
 {
 	//HECK_LOG_DEFAULT(heck::Log::kWarning, "Stub implementation. Returning false."sv);
 	// NOTE: Return value isn't used anywhere.
-	getCvInterface().updateCursorType();
+	gCommonEngineConfig.interface->updateCursorType();
 	return false;
 }
 
@@ -447,7 +447,7 @@ void MyCvDLLInterfaceIFace::updatePythonScreens()
 	// Any game action will invalidate UI anyway.
 	// This might possibly be useful if we had real-time game updates where not every update will invalidate UI.
 	//std::clog << "Ignoring call to " << __FUNCTION__ << std::endl;
-	getCvInterface().updatePythonScreens();
+	gCommonEngineConfig.interface->updatePythonScreens();
 }
 
 void MyCvDLLInterfaceIFace::lookAt(NiPoint3 pt3Target, CameraLookAtTypes type, NiPoint3 attackDirection)
@@ -455,67 +455,67 @@ void MyCvDLLInterfaceIFace::lookAt(NiPoint3 pt3Target, CameraLookAtTypes type, N
 	// Reuse map functions.
 	//const int x = gGlobals.getMap().pointXToPlotX(pt3Target.x);
 	//const int y = gGlobals.getMap().pointYToPlotY(pt3Target.y);
-	getCvInterface().lookAt(pt3Target, type, attackDirection);
+	gCommonEngineConfig.interface->lookAt(pt3Target, type, attackDirection);
 }
 
 void MyCvDLLInterfaceIFace::centerCamera(CvUnit* unit)
 {
-	getCvInterface().lookAtPlot({ unit->getX(), unit->getY() });
+	gCommonEngineConfig.interface->lookAtPlot({ unit->getX(), unit->getY() });
 }
 
 void MyCvDLLInterfaceIFace::releaseLockedCamera()
 {
-	getCvInterface().releaseLockedCamera();
+	gCommonEngineConfig.interface->releaseLockedCamera();
 }
 
 bool MyCvDLLInterfaceIFace::isFocusedWidget()
 {
-	return getCvInterface().isFocusedWidget();
+	return gCommonEngineConfig.interface->isFocusedWidget();
 }
 
 bool MyCvDLLInterfaceIFace::isFocused()
 {
-	return getCvInterface().isFocused();
+	return gCommonEngineConfig.interface->isFocused();
 }
 
 bool MyCvDLLInterfaceIFace::isBareMapMode()
 {
-	return getCvInterface().isBareMapMode();
+	return gCommonEngineConfig.interface->isBareMapMode();
 }
 
 void MyCvDLLInterfaceIFace::toggleBareMapMode()
 {
-	return getCvInterface().toggleBareMapMode();
+	return gCommonEngineConfig.interface->toggleBareMapMode();
 }
 
 bool MyCvDLLInterfaceIFace::isShowYields()
 {
-	return getCvInterface().isShowYields();
+	return gCommonEngineConfig.interface->isShowYields();
 }
 
 void MyCvDLLInterfaceIFace::toggleYieldVisibleMode()
 {
-	return getCvInterface().toggleYieldVisibleMode();
+	return gCommonEngineConfig.interface->toggleYieldVisibleMode();
 }
 
 bool MyCvDLLInterfaceIFace::isScoresVisible()
 {
-	return getCvInterface().isScoresVisible();
+	return gCommonEngineConfig.interface->isScoresVisible();
 }
 
 void MyCvDLLInterfaceIFace::toggleScoresVisible()
 {
-	return getCvInterface().toggleScoresVisible();
+	return gCommonEngineConfig.interface->toggleScoresVisible();
 }
 
 bool MyCvDLLInterfaceIFace::isScoresMinimized()
 {
-	return getCvInterface().isScoresMinimized();
+	return gCommonEngineConfig.interface->isScoresMinimized();
 }
 
 void MyCvDLLInterfaceIFace::toggleScoresMinimized()
 {
-	return getCvInterface().toggleScoresMinimized();
+	return gCommonEngineConfig.interface->toggleScoresMinimized();
 }
 
 bool MyCvDLLInterfaceIFace::isNetStatsVisible()
@@ -525,37 +525,37 @@ bool MyCvDLLInterfaceIFace::isNetStatsVisible()
 
 int MyCvDLLInterfaceIFace::getOriginalPlotCount()
 {
-	return getCvInterface().getOriginalUnitSelectionIndex();
+	return gCommonEngineConfig.interface->getOriginalUnitSelectionIndex();
 }
 
 bool MyCvDLLInterfaceIFace::isCityScreenUp()
 {
-	return getCvInterface().isCityScreenUp();
+	return gCommonEngineConfig.interface->isCityScreenUp();
 }
 
 bool MyCvDLLInterfaceIFace::isEndTurnMessage()
 {
-	return getCvInterface().isEndTurnMessage();
+	return gCommonEngineConfig.interface->isEndTurnMessage();
 }
 
 void MyCvDLLInterfaceIFace::setInterfaceMode(InterfaceModeTypes eNewValue)
 {
-	return getCvInterface().setInterfaceMode(eNewValue);
+	return gCommonEngineConfig.interface->setInterfaceMode(eNewValue);
 }
 
 InterfaceModeTypes MyCvDLLInterfaceIFace::getInterfaceMode()
 {
-	return getCvInterface().getInterfaceMode();
+	return gCommonEngineConfig.interface->getInterfaceMode();
 }
 
 InterfaceVisibility MyCvDLLInterfaceIFace::getShowInterface()
 {
-	return getCvInterface().getShowInterface();
+	return gCommonEngineConfig.interface->getShowInterface();
 }
 
 CvPlot* MyCvDLLInterfaceIFace::getMouseOverPlot()
 {
-	return getCvInterface().getMouseOverPlot();
+	return gCommonEngineConfig.interface->getMouseOverPlot();
 }
 
 void MyCvDLLInterfaceIFace::setFlashing([[maybe_unused]] PlayerTypes eWho, [[maybe_unused]] bool bFlashing)
@@ -586,49 +586,49 @@ void MyCvDLLInterfaceIFace::setMinimapColor(MinimapModeTypes eMinimapMode, int i
 {
 	// TODO: Minimap
 	//abort();
-	return getCvInterface().setMinimapColor(eMinimapMode, { iX, iY }, eColor, fAlpha);
+	return gCommonEngineConfig.interface->setMinimapColor(eMinimapMode, { iX, iY }, eColor, fAlpha);
 }
 
 unsigned char* MyCvDLLInterfaceIFace::getMinimapBaseTexture() const
 {
-	return getCvInterface().getMinimapBaseTextureDXT1();
+	return gCommonEngineConfig.interface->getMinimapBaseTextureDXT1();
 }
 
 void MyCvDLLInterfaceIFace::setEndTurnMessage(bool bNewValue)
 {
-	getCvInterface().setEndTurnMessage(bNewValue);
+	gCommonEngineConfig.interface->setEndTurnMessage(bNewValue);
 }
 
 bool MyCvDLLInterfaceIFace::isHasMovedUnit()
 {
-	return getCvInterface().isHasMovedUnit();
+	return gCommonEngineConfig.interface->isHasMovedUnit();
 }
 
 // Has the player manually moved a unit?
 void MyCvDLLInterfaceIFace::setHasMovedUnit(bool bNewValue)
 {
-	return getCvInterface().setHasMovedUnit(bNewValue);
+	return gCommonEngineConfig.interface->setHasMovedUnit(bNewValue);
 }
 
 bool MyCvDLLInterfaceIFace::isForcePopup()
 {
-	return getCvInterface().isForcePopup();
+	return gCommonEngineConfig.interface->isForcePopup();
 }
 
 void MyCvDLLInterfaceIFace::setForcePopup(bool bNewValue)
 {
-	getCvInterface().setForcePopup(bNewValue);
+	gCommonEngineConfig.interface->setForcePopup(bNewValue);
 }
 
 void MyCvDLLInterfaceIFace::lookAtCityOffset(int iCity)
 {
 	if (const CvCity* const city = CvPlayerAI::getPlayerNonInl(gGlobals.getGame().getActivePlayer()).getCity(iCity))
-		getCvInterface().lookAtPlot({ city->getX(), city->getY() });
+		gCommonEngineConfig.interface->lookAtPlot({ city->getX(), city->getY() });
 }
 
 void MyCvDLLInterfaceIFace::toggleTurnLog()
 {
-	getCvInterface().toggleTurnLog();
+	gCommonEngineConfig.interface->toggleTurnLog();
 }
 
 void MyCvDLLInterfaceIFace::showTurnLog([[maybe_unused]] ChatTargetTypes eTarget)
@@ -638,22 +638,22 @@ void MyCvDLLInterfaceIFace::showTurnLog([[maybe_unused]] ChatTargetTypes eTarget
 
 void MyCvDLLInterfaceIFace::dirtyTurnLog(PlayerTypes ePlayer)
 {
-	getCvInterface().dirtyTurnLog(ePlayer);
+	gCommonEngineConfig.interface->dirtyTurnLog(ePlayer);
 }
 
 int MyCvDLLInterfaceIFace::getPlotListColumn()
 {
-	return getCvInterface().getPlotListColumn();
+	return gCommonEngineConfig.interface->getPlotListColumn();
 }
 
 void MyCvDLLInterfaceIFace::verifyPlotListColumn()
 {
-	return getCvInterface().verifyPlotListColumn();
+	return gCommonEngineConfig.interface->verifyPlotListColumn();
 }
 
 int MyCvDLLInterfaceIFace::getPlotListOffset()
 {
-	return getCvInterface().getPlotListOffset();
+	return gCommonEngineConfig.interface->getPlotListOffset();
 }
 
 void MyCvDLLInterfaceIFace::unlockPopupHelp()
@@ -665,23 +665,23 @@ void MyCvDLLInterfaceIFace::unlockPopupHelp()
 void MyCvDLLInterfaceIFace::showDetails(bool bPasswordOnly)
 {
 	//throw std::runtime_error("Not implemented.");
-	return getCvInterface().showDetails(bPasswordOnly);
+	return gCommonEngineConfig.interface->showDetails(bPasswordOnly);
 }
 
 void MyCvDLLInterfaceIFace::showAdminDetails()
 {
 	//throw std::runtime_error("Not implemented.");
-	return getCvInterface().showAdminDetails();
+	return gCommonEngineConfig.interface->showAdminDetails();
 }
 
 void MyCvDLLInterfaceIFace::toggleClockAlarm(bool bValue, int iHour, int iMin)
 {
-	return getCvInterface().toggleClockAlarm(bValue, iHour, iMin);
+	return gCommonEngineConfig.interface->toggleClockAlarm(bValue, iHour, iMin);
 }
 
 bool MyCvDLLInterfaceIFace::isClockAlarmOn()
 {
-	return getCvInterface().isClockAlarmOn();
+	return gCommonEngineConfig.interface->isClockAlarmOn();
 }
 
 void MyCvDLLInterfaceIFace::setScreenDying([[maybe_unused]] int iPythonFileID, [[maybe_unused]] bool bDying)
@@ -692,7 +692,7 @@ void MyCvDLLInterfaceIFace::setScreenDying([[maybe_unused]] int iPythonFileID, [
 
 bool MyCvDLLInterfaceIFace::isExitingToMainMenu()
 {
-	return getCvInterface().isExitingToMainMenu();
+	return gCommonEngineConfig.interface->isExitingToMainMenu();
 }
 
 void MyCvDLLInterfaceIFace::exitingToMainMenu(const char* szLoadFile)
@@ -700,12 +700,12 @@ void MyCvDLLInterfaceIFace::exitingToMainMenu(const char* szLoadFile)
 	// Always null?
 	if (szLoadFile)
 		std::abort();
-	return getCvInterface().exitToMainMenu();
+	return gCommonEngineConfig.interface->exitToMainMenu();
 }
 
 void MyCvDLLInterfaceIFace::setWorldBuilder(bool bTurnOn)
 {
-	return getCvInterface().setWorldBuilder(bTurnOn);
+	return gCommonEngineConfig.interface->setWorldBuilder(bTurnOn);
 }
 
 int MyCvDLLInterfaceIFace::getFontLeftJustify()
@@ -754,7 +754,7 @@ void MyCvDLLInterfaceIFace::popupSetBodyString(CvPopup* pPopup, CvWString szText
 
 void MyCvDLLInterfaceIFace::popupLaunch(CvPopup* pPopup, bool bCreateOkButton, PopupStates bState, int iNumPixelScroll)
 {
-	return getCvInterface().launchPopup(std::unique_ptr<CvPopup>(pPopup), bCreateOkButton, bState, iNumPixelScroll);
+	return gCommonEngineConfig.interface->launchPopup(std::unique_ptr<CvPopup>(pPopup), bCreateOkButton, bState, iNumPixelScroll);
 }
 
 void MyCvDLLInterfaceIFace::popupSetPopupType(CvPopup* pPopup, PopupEventTypes ePopupType, [[maybe_unused]] const TCHAR* szArtFileName)
@@ -838,27 +838,27 @@ bool MyCvDLLInterfaceIFace::popupIsDying(CvPopup* pPopup)
 
 void MyCvDLLInterfaceIFace::setCityTabSelectionRow(CityTabTypes t)
 {
-	return getCvInterface().setCityTabSelectionRow(t);
+	return gCommonEngineConfig.interface->setCityTabSelectionRow(t);
 }
 
 bool MyCvDLLInterfaceIFace::noTechSplash()
 {
-	return getCvInterface().noTechSplash();
+	return gCommonEngineConfig.interface->noTechSplash();
 }
 
 bool MyCvDLLInterfaceIFace::isInAdvancedStart() const
 {
-	return getCvInterface().isInAdvancedStart();
+	return gCommonEngineConfig.interface->isInAdvancedStart();
 }
 
 void MyCvDLLInterfaceIFace::setInAdvancedStart(bool bAdvancedStart)
 {
-	return getCvInterface().setInAdvancedStart(bAdvancedStart);
+	return gCommonEngineConfig.interface->setInAdvancedStart(bAdvancedStart);
 }
 
 bool MyCvDLLInterfaceIFace::isSpaceshipScreenUp() const
 {
-	return getCvInterface().isSpaceshipScreenUp();
+	return gCommonEngineConfig.interface->isSpaceshipScreenUp();
 }
 
 bool MyCvDLLInterfaceIFace::isDebugMenuCreated() const
@@ -868,7 +868,7 @@ bool MyCvDLLInterfaceIFace::isDebugMenuCreated() const
 
 void MyCvDLLInterfaceIFace::setBusy(bool bBusy)
 {
-	return getCvInterface().setBusy(bBusy);
+	return gCommonEngineConfig.interface->setBusy(bBusy);
 }
 
 void MyCvDLLInterfaceIFace::getInterfaceScreenIdsForInput([[maybe_unused]] std::vector<int>& aIds)

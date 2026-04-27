@@ -1,5 +1,6 @@
 #include "CommonShared.h"
 #include "CommonDLLOnly.h"
+#include "PlayerBotEnablement.h"
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -35,4 +36,9 @@ std::span<const std::string_view> getCvGameCoreDLLConfigStrings()
 #endif
 		});
 	return k;
+}
+
+bool hasCvGameCoreDLLPlayerBotSupport()
+{
+	return !!ENABLE_PLAYER_BOT;
 }

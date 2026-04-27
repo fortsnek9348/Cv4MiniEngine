@@ -3,9 +3,8 @@
 #include "AudioSystem.h"
 #include "CommandLine.h"
 
-#include <Cv4CommonEngineLib/CvAppUtil.h>
-
-#include <PlayerBotEnablement.h>
+#include <Cv4CommonEngineLib/CvAppStates.h>
+#include <Cv4CommonEngineLib/CommonEngine.h>
 
 #include <vector>
 #include <filesystem>
@@ -17,12 +16,10 @@ namespace hecktui
 	class Element;
 }
 
-#if ENABLE_PLAYER_BOT
 namespace cvbot
 {
 	class IPlayerBotPlugin;
 }
-#endif
 
 namespace cvengine
 {
@@ -31,9 +28,6 @@ namespace cvengine
 	class ICvAppUI
 	{
 	public:
-		//virtual void setDebugConsoleMode() = 0;
-		//virtual void setMainInterfaceMode() = 0;
-
 		// This is used to fake the shift key in ActionButton.
 		[[nodiscard]] virtual hecktui::ModifierKeyState exchangeLastModifierKeysState(hecktui::ModifierKeyState) = 0;
 
@@ -109,15 +103,14 @@ namespace cvengine
 		cvengine::app::LoadGameState mImpl;
 	};
 
-	class CvApp
+	class CvApp : public ICommonEngineCallbackHandler
 	{
 	public:
 		static CvApp& getInstance();
 
-		CvApp();
-		~CvApp();
-
 		void start(const cvengine::AppStartupConfig& config);
+
+		static std::filesystem::path getUserDataDir();
 
 		void redirectLoggingOutput();
 
@@ -125,9 +118,7 @@ namespace cvengine
 
 		const cvengine::AppStartupConfig& getCommandLineConfig() const;
 
-#if ENABLE_PLAYER_BOT
 		const cvbot::IPlayerBotPlugin* getPlayerBotPlugin() const;
-#endif
 
 		void startUI();
 		ICvAppUI& getUI() noexcept;
@@ -139,10 +130,6 @@ namespace cvengine
 
 		void deferMainMenu();
 
-		// display load screen, do the loading, push InGame, reset UI
-		// Deferred to next update.
-		void deferLoadGame(const std::filesystem::path& path);
-
 		// With current setup
 		void deferNewGameStartup(cvengine::app::SimplifiedInitCore config);
 
@@ -151,8 +138,21 @@ namespace cvengine
 		// Main loop. Returns exit code.
 		int run();
 
-		void setWantExit();
-		bool isExiting() const;
+		virtual bool isShiftDown() const override;
+		virtual bool isAltDown() const override;
+		virtual bool isCtrlDown() const override;
+
+		virtual std::optional<std::filesystem::path> promptSaveGamePath(const std::filesystem::path& defPath) override;
+		virtual std::optional<std::filesystem::path> promptLoadGamePath(const std::filesystem::path& defDir) override;
+
+		// display load screen, do the loading, push InGame, reset UI
+		// Deferred to next update.
+		virtual void deferLoadGame(const std::filesystem::path&) override;
+
+		virtual bool isAutorun() const override;
+
+		virtual void exitApp() override;
+		virtual bool isAppExiting() const override;
 
 		std::unique_ptr<AudioSystem> audioSystem;
 
@@ -161,7 +161,7 @@ namespace cvengine
 
 		cvengine::AppStartupConfig mCmdLineConfig;
 
-		std::unique_ptr<cvengine::CvVFS> mVFS;
+		const cvengine::CvVFS* mVFS{};
 		std::unique_ptr<ICvAppUI> mAppUI;
 		std::unique_ptr<ICvAppState> mCurrentState;
 		std::unique_ptr<ICvAppState> mNextState;
@@ -170,8 +170,6 @@ namespace cvengine
 
 		bool mIsShiftClickHackEnabled = false;
 
-#if ENABLE_PLAYER_BOT
 		const cvbot::IPlayerBotPlugin* mPlayerBotPlugin = nullptr;
-#endif
 	};
 }

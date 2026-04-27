@@ -1,30 +1,9 @@
 #include "MyCvDLLFeature.h"
 
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
-
-CvDLLFeatureIFaceBase& cvengine::engine_specific::getFeatureIFace()
-{
-	static constinit MyCvDLLFeature s;
-	return s;
-}
-
-CvDLLSymbolIFaceBase& cvengine::engine_specific::getSymbolIFace()
-{
-	static constinit MyCvDLLSymbol s;
-	return s;
-}
-CvDLLRouteIFaceBase& cvengine::engine_specific::getRouteIFace()
-{
-	static constinit MyCvDLLRoute s;
-	return s;
-}
-
-CvDLLRiverIFaceBase& cvengine::engine_specific::getRiverIFace()
-{
-	static constinit MyCvDLLRiver s;
-	return s;
-}
-
+constinit MyCvDLLFeature MyCvDLLFeature::gInstance;
+constinit MyCvDLLSymbol MyCvDLLSymbol::gInstance;
+constinit MyCvDLLRoute MyCvDLLRoute::gInstance;
+constinit MyCvDLLRiver MyCvDLLRiver::gInstance;
 
 class ::CvFeature
 {

@@ -3,14 +3,14 @@
 #include "CvGInterfaceScreen.h"
 #include "CvGTurnLogWindow.h"
 #include "CvPopupTuiDialog.h"
-#include "CvTUIDiplomacyScreen.h"
+#include "CvTuiDiplomacyScreen.h"
+#include "CvTuiEngine.h"
 #include "PythonScreen.h"
 
 #include <Cv4CommonEngineLib/CvButtonPopup.h>
 #include <Cv4CommonEngineLib/CvEngine.h>
 #include <Cv4CommonEngineLib/CvPopup.h>
 #include <Cv4CommonEngineLib/DLLMessageQueue.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 #include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <FAStar/FAStar.h>
@@ -666,7 +666,7 @@ void CvTuiMainInterface::onWorldViewClickPlot(CvPlot* plot, bool shift)
 			virtual void Debug(char*) override {}
 			virtual void Execute() override
 			{
-				engine_specific::getCvEngine().setSignText(mPlayerI, mCoord, mLabel);
+				CvTuiEngine::getInstance().setSignText(mPlayerI, mCoord, mLabel);
 			}
 			virtual void PutInBuffer(FDataStreamBase* pStream) override
 			{
@@ -694,7 +694,7 @@ void CvTuiMainInterface::onWorldViewClickPlot(CvPlot* plot, bool shift)
 		const PlayerTypes playerI = GC.getGame().getActivePlayer();
 		const heck::ivec2 coord{ plot->getX(), plot->getY() };
 
-		if (engine_specific::getCvEngine().findSignTextAt(playerI, coord).size())
+		if (CvTuiEngine::getInstance().findSignTextAt(playerI, coord).size())
 		{
 			// Delete.
 			DLLMessageQueue::getInstance().push(std::make_unique<CvNetSign>(playerI, coord, std::wstring()));
@@ -1401,7 +1401,7 @@ void CvTuiMainInterface::updatePopups()
 			while (CvDiploParameters* const diploParams = player.popFrontDiplomacy())
 			{
 				// Taking ownership of diplo params.
-				if (auto diploScreenUI = std::make_unique<CvTUIDiplomacyScreen>(std::unique_ptr<CvDiploParameters>(diploParams)))
+				if (auto diploScreenUI = std::make_unique<CvTuiDiplomacyScreen>(std::unique_ptr<CvDiploParameters>(diploParams)))
 				{
 					if (!diploScreenUI->wantClose())
 					{

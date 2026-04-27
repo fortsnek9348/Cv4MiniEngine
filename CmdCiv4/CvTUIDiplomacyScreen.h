@@ -15,10 +15,10 @@ namespace cvengine
 {
 	class RichLabel;
 
-	class CvTUIDiplomacyScreen : public CvDiplomacyScreen, public CvGInterfaceScreen, public heck::NoCopyNoMove // self-referencing
+	class CvTuiDiplomacyScreen : public CvDiplomacyScreen, public CvGInterfaceScreen, public heck::NoCopyNoMove // self-referencing
 	{
 	public:
-		explicit CvTUIDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams);
+		explicit CvTuiDiplomacyScreen(std::unique_ptr<CvDiploParameters> diploParams);
 
 		virtual void rebuildPythonScreen() override;
 		virtual void updateFromGameState(hecktui::Window& window) override;

@@ -1,8 +1,7 @@
 #include "CyEngine.h"
 #include "CyCommon.h"
-
 #include "../inc/Cv4CommonEngineLib/CvEngine.h"
-#include "../inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
+#include "../CommonEngineGlobal.h"
 
 #include <CvGlobals.h>
 #include <CvInfos.h>
@@ -94,7 +93,7 @@ void CyEngine::registerWithPython(const pybind11::module& m)
 void CyEngine::addColoredPlot(int plotX, int plotY, NiColorA color, int iLayer)
 {
 	// Not sure what style to use.
-	cvengine::engine_specific::getCvEngine().addColoredPlot({ plotX, plotY }, color, PlotStyles::PLOT_STYLE_BOX_FILL, static_cast<PlotLandscapeLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->addColoredPlot({ plotX, plotY }, color, PlotStyles::PLOT_STYLE_BOX_FILL, static_cast<PlotLandscapeLayers>(iLayer));
 }
 
 void CyEngine::addColoredPlotAlt(int plotX, int plotY, int iPlotStyle, int iLayer, const std::string& szColor, float fAlpha)
@@ -105,12 +104,12 @@ void CyEngine::addColoredPlotAlt(int plotX, int plotY, int iPlotStyle, int iLaye
 	if (colourI != NO_COLOR)
 		colour = gGlobals.getColorInfo(colourI).getColor();
 	colour.a = fAlpha;
-	cvengine::engine_specific::getCvEngine().addColoredPlot({ plotX, plotY }, colour, static_cast<PlotStyles>(iPlotStyle), static_cast<PlotLandscapeLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->addColoredPlot({ plotX, plotY }, colour, static_cast<PlotStyles>(iPlotStyle), static_cast<PlotLandscapeLayers>(iLayer));
 }
 
 void CyEngine::addLandmark(CyPlot pPlot, const std::wstring& caption)
 {
-	cvengine::engine_specific::getCvEngine().addLandmark(pPlot.getPlot(), caption);
+	cvengine::gCommonEngineConfig.engine->addLandmark(pPlot.getPlot(), caption);
 }
 
 void CyEngine::addLandmarkPopup([[maybe_unused]] CyPlot pPlot)
@@ -122,22 +121,22 @@ void CyEngine::addLandmarkPopup([[maybe_unused]] CyPlot pPlot)
 void CyEngine::addSign(CyPlot pyPlot, PlayerTypes playerType, const std::wstring& caption)
 {
 	if (const CvPlot* const plot = pyPlot.getPlot())
-		cvengine::engine_specific::getCvEngine().setSignText(playerType, { plot->getX(), plot->getY() }, std::move(caption));
+		cvengine::gCommonEngineConfig.engine->setSignText(playerType, { plot->getX(), plot->getY() }, std::move(caption));
 }
 
 void CyEngine::clearAreaBorderPlots(int iLayer)
 {
-	cvengine::engine_specific::getCvEngine().clearAreaBorderPlots(static_cast<AreaBorderLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->clearAreaBorderPlots(static_cast<AreaBorderLayers>(iLayer));
 }
 
 void CyEngine::clearColoredPlots(int iLayer)
 {
-	cvengine::engine_specific::getCvEngine().clearColoredPlots(static_cast<PlotLandscapeLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->clearColoredPlots(static_cast<PlotLandscapeLayers>(iLayer));
 }
 
 void CyEngine::fillAreaBorderPlot(int plotX, int plotY, NiColorA color, int iLayer)
 {
-	cvengine::engine_specific::getCvEngine().fillAreaBorderPlot({ plotX, plotY }, color, static_cast<AreaBorderLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->fillAreaBorderPlot({ plotX, plotY }, color, static_cast<AreaBorderLayers>(iLayer));
 }
 
 void CyEngine::fillAreaBorderPlotAlt(int plotX, int plotY, int iLayer, const std::string& szColor, float fAlpha)
@@ -148,37 +147,37 @@ void CyEngine::fillAreaBorderPlotAlt(int plotX, int plotY, int iLayer, const std
 	if (colourI != NO_COLOR)
 		colour = gGlobals.getColorInfo(colourI).getColor();
 	colour.a = fAlpha;
-	cvengine::engine_specific::getCvEngine().fillAreaBorderPlot({ plotX, plotY }, colour, static_cast<AreaBorderLayers>(iLayer));
+	cvengine::gCommonEngineConfig.engine->fillAreaBorderPlot({ plotX, plotY }, colour, static_cast<AreaBorderLayers>(iLayer));
 }
 
 bool CyEngine::getCityBillboardVisibility()
 {
-	return cvengine::engine_specific::getCvEngine().getCityBillboardVisibility();
+	return cvengine::gCommonEngineConfig.engine->getCityBillboardVisibility();
 }
 
 bool CyEngine::getCultureVisibility()
 {
-	return cvengine::engine_specific::getCvEngine().getCultureVisibility();
+	return cvengine::gCommonEngineConfig.engine->getCultureVisibility();
 }
 
 int CyEngine::getNumSigns()
 {
-	return cvengine::engine_specific::getCvEngine().getNumSigns();
+	return cvengine::gCommonEngineConfig.engine->getNumSigns();
 }
 
 bool CyEngine::getSelectionCursorVisibility()
 {
-	return cvengine::engine_specific::getCvEngine().getSelectionCursorVisibility();
+	return cvengine::gCommonEngineConfig.engine->getSelectionCursorVisibility();
 }
 
 CySign CyEngine::getSignByIndex(int index)
 {
-	return { cvengine::engine_specific::getCvEngine().getSignByIndex(static_cast<size_t>(index)) };
+	return { cvengine::gCommonEngineConfig.engine->getSignByIndex(static_cast<size_t>(index)) };
 }
 
 bool CyEngine::getUnitFlagVisibility()
 {
-	return cvengine::engine_specific::getCvEngine().getUnitFlagVisibility();
+	return cvengine::gCommonEngineConfig.engine->getUnitFlagVisibility();
 }
 
 float CyEngine::getUpdateRate()
@@ -189,13 +188,13 @@ float CyEngine::getUpdateRate()
 
 bool CyEngine::isDirty(EngineDirtyBits eBit)
 {
-	return cvengine::engine_specific::getCvEngine().isDirty(eBit);
+	return cvengine::gCommonEngineConfig.engine->isDirty(eBit);
 }
 
 bool CyEngine::isGlobeviewUp()
 {
 	// TODO: Globeview?
-	return cvengine::engine_specific::getCvEngine().isGlobeviewUp();
+	return cvengine::gCommonEngineConfig.engine->isGlobeviewUp();
 }
 
 void CyEngine::reloadEffectInfos()
@@ -207,45 +206,45 @@ void CyEngine::reloadEffectInfos()
 void CyEngine::removeLandmark(CyPlot pyPlot)
 {
 	if (const CvPlot* const plot = pyPlot.getPlot())
-		cvengine::engine_specific::getCvEngine().removeLandmark({ plot->getX(), plot->getY() });
+		cvengine::gCommonEngineConfig.engine->removeLandmark({ plot->getX(), plot->getY() });
 }
 
 void CyEngine::removeSign(CyPlot pyPlot, PlayerTypes playerType)
 {
 	if (const CvPlot* const plot = pyPlot.getPlot())
-		cvengine::engine_specific::getCvEngine().removeSign(playerType, { plot->getX(), plot->getY() });
+		cvengine::gCommonEngineConfig.engine->removeSign(playerType, { plot->getX(), plot->getY() });
 }
 
 void CyEngine::setCityBillboardVisibility(bool bState)
 {
-	cvengine::engine_specific::getCvEngine().setCityBillboardVisibility(bState);
+	cvengine::gCommonEngineConfig.engine->setCityBillboardVisibility(bState);
 }
 
 void CyEngine::setCultureVisibility(bool bState)
 {
-	cvengine::engine_specific::getCvEngine().setCultureVisibility(bState);
+	cvengine::gCommonEngineConfig.engine->setCultureVisibility(bState);
 }
 
 void CyEngine::setDirty(EngineDirtyBits eBit, bool bNewValue)
 {
-	cvengine::engine_specific::getCvEngine().setDirty(eBit, bNewValue);
+	cvengine::gCommonEngineConfig.engine->setDirty(eBit, bNewValue);
 }
 
 void CyEngine::setFogOfWar([[maybe_unused]] bool bState)
 {
-	//cvengine::engine_specific::getCvEngine().setFogOfWar(bState);
+	//cvengine::gCommonEngineConfig.engine->setFogOfWar(bState);
 	// Not used?
 	abortOnUnimplementedPythonFunction();
 }
 
 void CyEngine::setSelectionCursorVisibility(bool bState)
 {
-	cvengine::engine_specific::getCvEngine().setSelectionCursorVisibility(bState);
+	cvengine::gCommonEngineConfig.engine->setSelectionCursorVisibility(bState);
 }
 
 void CyEngine::setUnitFlagVisibility(bool bState)
 {
-	cvengine::engine_specific::getCvEngine().setUnitFlagVisibility(bState);
+	cvengine::gCommonEngineConfig.engine->setUnitFlagVisibility(bState);
 }
 
 void CyEngine::setUpdateRate([[maybe_unused]] float fUpdateRate)
@@ -256,11 +255,11 @@ void CyEngine::setUpdateRate([[maybe_unused]] float fUpdateRate)
 
 void CyEngine::toggleGlobeview()
 {
-	cvengine::engine_specific::getCvEngine().toggleGlobeview();
+	cvengine::gCommonEngineConfig.engine->toggleGlobeview();
 }
 
 void CyEngine::triggerEffect(int iEffect, NiPoint3 plotPoint)
 {
-	cvengine::engine_specific::getCvEngine().triggerEffect(iEffect, plotPoint, 0.0f);
+	cvengine::gCommonEngineConfig.engine->triggerEffect(iEffect, plotPoint, 0.0f);
 }
 

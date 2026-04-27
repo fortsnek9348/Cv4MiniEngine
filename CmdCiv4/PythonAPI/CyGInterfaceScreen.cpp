@@ -587,7 +587,7 @@ void CyGInterfaceScreen::newPlotListUnitButton(std::string parent, std::string n
 }
 void CyGInterfaceScreen::newWorldView(std::string parent, std::string name)
 {
-	newControl(parent, name, buildMainInterfaceWorldViewComponent(CvTuiInterface::getInstance().getWorldView()));
+	newControl(parent, name, buildMainInterfaceWorldViewComponent(*CvTuiInterface::getInstance().getWorldView()));
 }
 
 void CyGInterfaceScreen::newHRule(std::string parent, std::string name, hecktui::EBorderStyle style)

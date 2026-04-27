@@ -1,6 +1,5 @@
 #include "CyDiplomacy.h"
-#include "../inc/Cv4CommonEngineLib/Common.h"
-#include "../MyCvDLLUtility.h"
+#include "../inc/Cv4CommonEngineLib/CvTranslator.h"
 
 #include <CvGlobals.h>
 #include <CvDiplomacyScreen.h>
@@ -210,7 +209,7 @@ void CyDiplomacy::setAIOffer(bool bOffer)
 void CyDiplomacy::setAIString(const std::wstring& szString, const std::vector<std::wstring>& txtArgs)
 {
 	// TODO: txtArgs can come from beginPythonDiplomacy. That's the types it contains. See if these args are used anywhere.
-	return getDiplo().setAIString(MyCvDLLUtility::getInstance().getTextGeneric(szString, std::vector<CvDLLUtilityIFaceBase::TextArg>(std::from_range, txtArgs)));
+	return getDiplo().setAIString(CvTranslator::getInstance().getText(szString, std::vector<CvDLLUtilityIFaceBase::TextArg>(std::from_range, txtArgs)));
 }
 
 void CyDiplomacy::showAllTrade(bool bShow)

@@ -3,18 +3,12 @@
 #include "WorldView.h"
 
 #include <Cv4CommonEngineLib/Common.h>
-#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvGlobals.h>
 #include <CvGameAI.h>
 #include <CvMap.h>
 
 using namespace cvengine;
-
-CvEngine& engine_specific::getCvEngine()
-{
-	return CvTuiEngine::getInstance();
-}
 
 CvTuiEngine& CvTuiEngine::getInstance()
 {
@@ -160,31 +154,38 @@ float CvTuiEngine::getHeightmapZ([[maybe_unused]] const NiPoint3& pt3, [[maybe_u
 
 void CvTuiEngine::lightenVisibility(ivec2 coord)
 {
-	CvTuiInterface::getInstance().getWorldView().changePlotVisibility(coord, WorldView::kLightened);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->changePlotVisibility(coord, WorldView::kLightened);
 }
 void CvTuiEngine::darkenVisibility(ivec2 coord)
 {
-	CvTuiInterface::getInstance().getWorldView().changePlotVisibility(coord, WorldView::kDarkened);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->changePlotVisibility(coord, WorldView::kDarkened);
 }
 void CvTuiEngine::blackenVisibility(ivec2 coord)
 {
-	CvTuiInterface::getInstance().getWorldView().changePlotVisibility(coord, WorldView::kBlackened);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->changePlotVisibility(coord, WorldView::kBlackened);
 }
 void CvTuiEngine::rebuildAllPlots()
 {
-	CvTuiInterface::getInstance().getWorldView().invalidateAll();
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->invalidateAll();
 }
 void CvTuiEngine::rebuildPlot(ivec2 coord, [[maybe_unused]] bool bRebuildHeights, [[maybe_unused]] bool bRebuildTextures)
 {
-	CvTuiInterface::getInstance().getWorldView().invalidatePlot(coord);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->invalidatePlot(coord);
 }
 void CvTuiEngine::rebuildRiverPlotTile(ivec2 coord, [[maybe_unused]] bool bRebuildHeights, [[maybe_unused]] bool bRebuildTextures)
 {
-	CvTuiInterface::getInstance().getWorldView().invalidatePlot(coord);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->invalidatePlot(coord);
 }
 void CvTuiEngine::rebuildTileArt(ivec2 coord)
 {
-	CvTuiInterface::getInstance().getWorldView().invalidatePlot(coord);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->invalidatePlot(coord);
 }
 void CvTuiEngine::forceTreeOffsets([[maybe_unused]] ivec2 coord)
 {
@@ -202,11 +203,13 @@ void CvTuiEngine::setGridMode([[maybe_unused]] bool bVal)
 
 void CvTuiEngine::addColoredPlot(ivec2 coord, const NiColorA& color, PlotStyles plotStyle, PlotLandscapeLayers layer)
 {
-	CvTuiInterface::getInstance().getWorldView().setColouredPlot(coord, { color, plotStyle, layer });
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->setColouredPlot(coord, { color, plotStyle, layer });
 }
 void CvTuiEngine::clearColoredPlots(PlotLandscapeLayers layer)
 {
-	CvTuiInterface::getInstance().getWorldView().clearColouredPlots(layer);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->clearColouredPlots(layer);
 }
 void CvTuiEngine::fillAreaBorderPlot([[maybe_unused]] ivec2 coord, [[maybe_unused]] const NiColorA& color, [[maybe_unused]] AreaBorderLayers layer)
 {
@@ -271,5 +274,6 @@ void CvTuiEngine::removeGreatWall([[maybe_unused]] CvCity* city)
 }
 void CvTuiEngine::markPlotTextureAsDirty([[maybe_unused]] ivec2 coord)
 {
-	CvTuiInterface::getInstance().getWorldView().invalidatePlot(coord);
+	if (auto* const worldView = CvTuiInterface::getInstance().getWorldView())
+		worldView->invalidatePlot(coord);
 }

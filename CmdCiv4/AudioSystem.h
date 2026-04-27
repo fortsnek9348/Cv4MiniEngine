@@ -7,25 +7,28 @@
 #include <string_view>
 #include <memory>
 
-class AudioSystem
+namespace cvengine
 {
-public:
-	AudioSystem();
-	AudioSystem(AudioSystem&&) noexcept;
-	AudioSystem& operator=(AudioSystem&&) noexcept;
-	~AudioSystem() noexcept;
+	class CvVFS;
 
-	void loadXmlDefs();
+	class AudioSystem
+	{
+	public:
+		AudioSystem(const CvVFS& vfs);
+		AudioSystem(AudioSystem&&) noexcept;
+		AudioSystem& operator=(AudioSystem&&) noexcept;
+		~AudioSystem() noexcept;
 
-	void playSound(std::string_view name);
-	void playScript2DSoundByIndex(int index);
-	void playScript3DSoundByIndex(int index, heck::ivec2 plotCoord);
-	//void setActiveSoundscape(int index, float volume);
-	void updateListener();
+		void playSound(std::string_view name);
+		void playScript2DSoundByIndex(int index);
+		void playScript3DSoundByIndex(int index, heck::ivec2 plotCoord);
+		//void setActiveSoundscape(int index, float volume);
+		void updateListener();
 
-	void clearSoundScape();
+		void clearSoundScape();
 
-private:
-	struct Internals;
-	std::unique_ptr<Internals> mInternals;
-};
+	private:
+		struct Internals;
+		std::unique_ptr<Internals> mInternals;
+	};
+}

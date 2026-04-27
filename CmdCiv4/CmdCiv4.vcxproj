@@ -130,7 +130,7 @@
     <ClCompile Include="FileDialogs.cpp" />
     <ClCompile Include="CvApp.cpp" />
     <ClCompile Include="CvAppUI.cpp" />
-    <ClCompile Include="CvTUIDiplomacyScreen.cpp" />
+    <ClCompile Include="CvTuiDiplomacyScreen.cpp" />
     <ClCompile Include="CvTuiEngine.cpp" />
     <ClCompile Include="CvGInterfaceScreen.cpp" />
     <ClCompile Include="CvGTurnLogWindow.cpp" />
@@ -152,7 +152,6 @@
     <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
     <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
     <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
-    <ClCompile Include="PythonAPI\PythonRegistration.cpp" />
     <ClCompile Include="PythonScreen.cpp" />
     <ClCompile Include="RichGuage.cpp" />
     <ClCompile Include="RichTextTable.cpp" />
@@ -192,7 +191,7 @@
     <ClInclude Include="CommandLine.h" />
     <ClInclude Include="CvApp.h" />
     <ClInclude Include="CvPopupTuiDialog.h" />
-    <ClInclude Include="CvTUIDiplomacyScreen.h" />
+    <ClInclude Include="CvTuiDiplomacyScreen.h" />
     <ClInclude Include="CvTuiEngine.h" />
     <ClInclude Include="CvGInterfaceScreen.h" />
     <ClInclude Include="CvGTurnLogWindow.h" />

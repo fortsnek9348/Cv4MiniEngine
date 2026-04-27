@@ -1,6 +1,5 @@
 #include "CyTranslator.h"
 #include "../MyCvDLLUtility.h"
-#include "../inc/Cv4CommonEngineLib/Common.h"
 #include "../inc/Cv4CommonEngineLib/CvTranslator.h"
 
 #include <CvGlobals.h>
