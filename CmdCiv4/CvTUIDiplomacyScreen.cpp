@@ -1,9 +1,12 @@
 #include "CvTUIDiplomacyScreen.h"
-#include "Common.h"
 #include "MainInterfaceControls.h"
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "UITheme.h"
-#include "CvButtonPopup.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
+#include "CvPopupTuiDialog.h"
+
+#include <Cv4CommonEngineLib/CvButtonPopup.h>
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <CLinkListIterator.h>
 #include <CvDiploParameters.h>
@@ -18,6 +21,7 @@
 
 using heck::range;
 using enum CvDiplomacyController::ESide;
+using namespace cvengine;
 
 static constexpr int kOfferPanelHeight = 7;
 static constexpr hecktui::EBorderStyle kUserCommentBorderStyle = hecktui::EBorderStyle::Rounded;
@@ -58,7 +62,7 @@ struct CvTUIDiplomacyScreen::Internals
 			Button::onClick(modifierKeyState);
 			ui.getController().onClickUserComment(userComment.type, userComment.data1, userComment.data2);
 			ui.updateUI();
-			CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::DiploEvent);
+			CvTuiInterface::getInstance().getTuiMainInterface()->onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::DiploEvent);
 		}
 	};
 
@@ -122,12 +126,12 @@ struct CvTUIDiplomacyScreen::Internals
 						: GET_PLAYER(side.playerI).AI_maxGoldTrade(otherSide.playerI);
 
 					auto popup = std::make_unique<InternalPopup>();
-					popup->headerString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_TRADE_TITLE_GOLD", {});
-					popup->bodyString = MyCvDLLUtility::getInstance().getTextGeneric(
+					popup->headerString = CvTranslator::getInstance().getText(L"TXT_KEY_TRADE_TITLE_GOLD");
+					popup->bodyString = CvTranslator::getInstance().getText(
 						isAIPlayer
 						? isGpt ? L"TXT_KEY_TRADE_GPT_FROM_THEM" : L"TXT_KEY_TRADE_GOLD_FROM_THEM"
-						: isGpt ? L"TXT_KEY_TRADE_GPT_TO_OFFER" : L"TXT_KEY_TRADE_GOLD_TO_OFFER",
-						{});
+						: isGpt ? L"TXT_KEY_TRADE_GPT_TO_OFFER" : L"TXT_KEY_TRADE_GOLD_TO_OFFER"
+					);
 					popup->controls.push_back(CvPopup::Control{
 						.type = CvPopup::EControlType::SpinBox,
 						.text = std::to_wstring(max),
@@ -135,7 +139,7 @@ struct CvTUIDiplomacyScreen::Internals
 						});
 					popup->controls.push_back(CvPopup::Control{
 						.type = CvPopup::EControlType::Button,
-						.text = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OK", {}),
+						.text = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OK"),
 						});
 					popup->optEnterSubmitBtnId = 0;
 					popup->enableEscCancel = true;
@@ -151,10 +155,10 @@ struct CvTUIDiplomacyScreen::Internals
 				if (ui.getController().onClickTradeItem(offerItem, isOffer, isAIPlayer, dealId) == CvDiplomacyController::EOfferResult::OnlyOneSideMayOfferItems)
 				{
 					auto popup = std::make_unique<InternalPopup>();
-					popup->bodyString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_PEACE_ERROR", {});
+					popup->bodyString = CvTranslator::getInstance().getText(L"TXT_KEY_PEACE_ERROR");
 					popup->controls.push_back(CvPopup::Control{
 						.type = CvPopup::EControlType::Button,
-						.text = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OK", {}),
+						.text = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OK"),
 						});
 					popup->optEnterSubmitBtnId = 0;
 					popup->enableEscCancel = true;
@@ -162,7 +166,7 @@ struct CvTUIDiplomacyScreen::Internals
 				}
 
 				ui.updateUI();
-				CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::DiploEvent);
+				CvTuiInterface::getInstance().getTuiMainInterface()->onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::DiploEvent);
 			}
 		}
 
@@ -228,7 +232,7 @@ struct CvTUIDiplomacyScreen::TradePanel : hecktui::Element
 		offerListContainer->setLayout(std::make_unique<hecktui::FlowLayout>(listFlowLayout));
 		addChild(std::move(offerListScrollPanel));
 
-		ceaseFireHeader = std::make_shared<hecktui::Label>(MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_TRADE_CEASE_FIRE_STRING", {}));
+		ceaseFireHeader = std::make_shared<hecktui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_TRADE_CEASE_FIRE_STRING"));
 		ceaseFireHeader->setVisible(false);
 		offerListContainer->addChild(ceaseFireHeader);
 

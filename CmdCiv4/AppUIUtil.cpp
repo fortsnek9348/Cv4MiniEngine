@@ -1,11 +1,13 @@
 #include "AppUIUtil.h"
-#include "DLLInterface/MyCvDLLUtility.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
+#include <Cv4CommonEngineLib/Common.h>
 
 using namespace cvengine;
 
 std::wstring cvengine::getRandomText()
 {
-	return MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
+	return CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
 }
 
 MyComboBox::MyComboBox(IWindowChildEventHandler& eventHandler, hecktui::EComboboxStyle style) : Combobox(style), mHandler(eventHandler)
@@ -53,5 +55,5 @@ unsigned int cvengine::strictStringToUInt(std::wstring_view str, std::wstring_vi
 	catch (const std::exception&)
 	{
 	}
-	throw UIInputError(std::wstring(inputName) + std::wstring(L": ") + static_cast<std::wstring>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_PITBOSS_CITYELIMINATION_ERROR_DESC")));
+	throw UIInputError(std::wstring(inputName) + std::wstring(L": ") + static_cast<std::wstring>(CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_CITYELIMINATION_ERROR_DESC")));
 }

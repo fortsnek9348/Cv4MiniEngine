@@ -2,10 +2,13 @@
 
 #include "CvApp.h"
 
-class AppMainMenusState : public ICvAppState
+namespace cvengine
 {
-public:
-	virtual void onEnter(CvApp&) override;
-	virtual void onUpdate(CvApp&) override;
-	virtual void onLeave(CvApp&) override;
-};
+	class AppMainMenusState : public ICvAppState
+	{
+	public:
+		virtual void onEnter(CvApp&) override;
+		virtual void onUpdate(CvApp&) override;
+		virtual void onLeave(CvApp&) override;
+	};
+}

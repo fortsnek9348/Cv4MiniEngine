@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CvEngineEnums.h"
+#include <Cv4CommonEngineLib/CvEngineEnums.h>
 
 #include <CvEnums.h>
 

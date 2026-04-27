@@ -1,11 +1,14 @@
 #include "MainInterface.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
 #include "WorldView.h"
 #include "Graphics.h"
-#include "CvInterface.h"
-#include "Common.h"
 #include "TuiTextCode.h"
 #include "RichGuage.h"
 #include "CvApp.h"
+#include "Minimap.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <CvMap.h>
 #include <CvCity.h>
@@ -21,8 +24,7 @@
 #include <array>
 #include <ranges>
 
-using cvengine::Minimap;
-using cvengine::RichGuage;
+using namespace cvengine;
 using heck::range;
 
 namespace
@@ -48,6 +50,11 @@ namespace
 		// This is called after the WorldViewUIComponent is positioned, every frame.
 		virtual void layoutPhase2Apply(ivec2, ChildList) const override;
 	};
+
+	CvTuiMainInterface& getTuiMainInterface()
+	{
+		return *CvTuiInterface::getInstance().getTuiMainInterface();
+	}
 
 	struct CityBillboard : std::enable_shared_from_this<CityBillboard>, EmptyButton
 	{
@@ -95,7 +102,7 @@ namespace
 				{
 					// Treat as double clicking on the plot.
 					if (CvCity* const city = getCity(idInfo))
-						CvInterface::getInstance().onWorldViewDoubleClickPlot(city->plot());
+						getTuiMainInterface().onWorldViewDoubleClickPlot(city->plot());
 					handled = true;
 				}
 			}
@@ -112,7 +119,7 @@ namespace
 
 		virtual void onBeginMouseHover() override
 		{
-			CvInterface::getInstance().onCityBillboardMouseOver(shared_from_this(), idInfo);
+			getTuiMainInterface().onCityBillboardMouseOver(shared_from_this(), idInfo);
 		}
 
 		void updateCityBillboard(const iaabb2& plotInnerRect, CvCity& city)
@@ -132,7 +139,7 @@ namespace
 			std::wstring str = std::wstring(buf.getCString());
 			// Stick the star in front if this is the capital.
 			if (city.isCapital())
-				str.insert(str.begin(), CvApp::getInstance().symbols[STAR_CHAR]);
+				str.insert(str.begin(), CvTranslator::getInstance().symbols[STAR_CHAR]);
 			iconLineText = cvengine::renderCiv4TextCode(str, defPixel);
 			
 			NiColorA textColour{};
@@ -178,7 +185,7 @@ namespace
 				prodBarRatios = {};
 			}
 
-			isSelected = CvInterface::getInstance().isCitySelected(&city);
+			isSelected = getTuiMainInterface().isCitySelected(&city);
 
 			const int maxLineWidth = (int)std::max({
 				iconLineText.size(),
@@ -243,7 +250,7 @@ namespace
 	class WorldViewUIComponent : public Element
 	{
 	public:
-		explicit WorldViewUIComponent(CvInterface& interface, WorldView& view) : interface(interface), worldView(view)
+		explicit WorldViewUIComponent(WorldView& view) : worldView(view)
 		{
 			mCanFocus = false;
 			mIsMouseInteractable = true;
@@ -262,7 +269,7 @@ namespace
 			worldView.setWindowSize({ w, h });
 
 			// Update displayed path.
-			CvInterface::getInstance().onBeforeWorldViewRender();
+			getTuiMainInterface().onBeforeWorldViewRender();
 
 			if (worldView.isDirty())
 			{
@@ -302,7 +309,7 @@ namespace
 						{
 							if (e.type == EConsoleEventType::MouseButtonDown)
 							{
-								self.interface.onWorldViewClickPlot(plot, e.shift);
+								getTuiMainInterface().onWorldViewClickPlot(plot, e.shift);
 
 								if (self.mClickedPlot)
 								{
@@ -329,22 +336,22 @@ namespace
 							}
 							else if (e.type == EConsoleEventType::MouseButtonDoubleClick)
 							{
-								self.interface.onWorldViewDoubleClickPlot(plot);
+								getTuiMainInterface().onWorldViewDoubleClickPlot(plot);
 							}
 							else
 							{
-								self.interface.onWorldViewButtonUpOnPlot(plot, e);
+								getTuiMainInterface().onWorldViewButtonUpOnPlot(plot, e);
 								self.mClickedPlotReleased = true;
 							}
 						}
 						else if (e.button == EMouseButton::Right)
 						{
-							self.interface.cancelInterfaceMode();
+							getTuiMainInterface().cancelInterfaceMode();
 						}
 						else if (e.button == EMouseButton::Middle)
 						{
 							if (e.type == EConsoleEventType::MouseButtonDown)
-								self.interface.onWorldViewMiddleButtonOnPlot(plot);
+								getTuiMainInterface().onWorldViewMiddleButtonOnPlot(plot);
 						}
 					}
 
@@ -354,7 +361,7 @@ namespace
 				bool operator()(const MouseMoveEvent& e) const
 				{
 					CvPlot* const plot = self.worldView.getPlotAtWindowCoord({ e.coord.x, e.coord.y });
-					self.interface.onWorldViewMouseOverPlot(plot, self.getUISceneState().capture);
+					getTuiMainInterface().onWorldViewMouseOverPlot(plot, self.getUISceneState().capture);
 					return true;
 				}
 
@@ -375,7 +382,7 @@ namespace
 
 		virtual void onEndMouseHover() override
 		{
-			interface.onWorldViewMouseLeave();
+			getTuiMainInterface().onWorldViewMouseLeave();
 		}
 
 		void updateCityBillboards()
@@ -388,7 +395,7 @@ namespace
 
 			const CvMap& map = gGlobals.getMap();
 
-			const bool areBillboardsVisible = !interface.isInCityScreen();
+			const bool areBillboardsVisible = !getTuiMainInterface().isInCityScreen();
 
 			const TeamTypes activeTeam = gGlobals.getGame().getActiveTeam();
 
@@ -468,7 +475,7 @@ namespace
 			};
 
 			// Check that we're within minimap revealed bounds.
-			const iaabb2 rect = interface.updateAndGetMinimapSectionRect();
+			const iaabb2 rect = getTuiMainInterface().updateAndGetMinimapSectionRect();
 			const ivec2 position = worldView.getLookAtPlotCoord();
 			CvMap& map = gGlobals.getMap();
 			const ivec2 clampedPosition{
@@ -478,7 +485,6 @@ namespace
 			worldView.setCenterPlot(clampedPosition);
 		}
 
-		CvInterface& interface;
 		WorldView& worldView;
 		WorldViewFramebuffer worldViewFB{};
 		
@@ -500,5 +506,5 @@ namespace
 
 std::shared_ptr<hecktui::Element> cvengine::buildMainInterfaceWorldViewComponent(WorldView& worldView)
 {
-	return std::make_shared<WorldViewUIComponent>(CvInterface::getInstance(), worldView);
+	return std::make_shared<WorldViewUIComponent>(worldView);
 }

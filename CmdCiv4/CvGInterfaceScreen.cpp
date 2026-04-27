@@ -1,6 +1,7 @@
 #include "CvGInterfaceScreen.h"
 #include "MainInterface.h"
-#include "CvInterface.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
 #include "MainInterfaceControls.h"
 #include "CvApp.h"
 
@@ -12,6 +13,7 @@
 #include <algorithm>
 
 using namespace hecktui;
+using namespace cvengine;
 
 CvGInterfaceScreen::CvGInterfaceScreen(std::string name, cvengine::ECvScreen kind)
 	: mScreenKind(kind)
@@ -28,7 +30,8 @@ cvengine::ECvScreen CvGInterfaceScreen::getKind() const noexcept
 
 bool CvGInterfaceScreen::isActive() const
 {
-	return CvInterface::getInstance().isActive(getKind());
+	const auto* const mainInterface = CvTuiInterface::getInstance().getTuiMainInterface();
+	return mainInterface && mainInterface->isActive(getKind());
 }
 
 bool CvGInterfaceScreen::isPersistent() const
@@ -99,7 +102,8 @@ void CvGInterfaceScreen::updatePlotHelp(CvPlot* plot)
 			//	buf.append(L'\n');
 			//CvGameTextMgr::GetInstance().setPlotHelp(buf, plot);
 
-			CvGameTextMgr::GetInstance().getPlotHelp(plot, CvInterface::getInstance().getCurrentCityBillboardHoverCity(), nullptr, false, buf);
+			const auto* const mainInterface = CvTuiInterface::getInstance().getTuiMainInterface();
+			CvGameTextMgr::GetInstance().getPlotHelp(plot, mainInterface->getCurrentCityBillboardHoverCity(), nullptr, false, buf);
 		}
 		//static_cast<RichLabel&>(*at(mPlotHelpTargetName)).debug = std::wstring_view(buf.getCString()).starts_with(L"Defense");
 		//if (std::wstring_view(buf.getCString()).starts_with(L"Defense"))
@@ -192,7 +196,7 @@ std::shared_ptr<hecktui::Window> CvGInterfaceScreen::createTuiWindow(bool passIn
 				setWantClose();
 				return true;
 			}
-			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
+			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e));
 		}
 	};
 

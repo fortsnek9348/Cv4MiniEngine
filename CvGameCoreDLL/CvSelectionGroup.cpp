@@ -4165,7 +4165,7 @@ CvSelectionGroup* CvSelectionGroup::splitGroup(int iSplitSize, CvUnit* pNewHeadU
 //! \param      pUnit The unit to find the index of within the group
 //! \retval     The zero-based index of the unit within the group, or -1 if it is not in the group.
 //------------------------------------------------------------------------------------------------
-int CvSelectionGroup::getUnitIndex(CvUnit* pUnit, int maxIndex /* = -1 */) const
+int CvSelectionGroup::getUnitIndex(const CvUnit* pUnit, int maxIndex /* = -1 */) const
 {
 	CLLNode<IDInfo>* pUnitNode;
 	CvUnit* pLoopUnit;

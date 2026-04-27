@@ -1,8 +1,8 @@
 #include "MainInterface.h"
-#include "Common.h"
-#include "CvInterface.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
 
-#include "DLLInterface/MyCvDLLPython.h"
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <CvGameAI.h>
 #include <CvGlobals.h>
@@ -56,17 +56,14 @@ namespace
 		return bestIndex;
 	}
 
-	bool isPlayableAction(int index)
-	{
-		return gGlobals.getActionInfo(index).isVisible() && gGlobals.getGame().canHandleAction(index, CvInterface::getInstance().getGotoPlot(), true, true);
-	}
+	
 }
 
-bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterface& interfaceController)
+bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e)
 {
 	struct Handler
 	{
-		CvInterface& interfaceController;
+		CvTuiMainInterface& interfaceController = *CvTuiInterface::getInstance().getTuiMainInterface();
 		WorldView& worldView = interfaceController.getWorldView();
 
 		bool tryKey(FInputDevice::InputType key, const hecktui::ModifierKeyState& modifiers) const
@@ -81,7 +78,7 @@ bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterfac
 				else if (const int actionI = findActionByKeyInput(key, modifiers.ctrl, modifiers.alt, modifiers.shift); actionI != -1)
 				{
 					gGlobals.getGame().handleAction(actionI);
-					interfaceController.onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
+					interfaceController.onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::Action);
 					return true;
 				}
 			}
@@ -158,11 +155,6 @@ bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e, CvInterfac
 		}
 	};
 
-	return dispatch(e, Handler(interfaceController));
+	return dispatch(e, Handler());
 }
 
-std::vector<int> cvengine::buildListOfActionsToShow()
-{
-	gGlobals.getGame().setupActionCache();
-	return range(gGlobals.getNumActionInfos()) | std::views::filter(isPlayableAction) | std::ranges::to<std::vector>();
-}

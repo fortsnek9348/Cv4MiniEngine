@@ -1,11 +1,11 @@
 ﻿#include "Minimap.h"
-#include "Common.h"
-#include "CvInterface.h"
 #include "WorldView.h"
 #include "TuiTextCode.h"
 #include "DXT.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
 
-#include "DLLInterface/MyCvDLLPython.h"
+#include <Cv4CommonEngineLib\MyCvDLLPython.h>
 
 #include <CvGlobals.h>
 #include <CvMap.h>
@@ -297,17 +297,17 @@ namespace
 bool Minimap::onEvent(const hecktui::ConsoleEvent& e)
 {
 	const auto lookAt = [this](ivec2 panelCoord) {
-
-		CvInterface::getInstance().exitCityScreen();
+		auto& mainInterface = *CvTuiInterface::getInstance().getTuiMainInterface();
+		mainInterface.exitCityScreen();
 
 		const iaabb2 rect{ .max = getRect().size() };
-		const iaabb2 mapRect = CvInterface::getInstance().updateAndGetMinimapSectionRect();
+		const iaabb2 mapRect = mainInterface.updateAndGetMinimapSectionRect();
 		const UICoordMapping mapping(rect, mapRect.size(), mapRect);
 		if (mapping.panelDrawRect.contains(panelCoord))
 		{
 			const ivec2 renderCoord = (panelCoord - mapping.panelDrawRect.min) * ivec2(1, 2);
 			const ivec2 plotCoord = mapping.toPlotCoord({ (float)renderCoord.x + 0.5f, (float)renderCoord.y + 1.0f });
-			CvInterface::getInstance().lookAt(plotCoord);
+			mainInterface.lookAt(plotCoord);
 
 			CyArgsList pyArgs;
 			pyArgs.add((int)screenEventSource);
@@ -439,7 +439,8 @@ void Minimap::drawThis(ivec2 offset, hecktui::Framebuffer& fb)
 	if (panelDim.x <= 0 || panelDim.y <= 0)
 		return;
 
-	const iaabb2 mapRect = mReplayBaseTexture.empty() ? CvInterface::getInstance().updateAndGetMinimapSectionRect() : iaabb2::sized({}, mReplayMapSize);
+	auto& mainInterface = *CvTuiInterface::getInstance().getTuiMainInterface();
+	const iaabb2 mapRect = mReplayBaseTexture.empty() ? mainInterface.updateAndGetMinimapSectionRect() : iaabb2::sized({}, mReplayMapSize);
 	const iaabb2 textureRect = mReplayBaseTexture.empty() ? mapRect : iaabb2::sized({}, getMinimapBaseTextureDim());
 	const UICoordMapping mapping(rect, mapRect.size(), textureRect);
 	const UICoordMapping plotMapping(rect, mapRect.size(), mapRect);
@@ -548,7 +549,7 @@ void Minimap::drawThis(ivec2 offset, hecktui::Framebuffer& fb)
 	if (mReplayBaseTexture.empty())
 	{
 		drawMarker({
-			.coord = CvInterface::getInstance().getWorldView().getLookAtPlotCoord(),
+			.coord = CvTuiInterface::getInstance().getWorldView().getLookAtPlotCoord(),
 			.colourI = (ColorTypes)gGlobals.getInfoTypeForString("COLOR_WHITE"),
 			.c = L'@',
 			});

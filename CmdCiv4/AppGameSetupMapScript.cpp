@@ -5,6 +5,8 @@
 #include <CvGlobals.h>
 #include <CyArgsList.h>
 
+using namespace cvengine;
+
 bool AppGameSetupMapScriptInfo::isClimateMap() const
 {
 	long value = 1;

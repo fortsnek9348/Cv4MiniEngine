@@ -1,11 +1,19 @@
 #include "MyCvDLLFlagEntity.h"
 
-class CvFlagEntity
+#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
+
+class ::CvFlagEntity
 {
 public:
     PlayerTypes playerI = NO_PLAYER;
     CvPlot* plot = nullptr;
 };
+
+CvDLLFlagEntityIFaceBase& cvengine::engine_specific::getFlagEntityIFace()
+{
+    static constinit MyCvDLLFlagEntity s;
+    return s;
+}
 
 CvFlagEntity* MyCvDLLFlagEntity::create(PlayerTypes ePlayer)
 {

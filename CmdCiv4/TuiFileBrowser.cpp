@@ -1,6 +1,7 @@
 ﻿#include "TuiFileBrowser.h"
-#include "Common.h"
-#include "DLLInterface/MyCvDLLUtility.h"
+
+#include <Cv4CommonEngineLib/Common.h>
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/UIScene.h>
@@ -123,7 +124,7 @@ namespace
 	{
 	public:
 		explicit ErrorDialog(std::wstring text, bool useText)
-			: Window(useText ? MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_ERROR") : L"ERROR", WindowConfig{
+			: Window(useText ? CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_ERROR") : L"ERROR", WindowConfig{
 			.isDefaultFocus = true,
 			.isFullscreen = false,
 			.isModal = true,
@@ -213,7 +214,7 @@ namespace
 			navbar->addChild(std::make_shared<Button>(L"↑", [this] { navigateUp(); }));
 			
 			txtViewPath = std::make_shared<Textbox>(
-				config.useText ? MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOADSAVE_GAME_FOLDER") : L"Folder",
+				config.useText ? CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOADSAVE_GAME_FOLDER") : L"Folder",
 				L"",
 				PixelColouring().back,
 				EColour::Gray,
@@ -259,7 +260,7 @@ namespace
 			if (config.toSave)
 			{
 				txtSavePath = std::make_shared<Textbox>(
-					config.useText ? MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOADSAVE_FILE_NAME") : L"Filename",
+					config.useText ? CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOADSAVE_FILE_NAME") : L"Filename",
 					defFilename.wstring(),
 					PixelColouring().back,
 					EColour::Gray,
@@ -270,7 +271,7 @@ namespace
 			else
 				bottomBar->addChild(std::make_shared<Element>());
 
-			bottomBar->addChild(std::make_shared<Button>(config.useText ? MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_OK") : L"OK", [this] { onOK(); }));
+			bottomBar->addChild(std::make_shared<Button>(config.useText ? CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OK") : L"OK", [this] { onOK(); }));
 			client->addChild(bottomBar);
 			
 

@@ -35,6 +35,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FortsneksTestBot", "Fortsne
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlayerBotGameBinding", "PlayerBotGameBinding\PlayerBotGameBinding.vcxproj", "{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4CommonEngineLib", "Cv4CommonEngineLib\Cv4CommonEngineLib.vcxproj", "{67F7CF0A-D595-40C6-86E9-02D7381FFE22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		DebugEnhanced|x64 = DebugEnhanced|x64
@@ -121,6 +123,14 @@ Global
 		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseEnhanced|x64.Build.0 = Release|x64
 		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseStrict|x64.ActiveCfg = Release|x64
 		{A9ECECE7-C47F-4D49-B04F-7403864BC6A2}.ReleaseStrict|x64.Build.0 = Release|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.DebugEnhanced|x64.ActiveCfg = Debug|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.DebugEnhanced|x64.Build.0 = Debug|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.DebugStrict|x64.ActiveCfg = Debug|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.DebugStrict|x64.Build.0 = Debug|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseEnhanced|x64.ActiveCfg = Release|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseEnhanced|x64.Build.0 = Release|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseStrict|x64.ActiveCfg = Release|x64
+		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseStrict|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

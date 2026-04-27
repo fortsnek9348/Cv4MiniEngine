@@ -1,10 +1,12 @@
 #include "AppGameSetupWindow.h"
 #include "AppGameSetupPlayerListPanel.h"
 #include "AppGameSetupConfigPanel.h"
-#include "DLLInterface/MyCvDLLUtility.h"
-#include "CivIni.h"
 #include "CvApp.h"
-#include "CvVFS.h"
+
+#include <Cv4CommonEngineLib/CvAppUtil.h>
+#include <Cv4CommonEngineLib/CvVFS.h>
+#include <Cv4CommonEngineLib/CivIni.h>
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <CvInitCore.h>
 #include <CvGlobals.h>
@@ -33,7 +35,7 @@ static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts()
 		};
 		//CvWString descTag;
 		//if (gDLL->getPythonIFace()->callFunction(info.moduleName.c_str(), "getDescription", nullptr, &descTag))
-		//	info.descName = MyCvDLLUtility::getInstance().getTextGeneric(descTag, {});
+		//	info.descName = CvTranslator::getInstance().getTextGeneric(descTag, {});
 		//else
 		//	info.descName = CvWString(info.moduleName);
 		return info;
@@ -50,7 +52,7 @@ static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameS
 
 	const std::wstring userName = heck::getUserName();
 	constexpr auto& kSectionName = kCivilizationIVIniSection_GAME;
-	initCore.setGameName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameName, MyCvDLLUtility::getInstance().getText(L"TXT_KEY_DEFAULT_GAMENAME")));
+	initCore.setGameName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameName, CvTranslator::getInstance().getText(L"TXT_KEY_DEFAULT_GAMENAME")));
 	initCore.setWorldSize(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_WorldSize, L"WORLDSIZE_STANDARD"));
 	initCore.setWorldSizeMultiplier(gCivilizationIVIni.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_WorldSizeMultiplier, 1));
 	initCore.setClimate(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Climate, L"CLIMATE_TEMPERATE"));
@@ -109,14 +111,14 @@ AppGameSetupWindow::AppGameSetupWindow()
 	const auto client = getClientArea();
 
 	//auto tabBar = std::make_shared<tui::Element>();
-	//tabBar->addChild(mTabOptions = std::make_shared<tui::Checkbox>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getText(L"TXT_KEY_OPTIONS_TITLE"), [this](bool) { updateTabs(0); }));
-	//tabBar->addChild(mTabPlayers = std::make_shared<tui::Checkbox>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_PLAYERS"), [this](bool) { updateTabs(1); }));
+	//tabBar->addChild(mTabOptions = std::make_shared<tui::Checkbox>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_OPTIONS_TITLE"), [this](bool) { updateTabs(0); }));
+	//tabBar->addChild(mTabPlayers = std::make_shared<tui::Checkbox>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_PLAYERS"), [this](bool) { updateTabs(1); }));
 	//tabBar->setLayout(std::make_unique<tui::FlowLayout>(tui::FlowConfig{ .axis = tui::EAxis::Horizontal }));
 	//
 	//mTabOptions->setIsRadioButton(true);
 	//mTabPlayers->setIsRadioButton(true);
 
-	client->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_CUSTOM_GAME")));
+	client->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_CUSTOM_GAME")));
 	client->addChild(std::make_shared<tui::HorizontalRule>(tui::EBorderStyle::Thick));
 	mPlayerListPanel = std::make_shared<AppGameSetupPlayerListPanel>(initCore);
 	mGameSetupBottomPanel = std::make_shared<AppGameSetupConfigPanel>(mMapScriptsList, *this, mPlayerListPanel);
@@ -128,11 +130,11 @@ AppGameSetupWindow::AppGameSetupWindow()
 	//	.linesCrosswiseJustilign = tui::EJustilign::Stretch,
 	//	}));
 
-	client->addChild(std::make_shared<tui::Button>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_GO_BACK"), [this] {
+	client->addChild(std::make_shared<tui::Button>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_GO_BACK"), [this] {
 		CvApp::getInstance().getUI().removeWindow(this);
 		}));
 
-	client->addChild(std::make_shared<tui::Button>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_LAUNCH"), [this] {
+	client->addChild(std::make_shared<tui::Button>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LAUNCH"), [this] {
 		launch();
 		}));
 
@@ -186,7 +188,7 @@ const std::vector<AppGameSetupMapScriptInfo>& AppGameSetupWindow::getMapScripts(
 
 void AppGameSetupWindow::launch()
 {
-	SimplifiedInitCore config;
+	app::SimplifiedInitCore config;
 	mGameSetupBottomPanel->setupConfig(mMapScriptsList, config);
 	mPlayerListPanel->setupConfig(config);
 

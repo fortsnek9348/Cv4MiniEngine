@@ -1,7 +1,6 @@
 ﻿#include "RichTextTable.h"
 #include "TuiTextCode.h"
 #include "MainInterfaceControls.h"
-#include "Common.h"
 
 #include <HeckTextUI/BasicControls.h>
 

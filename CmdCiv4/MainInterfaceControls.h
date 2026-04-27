@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CvInterface.h"
+#include <Cv4CommonEngineLib/CvEngineEnums.h>
 
 #include <CvGame.h>
 
@@ -123,10 +123,10 @@ namespace cvengine
 		Element* mClientPanel = nullptr;
 	};
 
-	std::shared_ptr<ActionButton> makeActionButtonWithAutoLabel(const CvGame& game, CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex, int data2);
+	std::shared_ptr<ActionButton> makeActionButtonWithAutoLabel(const CvGame& game, WidgetTypes widgetType, int actionIndex, int data2);
 	std::shared_ptr<ActionButton> makeActionButtonWithManualLabel(std::wstring_view label, CvWidgetDataStruct widgetType, std::function<void()> onClickCallback);
 	std::shared_ptr<ActionButton> makeEmptyActionButton(CvWidgetDataStruct widgetType);
-	std::shared_ptr<ActionCheckBox> makeActionCheckBoxWithAutoLabel(CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex);
+	std::shared_ptr<ActionCheckBox> makeActionCheckBoxWithAutoLabel(WidgetTypes widgetType, int actionIndex);
 
 	std::shared_ptr<hecktui::Combobox> makePythonCombobox(WidgetTypes widgetType, int actionIndex, int data2, PythonScreenControlId pythonCtrlId);
 

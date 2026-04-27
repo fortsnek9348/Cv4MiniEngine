@@ -1,10 +1,9 @@
 ﻿#include "CyTuiDialog.h"
-#include "CvPythonExtensions.h"
-#include "../Common.h"
 #include "../TuiTextCode.h"
 #include "../MainInterfaceControls.h"
-#include "../DLLInterface/MyCvDLLPython.h"
 #include "../CvApp.h"
+
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <CyArgsList.h>
 

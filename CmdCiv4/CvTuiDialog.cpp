@@ -1,6 +1,5 @@
 #include "CvTuiDialog.h"
 #include "MainInterface.h"
-#include "CvInterface.h"
 #include "MainInterfaceControls.h"
 #include "CvApp.h"
 
@@ -12,6 +11,7 @@
 #include <algorithm>
 
 using namespace hecktui;
+using namespace cvengine;
 
 std::shared_ptr<hecktui::Element> CvTuiDialog::getTuiRoot() const noexcept
 {
@@ -138,7 +138,7 @@ std::shared_ptr<hecktui::Window> CvTuiDialog::createTuiWindow(bool passInputToMa
 
 		virtual bool onEvent(const hecktui::ConsoleEvent& e) override
 		{
-			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e, CvInterface::getInstance()));
+			return hecktui::Window::onEvent(e) || (isPassInput && cvengine::handleMainInterfaceConsoleEvent(e));
 		}
 	};
 

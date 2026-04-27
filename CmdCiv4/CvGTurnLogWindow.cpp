@@ -1,8 +1,10 @@
 #include "CvGTurnLogWindow.h"
 #include "MainInterfaceControls.h"
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "TuiTextCode.h"
 #include "UITheme.h"
+#include "CvTuiInterface.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <HeckTextUI/BasicControls.h>
 
@@ -14,6 +16,7 @@
 #include <ranges>
 
 namespace tui = hecktui;
+using namespace cvengine;
 
 static constexpr size_t kNumEventsPerLoad = 100;
 
@@ -78,7 +81,7 @@ struct CvGTurnLogWindow::EventLogScrollPanel : tui::ScrollBarPanel
 			if (e.type == tui::EConsoleEventType::MouseButtonDown && static_cast<const tui::MouseButtonEvent&>(e).button == tui::EMouseButton::Left)
 			{
 				if (plotCoord.x >= 0)
-					CvInterface::getInstance().lookAt(plotCoord);
+					CvTuiInterface::getInstance().lookAtPlot(plotCoord);
 				return true;
 			}
 			
@@ -150,10 +153,10 @@ CvGTurnLogWindow::CvGTurnLogWindow() : tui::Window(L"", tui::WindowConfig{
 		mEventLogScrollPanel->switchTab(tab);
 		};
 
-	tabBar->addChild(mTabBtns[kEvents] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_EVENT_LOG", {}), [=](bool) { activateTab(kEvents); }));
-	tabBar->addChild(mTabBtns[kChat] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_CHAT_LOG", {}), [=](bool) { activateTab(kChat); }));
-	tabBar->addChild(mTabBtns[kCombat] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_COMBAT_MESSAGE_LOG", {}), [=](bool) { activateTab(kCombat); }));
-	tabBar->addChild(mTabBtns[kQuests] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_QUEST_MESSAGE_LOG", {}), [=](bool) { activateTab(kQuests); }));
+	tabBar->addChild(mTabBtns[kEvents] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_EVENT_LOG"), [=](bool) { activateTab(kEvents); }));
+	tabBar->addChild(mTabBtns[kChat] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_CHAT_LOG"), [=](bool) { activateTab(kChat); }));
+	tabBar->addChild(mTabBtns[kCombat] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_COMBAT_MESSAGE_LOG"), [=](bool) { activateTab(kCombat); }));
+	tabBar->addChild(mTabBtns[kQuests] = std::make_shared<tui::RadioButton>(tui::ECheckStyle::Border, CvTranslator::getInstance().getText(L"TXT_KEY_QUEST_MESSAGE_LOG"), [=](bool) { activateTab(kQuests); }));
 	getClientArea()->addChild(std::move(tabBar));
 
 	for (auto& tabBtn : mTabBtns)

@@ -1,8 +1,10 @@
 #include "PythonScreen.h"
 
-#include "DLLInterface/MyCvDLLPython.h"
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <CyArgsList.h>
+
+using namespace cvengine;
 
 void PythonScreen::rebuildPythonScreen()
 {

@@ -1,11 +1,17 @@
 #include "MyCvDLLEntityIFace.h"
-#include "../CvInterface.h"
+#include "../CvTuiInterface.h"
 
-#include "../Logger.h"
+#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvUnit.h>
 
 #include <cstdlib>
+
+CvDLLEntityIFaceBase& cvengine::engine_specific::getEntityIFace()
+{
+    static constinit MyCvDLLEntityIFace s;
+    return s;
+}
 
 class CvUnitEntity : public CvEntity
 {
@@ -72,7 +78,7 @@ bool MyCvDLLEntityIFace::IsSelected(const CvEntity* entity) const
     {
         // Civ4 probably maintains a selection state in entities.
         // Here, we'll just query the interface selection list directly.
-        return CvInterface::getInstance().getSelectionGroup().getUnitIndex(static_cast<const CvUnitEntity&>(*entity).unit) >= 0;
+        return cvengine::CvTuiInterface::getInstance().isUnitSelected(*static_cast<const CvUnitEntity&>(*entity).unit);
     }
     return false;
 }

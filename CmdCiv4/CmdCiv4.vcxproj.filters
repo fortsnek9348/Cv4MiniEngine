@@ -18,13 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DLLInterface\MyCvDLLEntityIFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLFAStar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DLLInterface\MyCvDLLFeature.cpp">
@@ -33,67 +27,10 @@
     <ClCompile Include="DLLInterface\MyCvDLLFlagEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLInterfaceIFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLPython.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLUtility.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLXml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyTranslator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvEngineEnums.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyDiplomacy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyUserProfile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyFractal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyPythonMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLInterface\FMPIManager.cpp">
+    <ClCompile Include="CvTuiInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CvApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyGlobeLayerManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyPopupInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WorldView.cpp">
@@ -102,25 +39,7 @@
     <ClCompile Include="Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DLLInterface\MyCvDLLEngineIFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvTranslator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyPopup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvPopup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLMessageQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MainInterfaceWorldView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RawBinaryStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainInterfaceEventHandling.cpp">
@@ -139,12 +58,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PythonPopup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyPopupReturn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvButtonPopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PythonScreen.cpp">
@@ -168,9 +81,6 @@
     <ClCompile Include="LineGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PythonAPI\CyStatistics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -180,22 +90,13 @@
     <ClCompile Include="WorldViewUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IniReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CvTuiDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PythonAPI\CyTuiDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvUserProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CvGTurnLogWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CvEngine.cpp">
+    <ClCompile Include="CvTuiEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AppMainMenusState.cpp">
@@ -219,12 +120,6 @@
     <ClCompile Include="AppGameSetupMapScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CivIni.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CvVFS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CvTUIDiplomacyScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -240,18 +135,42 @@
     <ClCompile Include="CommandLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonAPI\CyTuiDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonAPI\CyPopup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonAPI\PythonRegistration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TuiTextCodeSymbols.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CvPopupTuiDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CvTuiMainInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CvAppStates.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DLLInterface\MyCvDLLPlotBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DLLInterface\MyCvDLLXml.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DLLInterface\MyCvDLLEntityIFace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DLLInterface\MyCvDLLFAStar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DLLInterface\MyCvDLLFeature.h">
@@ -260,67 +179,10 @@
     <ClInclude Include="DLLInterface\MyCvDLLFlagEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DLLInterface\MyCvDLLInterfaceIFace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DLLInterface\MyCvDLLPython.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DLLInterface\MyCvDLLUtility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyFFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyTranslator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvEngineEnums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyDiplomacy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyUserProfile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyFractal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CvPythonExtensions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyPythonMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DLLInterface\FMPIManager.h">
+    <ClInclude Include="CvTuiInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CvApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyGInterfaceScreen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyGlobeLayerManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyPopupInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorldView.h">
@@ -329,28 +191,10 @@
     <ClInclude Include="Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DLLInterface\MyCvDLLEngineIFace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvTranslator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyPopup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvPopup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PythonPopup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DLLMessageQueue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RawBinaryStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainInterfaceControls.h">
@@ -360,12 +204,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TuiTextCode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyPopupReturn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvButtonPopup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PythonScreen.h">
@@ -383,9 +221,6 @@
     <ClInclude Include="LineGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PythonAPI\CyStatistics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DXT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -395,22 +230,13 @@
     <ClInclude Include="WorldViewUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IniReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CvTuiDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PythonAPI\CyTuiDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvUserProfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CvGTurnLogWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CvEngine.h">
+    <ClInclude Include="CvTuiEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AppMainMenusState.h">
@@ -434,12 +260,6 @@
     <ClInclude Include="AppGameSetupMapScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CivIni.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CvVFS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CvTUIDiplomacyScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -450,6 +270,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommandLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PythonAPI\CyGInterfaceScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PythonAPI\CyTuiDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PythonAPI\CyPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CvTuiMainInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CvPopupTuiDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DLLInterface\MyCvDLLPlotBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,14 +1,13 @@
 #include "AudioSystem.h"
-#include "CvVFS.h"
-#include "Common.h"
-#include "DLLInterface/MyCvDLLXml.h"
-#include "MyFFile.h"
-#include "CivIni.h"
+#include "CvTuiInterface.h"
 
-#include "CvInterface.h"
+#include <Cv4CommonEngineLib/AudioXmlDefs.h>
+#include <Cv4CommonEngineLib/CvVFS.h>
+#include <Cv4CommonEngineLib/Common.h>
+#include <Cv4CommonEngineLib/MyFFile.h>
+#include <Cv4CommonEngineLib/CivIni.h>
 
 #include <CvGlobals.h>
-#include <CvXMLLoadUtility.h>
 #include <CvRandom.h>
 #include <CvMap.h>
 #include <CvCity.h>
@@ -35,296 +34,6 @@ static constexpr int kDefaultSimultaneouslyStartedSoundLimit = 1;
 
 namespace
 {
-	struct SoundData
-	{
-		std::string soundId;
-		std::string filename;
-		int loadType = -1;
-		bool isCompressed = false; // always true?
-		bool inGeneric = false; // always true?
-	};
-
-	struct ScriptCommonSound
-	{
-		std::string scriptId;
-		const SoundData* soundData = nullptr;
-		int soundType = -1;
-		int minVolume = 0;
-		int maxVolume = 0;
-		int pitchChangeDown = 0;
-		int pitchChangeUp = 0;
-		int minTimeDelay = 0;
-		int maxTimeDelay = 0;
-		bool taperForSoundtracks = false;
-		int lengthOfSound = 0;
-		float minDryLevel = 1;
-		float maxDryLevel = 1;
-		float minWetLevel = 0;
-		float maxWetLevel = 0;
-		bool looping = false;
-	};
-
-	struct Script2DSound : ScriptCommonSound
-	{
-		int minLeftPan = 0;
-		int maxLeftPan = 0;
-		int minRightPan = 0;
-		int maxRightPan = 0;
-	};
-
-	struct Script3DSound : ScriptCommonSound
-	{
-		int startPositionType = -1;
-		int endPositionType = -1;
-		int minVelocity = 0;
-		int maxVelocity = 0;
-		int minDistanceFromListener = 0;
-		int maxDistanceFromListener = 0;
-		int minDistanceForMaxVolume = 0;
-		int maxDistanceForMaxVolume = 0;
-		int minCutoffDistance = 0;
-		int maxCutoffDistance = 0;
-	};
-
-	struct ScriptRef
-	{
-		int type = -1;
-		int index = -1;
-	};
-
-	struct Soundscape
-	{
-		std::string scriptId;
-		int iMinVolume = 100;
-		int iMaxVolume = 100;
-		std::vector<ScriptRef> elements;
-	};
-
-	struct AudioDefines
-	{
-		std::vector<std::string> contextTypes;
-		std::vector<std::string> soundTypes;
-		std::vector<std::string> positionTypes;
-		std::vector<std::string> scriptTypes;
-		std::vector<std::string> loadTypes;
-		std::vector<std::string> effectTypes;
-		std::vector<std::string> gameEnvironmentTypes;
-		std::vector<std::string> speakerConfigs;
-		std::unordered_map<std::string_view, SoundData> sounds;
-	};
-
-	// Basically CvXMLLoadUtility::SetGlobalStringArray
-	std::vector<std::string> loadAudioDefinesEnum(MyCvDLLXml& xmlSys, FXml* xml, const char* path)
-	{
-		std::vector<std::string> list;
-
-		if (xmlSys.LocateNode(xml, path))
-		{
-			const int numValues = xmlSys.NumOfElementsByTagName(xml, path);
-
-			list.reserve(numValues);
-
-			int index = 0;
-			std::string temp;
-			do
-			{
-				if (!xmlSys.GetLastNodeValue(xml, temp))
-					std::abort();
-				if (temp != "NONE") // HACK: Special case this
-				{
-					// Let's just hijack globals for this. It will check for duplicates too.
-					gGlobals.setTypesEnum(temp.c_str(), index);
-				}
-				else if (index != 0)
-					std::abort();
-				list.push_back(std::move(temp));
-				++index;
-			} while (xmlSys.NextSibling(xml));
-		}
-
-		return list;
-	}
-
-	template<class T>
-	T getChildXmlValByName(MyCvDLLXml& xmlSys, FXml* xml, const char* szName, T def = {})
-	{
-		if (xmlSys.SetToChildByTagName(xml, szName))
-		{
-			T value = def;
-			if constexpr (requires { xmlSys.GetLastNodeValue(xml, &value); })
-				xmlSys.GetLastNodeValue(xml, &value);
-			else
-				xmlSys.GetLastNodeValue(xml, value);
-			xmlSys.SetToParent(xml);
-			return value;
-		}
-		else
-			std::abort();
-	}
-
-	int getChildXmlEnumByName(MyCvDLLXml& xmlSys, FXml* xml, const char* tag)
-	{
-		const std::string name = getChildXmlValByName<std::string>(xmlSys, xml, tag);
-		return name.empty() ? -1 : name == "NONE" ? 0 : gGlobals.getTypesEnum(name.c_str());
-	}
-
-
-	std::unordered_map<std::string_view, SoundData> loadAudioDefinesSounds(MyCvDLLXml& xmlSys, FXml* xml)
-	{
-		std::unordered_map<std::string_view, SoundData> map;
-
-		if (xmlSys.LocateNode(xml, "AudioDefines/SoundDatas/SoundData"))
-		{
-			do
-			{
-				SoundData data{
-					.soundId = getChildXmlValByName<std::string>(xmlSys, xml, "SoundID"),
-					.filename = getChildXmlValByName<std::string>(xmlSys, xml, "Filename", ""),
-					.loadType = getChildXmlEnumByName(xmlSys, xml, "LoadType"),
-					.isCompressed = getChildXmlValByName(xmlSys, xml, "bIsCompressed", false),
-					.inGeneric = getChildXmlValByName(xmlSys, xml, "bInGeneric", false),
-				};
-
-				auto node = map.extract(map.emplace(data.soundId, std::move(data)).first);
-				node.key() = node.mapped().soundId;
-				map.insert(std::move(node));
-			} while (xmlSys.NextSibling(xml));
-		}
-
-		return map;
-	}
-
-	AudioDefines loadAudioDefines(MyCvDLLXml& xmlSys)
-	{
-		FXml* const xml = xmlSys.CreateFXml(nullptr);
-		if (!xmlSys.LoadXml(xml, "XML/Audio/AudioDefines.xml"))
-			std::abort();
-
-		return {
-			.contextTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/ContextTypes/ContextType"),
-			.soundTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/SoundTypes/SoundType"),
-			.positionTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/PositionTypes/PositionType"),
-			.scriptTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/ScriptTypes/ScriptType"),
-			.loadTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/LoadTypes/LoadType"),
-			.effectTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/EffectTypes/EffectType"),
-			.gameEnvironmentTypes = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/GameEnvironmentTypes/GameEnvironmentType"),
-			.speakerConfigs = loadAudioDefinesEnum(xmlSys, xml, "AudioDefines/SpeakerConfigs/SpeakerConfig"),
-			.sounds = loadAudioDefinesSounds(xmlSys, xml),
-		};
-	}
-
-	void loadAudioCommonScript(MyCvDLLXml& xmlSys, FXml* xml, const AudioDefines& audioDefs, ScriptCommonSound& data)
-	{
-		data.scriptId = getChildXmlValByName<std::string>(xmlSys, xml, "ScriptID");
-		data.soundData = &audioDefs.sounds.at(getChildXmlValByName<std::string>(xmlSys, xml, "SoundID"));
-		data.soundType = getChildXmlEnumByName(xmlSys, xml, "SoundType");
-		data.minVolume = getChildXmlValByName(xmlSys, xml, "iMinVolume", 0);
-		data.maxVolume = getChildXmlValByName(xmlSys, xml, "iMaxVolume", 0);
-		data.pitchChangeDown = getChildXmlValByName(xmlSys, xml, "iPitchChangeDown", 0);
-		data.pitchChangeUp = getChildXmlValByName(xmlSys, xml, "iPitchChangeUp", 0);
-		data.looping = getChildXmlValByName(xmlSys, xml, "bLooping", false);
-		data.minTimeDelay = getChildXmlValByName(xmlSys, xml, "iMinTimeDelay", 0);
-		data.maxTimeDelay = getChildXmlValByName(xmlSys, xml, "iMaxTimeDelay", 0);
-		data.taperForSoundtracks = getChildXmlValByName(xmlSys, xml, "bTaperForSoundtracks", false);
-		data.lengthOfSound = getChildXmlValByName(xmlSys, xml, "iLengthOfSound", 0);
-		data.minDryLevel = getChildXmlValByName(xmlSys, xml, "fMinDryLevel", 1.0f);
-		data.maxDryLevel = getChildXmlValByName(xmlSys, xml, "fMaxDryLevel", 1.0f);
-		data.minWetLevel = getChildXmlValByName(xmlSys, xml, "fMinWetLevel", 0.0f);
-		data.maxWetLevel = getChildXmlValByName(xmlSys, xml, "fMaxWetLevel", 0.0f);
-	}
-
-	std::vector<Script2DSound> loadAudio2DScripts(MyCvDLLXml& xmlSys, const AudioDefines& audioDefs)
-	{
-		FXml* const xml = xmlSys.CreateFXml(nullptr);
-		if (!xmlSys.LoadXml(xml, "XML/Audio/Audio2DScripts.xml"))
-			std::abort();
-
-		std::vector<Script2DSound> map;
-
-		if (xmlSys.LocateNode(xml, "Script2DSounds/Script2DSound"))
-		{
-			do
-			{
-				Script2DSound data{};
-				loadAudioCommonScript(xmlSys, xml, audioDefs, data);
-				data.minLeftPan = getChildXmlValByName(xmlSys, xml, "iMinLeftPan", 0);
-				data.maxLeftPan = getChildXmlValByName(xmlSys, xml, "iMaxLeftPan", 0);
-				data.minRightPan = getChildXmlValByName(xmlSys, xml, "iMinRightPan", 0);
-				data.maxRightPan = getChildXmlValByName(xmlSys, xml, "iMaxRightPan", 0);
-				map.push_back(std::move(data));
-			} while (xmlSys.NextSibling(xml));
-		}
-
-		return map;
-	}
-
-	std::vector<Script3DSound> loadAudio3DScripts(MyCvDLLXml& xmlSys, const AudioDefines& audioDefs)
-	{
-		FXml* const xml = xmlSys.CreateFXml(nullptr);
-		if (!xmlSys.LoadXml(xml, "XML/Audio/Audio3DScripts.xml"))
-			std::abort();
-
-		std::vector<Script3DSound> map;
-
-		if (xmlSys.LocateNode(xml, "Script3DSounds/Script3DSound"))
-		{
-			do
-			{
-				Script3DSound data{};
-				loadAudioCommonScript(xmlSys, xml, audioDefs, data);
-				data.startPositionType = getChildXmlEnumByName(xmlSys, xml, "StartPosition");
-				data.endPositionType = getChildXmlEnumByName(xmlSys, xml, "EndPosition");
-				data.minVelocity = getChildXmlValByName(xmlSys, xml, "iMinVelocity", 0);
-				data.maxVelocity = getChildXmlValByName(xmlSys, xml, "iMaxVelocity", 0);
-				data.minDistanceFromListener = getChildXmlValByName(xmlSys, xml, "iMinDistanceFromListener", 0);
-				data.maxDistanceFromListener = getChildXmlValByName(xmlSys, xml, "iMaxDistanceFromListener", 0);
-				data.minDistanceForMaxVolume = getChildXmlValByName(xmlSys, xml, "iMinDistanceForMaxVolume", 100000);
-				data.maxDistanceForMaxVolume = getChildXmlValByName(xmlSys, xml, "iMaxDistanceForMaxVolume", 100000);
-				data.minCutoffDistance = getChildXmlValByName(xmlSys, xml, "iMinCutoffDistance", 100000);
-				data.maxCutoffDistance = getChildXmlValByName(xmlSys, xml, "iMaxCutoffDistance", 100000);
-				map.push_back(std::move(data));
-			} while (xmlSys.NextSibling(xml));
-		}
-
-		return map;
-	}
-
-	std::vector<Soundscape> loadSoundscapes(MyCvDLLXml& xmlSys, [[maybe_unused]] const AudioDefines& audioDefs, const std::unordered_map<std::string_view, ScriptRef>& tagIndexLookup)
-	{
-		FXml* const xml = xmlSys.CreateFXml(nullptr);
-		if (!xmlSys.LoadXml(xml, "XML/Audio/AudioSoundscapeScripts.xml"))
-			std::abort();
-
-		std::vector<Soundscape> map;
-
-		if (xmlSys.LocateNode(xml, "ScriptSoundscapes/ScriptSoundscape"))
-		{
-			do
-			{
-				Soundscape data{};
-				data.scriptId = getChildXmlValByName<std::string>(xmlSys, xml, "ScriptID");
-				data.iMinVolume = getChildXmlValByName(xmlSys, xml, "iMinVolume", data.iMinVolume);
-				data.iMaxVolume = getChildXmlValByName(xmlSys, xml, "iMaxVolume", data.iMaxVolume);
-				// CvXMLLoadUtility::SetVariableListTagPairForAudioScripts and similar
-				if (xmlSys.SetToChildByTagName(xml, "SoundscapeElement"))
-				{
-					do
-					{
-						// Ignoring ScriptType.
-						std::string elementScriptName = getChildXmlValByName<std::string>(xmlSys, xml, "ScriptID");
-						const ScriptRef ref = tagIndexLookup.at(elementScriptName);
-						data.elements.push_back(ref);
-					} while (xmlSys.NextSibling(xml));
-
-					xmlSys.SetToParent(xml);
-				}
-				map.push_back(std::move(data));
-			} while (xmlSys.NextSibling(xml));
-		}
-
-		return map;
-	}
-
 	struct ADPCMDecodeState
 	{
 		int sample = 0;
@@ -770,41 +479,10 @@ namespace
 	};
 }
 
-struct AudioSystem::XmlDefsInternals
-{
-	AudioDefines audioDefs;
-	std::vector<Script2DSound> script2dList;
-	std::vector<Script3DSound> script3dList;
-	std::vector<Soundscape> soundscapes;
-
-	std::unordered_map<std::string_view, ScriptRef> tagIndexLookup;
-
-	int scriptType2D = -1;
-	int scriptType3D = -1;
-	int scriptTypeSoundscape = -1;
-
-	void loadXmlDefs()
-	{
-		MyCvDLLXml xmlSys;
-		audioDefs = loadAudioDefines(xmlSys);
-		script2dList = loadAudio2DScripts(xmlSys, audioDefs);
-		script3dList = loadAudio3DScripts(xmlSys, audioDefs);
-
-		scriptType2D = gGlobals.getTypesEnum("2D");
-		scriptType3D = gGlobals.getTypesEnum("3D");
-		scriptTypeSoundscape = gGlobals.getTypesEnum("SOUNDSCAPE");
-		for (const auto& [i, script] : std::views::enumerate(script2dList))
-			tagIndexLookup[script.scriptId] = { scriptType2D, int(i) };
-		for (const auto& [i, script] : std::views::enumerate(script3dList))
-			tagIndexLookup[script.scriptId] = { scriptType3D, int(i) };
-		soundscapes = loadSoundscapes(xmlSys, audioDefs, tagIndexLookup);
-		for (const auto& [i, script] : std::views::enumerate(soundscapes))
-			tagIndexLookup[script.scriptId] = { scriptTypeSoundscape, int(i) };
-	}
-};
-
 struct AudioSystem::Internals
 {
+	cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
+
 	int maxConcurrentSounds = kDefaultSimultaneouslyStartedSoundLimit;
 	double maxConcurrentSoundTimeSeconds = 0.2;
 
@@ -998,7 +676,7 @@ struct AudioSystem::Internals
 		return nullptr;
 	}
 
-	void play2DSoundScript(const XmlDefsInternals& xmlDefs, std::string_view name)
+	void play2DSoundScript(std::string_view name)
 	{
 		if (name.empty())
 			return;
@@ -1010,25 +688,35 @@ struct AudioSystem::Internals
 			return;
 		}
 
-		sf::Sound* sound = nullptr;
-
 		if (it->second.type == xmlDefs.scriptType2D)
-		{
-			const Script2DSound& script = xmlDefs.script2dList[it->second.index];
-			// Why is spatialisation enabled by default??
-			sound = genericPlaySound(script.soundData);
-		}
+			play2DSoundScriptByIndex(it->second.index);
 		else if (it->second.type == xmlDefs.scriptType3D)
-		{
-			const Script3DSound& script = xmlDefs.script3dList[it->second.index];
-			sound = genericPlaySound(script.soundData);
-		}
+			play3DSoundScriptByIndexNoSpatialisation(it->second.index);
+	}
 
-		if (sound)
+	void play2DSoundScriptByIndex(int index)
+	{
+		if (index < 0)
+			return;
+
+		const Script2DSound& script = xmlDefs.script2dList[index];
+		// Why is spatialisation enabled by default??
+		if (sf::Sound* const sound = genericPlaySound(script.soundData))
 			sound->setSpatializationEnabled(false);
 	}
 
-	void playScript3DSoundByIndex(const XmlDefsInternals& xmlDefs, int index, heck::ivec2 plotCoord)
+	void play3DSoundScriptByIndexNoSpatialisation(int index)
+	{
+		if (index < 0)
+			return;
+
+		const Script3DSound& script = xmlDefs.script3dList[index];
+		// Why is spatialisation enabled by default??
+		if (sf::Sound* const sound = genericPlaySound(script.soundData))
+			sound->setSpatializationEnabled(false);
+	}
+
+	void playScript3DSoundByIndex(int index, heck::ivec2 plotCoord)
 	{
 		if (index < 0)
 			return;
@@ -1053,7 +741,7 @@ struct AudioSystem::Internals
 		playingSoundscapes.clear();
 	}
 
-	PlayingSoundscape createPlayingSoundscape(const XmlDefsInternals& xmlDefs, int index, float volume)
+	PlayingSoundscape createPlayingSoundscape(int index, float volume)
 	{
 		const Soundscape& soundscape = xmlDefs.soundscapes[index];
 
@@ -1102,7 +790,7 @@ struct AudioSystem::Internals
 	}
 };
 
-AudioSystem::AudioSystem() : mXmlDefsInternals(std::make_unique<XmlDefsInternals>())
+AudioSystem::AudioSystem()
 {
 	if constexpr (!kEnable)
 		std::clog << "Not compiled with audio support." << std::endl;
@@ -1128,57 +816,32 @@ AudioSystem::~AudioSystem() noexcept = default;
 
 void AudioSystem::loadXmlDefs()
 {
-	mXmlDefsInternals->loadXmlDefs();
-}
-
-int AudioSystem::getAudioTagIndex(std::string_view name, AudioTag tagType) const
-{
-	if (name.empty())
-		return -1;
-
-	int soundType = -1;
-
-	switch (tagType)
-	{
-	case AUDIOTAG_NONE:
-		break;
-	case AUDIOTAG_2DSCRIPT:
-		soundType = mXmlDefsInternals->scriptType2D;
-		break;
-	case AUDIOTAG_3DSCRIPT:
-		soundType = mXmlDefsInternals->scriptType3D;
-		break;
-	case AUDIOTAG_SOUNDSCAPE:
-		soundType = mXmlDefsInternals->scriptTypeSoundscape;
-		break;
-	default:
-		std::abort();
-	}
-	
-	const auto it = mXmlDefsInternals->tagIndexLookup.find(name);
-	if (it != mXmlDefsInternals->tagIndexLookup.end() && (soundType < 0 || it->second.type == soundType))
-		return it->second.index;
-	else
-		std::abort();
+	mInternals->xmlDefs.loadXmlDefs();
 }
 
 void AudioSystem::playSound(std::string_view name)
 {
 	if (mInternals)
-		mInternals->play2DSoundScript(*mXmlDefsInternals, name);
+		mInternals->play2DSoundScript(name);
+}
+
+void AudioSystem::playScript2DSoundByIndex(int index)
+{
+	if (mInternals)
+		mInternals->play2DSoundScriptByIndex(index);
 }
 
 void AudioSystem::playScript3DSoundByIndex(int index, heck::ivec2 plotCoord)
 {
 	if (mInternals)
-		mInternals->playScript3DSoundByIndex(*mXmlDefsInternals, index, plotCoord);
+		mInternals->playScript3DSoundByIndex(index, plotCoord);
 }
 
 void AudioSystem::updateListener()
 {
 	if (mInternals)
 	{
-		const WorldView& worldView = CvInterface::getInstance().getWorldView();
+		const WorldView& worldView = CvTuiInterface::getInstance().getWorldView();
 		const heck::ivec2 center = worldView.getLookAtPlotCoord();
 		const int zoom = worldView.getZoom();
 		// TODO: Difficult to check whether Y and Z sign are correct.
@@ -1214,11 +877,11 @@ void AudioSystem::updateListener()
 				}
 			}
 				
-			mInternals->playingSoundscapes.emplace(key, mInternals->createPlayingSoundscape(*mXmlDefsInternals, index, volume));
+			mInternals->playingSoundscapes.emplace(key, mInternals->createPlayingSoundscape(index, volume));
 			};
 
 		// Update soundscape.
-		if (const CvCity* const city = CvInterface::getInstance().getHeadSelectedCity())
+		if (const CvCity* const city = CvTuiInterface::getInstance().getHeadSelectedCity())
 			useSoundscape(Internals::kCitySelectionSoundscapeKey, city->getSoundscapeScriptId(), kCityScreenSoundscapeVolume);
 		else
 		{

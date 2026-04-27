@@ -1,9 +1,10 @@
 ﻿#include "AppMainMenusState.h"
 #include "AppGameSetupWindow.h"
-#include "Common.h"
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "VersionInfo.h"
-#include "CvVFS.h"
+#include "CvApp.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
+#include <Cv4CommonEngineLib/CvVFS.h>
 
 #include <CvGlobals.h>
 #include <CvDLLPythonIFaceBase.h>
@@ -11,6 +12,7 @@
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
 
 namespace tui = hecktui;
+using namespace cvengine;
 
 namespace
 {
@@ -18,7 +20,7 @@ namespace
 	{
 	public:
 		AboutWindow()
-			: Window{ MyCvDLLUtility::getInstance().getText(L"TXT_KEY_PITBOSS_ABOUT"), tui::WindowConfig{
+			: Window{ CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_ABOUT"), tui::WindowConfig{
 				.isDefaultFocus = true,
 				.isFullscreen = false,
 				.isModal = true,
@@ -31,9 +33,9 @@ namespace
 			client->setLayout(std::make_unique<tui::FillLayout>());
 
 			std::wstringstream text;
-			text << MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_SAVE_VERSION") << L' ' << gGlobals.getDefineINT("SAVE_VERSION") << L'\n';
+			text << CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_SAVE_VERSION") << L' ' << gGlobals.getDefineINT("SAVE_VERSION") << L'\n';
 
-			text << MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(cvengine::kEngineVersionString) << L'\n';
+			text << CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_BUILD_VERSION") + L' ' + std::wstring(cvengine::kEngineVersionString) << L'\n';
 			for (const std::string_view s : getCvGameCoreDLLConfigStrings())
 				text << CvWString(CvString(s)) << L'\n';
 			
@@ -83,7 +85,7 @@ namespace
                                                  |___/              
 )"));
 			std::wstring buildString;
-			buildString = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_BUILD_VERSION", {}) + L' ' + std::wstring(cvengine::kEngineVersionString);
+			buildString = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_BUILD_VERSION") + L' ' + std::wstring(cvengine::kEngineVersionString);
 			for (const std::string_view s : getCvGameCoreDLLConfigStrings())
 			{
 				buildString += L' ';
@@ -94,11 +96,13 @@ namespace
 				buildString += L'\n';
 				buildString += L"Mod: " + s;
 			}
+#if ENABLE_PLAYER_BOT
 			if (const cvbot::IPlayerBotPlugin* const plugin = app.getPlayerBotPlugin())
 			{
 				buildString += L'\n';
 				buildString += L"Bot: " + plugin->getName();
 			}
+#endif
 			auto lblBuildString = std::make_shared<tui::Label>(buildString);
 			lblBuildString->enableWrapping = true;
 			lblBuildString->setLabelAlignment(tui::EAlign::Center);
@@ -114,20 +118,20 @@ namespace
 
 			static constexpr const wchar_t* kPadding = L"  ";
 
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_NEW_GAME", {}) + kPadding, [] {
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_NEW_GAME") + kPadding, [] {
 				CvApp::getInstance().getUI().pushWindow(std::make_shared<AppGameSetupWindow>());
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_LOAD_GAME", {}) + kPadding, [] {
-				MyCvDLLUtility::getInstance().LoadGame();
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOAD_GAME") + kPadding, [] {
+				gGlobals.getDLLIFaceNonInl()->LoadGame();
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_OPTIONS", {}) + kPadding, [] {
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OPTIONS") + kPadding, [] {
 				gDLL->getPythonIFace()->callFunction("CvScreensInterface", "showOptionsScreen");
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_PITBOSS_ABOUT", {}) + kPadding, [] {
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_ABOUT") + kPadding, [] {
 				CvApp::getInstance().getUI().pushWindow(std::make_shared<AboutWindow>());
 				}));
-			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_MAIN_MENU_EXIT_GAME", {}) + kPadding, [] {
-				MyCvDLLUtility::getInstance().isDone = true;
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_EXIT_GAME") + kPadding, [] {
+				CvApp::getInstance().setWantExit();
 				}));
 			menuPanel->setLayout(std::make_unique<tui::FlowLayout>(tui::FlowConfig{
 				.axis = tui::EAxis::Vertical,

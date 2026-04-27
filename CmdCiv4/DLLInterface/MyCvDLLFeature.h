@@ -36,7 +36,6 @@ public:
 class MyCvDLLRoute : public CvDLLRouteIFaceBase
 {
 public:
-
 	// Inherited via CvDLLRouteIFaceBase
 	virtual CvRoute* createRoute() override;
 	virtual void init(CvRoute*, int iID, int iOffset, int iType, CvPlot* pPlot) override;
@@ -48,7 +47,6 @@ public:
 class MyCvDLLRiver : public CvDLLRiverIFaceBase
 {
 public:
-
 	// Inherited via CvDLLRiverIFaceBase
 	virtual CvRiver* createRiver() override;
 	virtual void init(CvRiver*, int iID, int iOffset, int iType, CvPlot* pPlot) override;

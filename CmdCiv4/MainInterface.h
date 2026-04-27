@@ -3,9 +3,6 @@
 #include <memory>
 #include <vector>
 
-class WorldView;
-class CvInterface;
-
 // Implementation mirroring CvMainInterface.py. Handles the world view, unit selection, minimap, etc, *and* the city screen.
 //class MainInterface : public ftxui::ComponentBase
 //{
@@ -44,11 +41,11 @@ namespace hecktui
 
 namespace cvengine
 {
+	class WorldView;
+
 	std::shared_ptr<hecktui::Element> buildMainInterfaceWorldViewComponent(WorldView& worldView);
 
 	//std::shared_ptr<hecktui::Element> createMainInterfaceRootElement();
 
-	bool handleMainInterfaceConsoleEvent(const hecktui::ConsoleEvent&, CvInterface& interfaceController);
-
-	std::vector<int> buildListOfActionsToShow();
+	bool handleMainInterfaceConsoleEvent(const hecktui::ConsoleEvent&);
 }

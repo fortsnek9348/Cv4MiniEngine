@@ -5,26 +5,29 @@
 
 #include <HeckTextUI/Window.h>
 
-class AppGameSetupPlayerListPanel;
-class AppGameSetupConfigPanel;
-
-class AppGameSetupWindow : public hecktui::Window
+namespace cvengine
 {
-public:
-	AppGameSetupWindow();
+	class AppGameSetupPlayerListPanel;
+	class AppGameSetupConfigPanel;
 
-	virtual void drawThis(hecktui::ivec2 offset, hecktui::Framebuffer& fb) override;
+	class AppGameSetupWindow : public hecktui::Window
+	{
+	public:
+		AppGameSetupWindow();
 
-	void onPlayerCountChanged();
+		virtual void drawThis(hecktui::ivec2 offset, hecktui::Framebuffer& fb) override;
 
-	void onUnrestrictedLeadersOptionChanged(bool value);
+		void onPlayerCountChanged();
 
-	const std::vector<AppGameSetupMapScriptInfo>& getMapScripts() const;
+		void onUnrestrictedLeadersOptionChanged(bool value);
 
-	void launch();
+		const std::vector<AppGameSetupMapScriptInfo>& getMapScripts() const;
 
-private:
-	std::vector<AppGameSetupMapScriptInfo> mMapScriptsList;
-	std::shared_ptr<AppGameSetupPlayerListPanel> mPlayerListPanel;
-	std::shared_ptr<AppGameSetupConfigPanel> mGameSetupBottomPanel;
-};
+		void launch();
+
+	private:
+		std::vector<AppGameSetupMapScriptInfo> mMapScriptsList;
+		std::shared_ptr<AppGameSetupPlayerListPanel> mPlayerListPanel;
+		std::shared_ptr<AppGameSetupConfigPanel> mGameSetupBottomPanel;
+	};
+}

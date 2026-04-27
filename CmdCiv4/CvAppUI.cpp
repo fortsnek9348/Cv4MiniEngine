@@ -1,5 +1,6 @@
 #include "CvApp.h"
-#include "CivIni.h"
+
+#include <Cv4CommonEngineLib/CivIni.h>
 
 #include <HeckTextUI/HeckTextUI.h>
 #include <HeckTextUI/UIScene.h>

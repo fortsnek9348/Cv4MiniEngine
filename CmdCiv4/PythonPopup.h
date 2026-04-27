@@ -1,22 +1,25 @@
 #pragma once
 
-#include "CvPopup.h"
+#include <Cv4CommonEngineLib/CvPopup.h>
 
 #include <CvEnums.h>
 
 #include <pybind11/pytypes.h>
 
-class PythonPopup : public CvPopup
+namespace cvengine
 {
-public:
-	explicit PythonPopup(int eventId, EventContextTypes eventCtxType);
+	class PythonPopup : public CvPopup
+	{
+	public:
+		explicit PythonPopup(int eventId, EventContextTypes eventCtxType);
 
-	virtual void onPopupDisplayed() override;
-	virtual void submit(const PopupReturn& result) override;
-	virtual void escCancel() override;
+		virtual void onPopupDisplayed() override;
+		virtual void submit(const PopupReturn& result) override;
+		virtual void escCancel() override;
 
-	int eventId = 0;
-	EventContextTypes eventCtxType{};
-	
-	pybind11::tuple userData;
-};
+		int eventId = 0;
+		EventContextTypes eventCtxType{};
+
+		pybind11::tuple userData;
+	};
+}

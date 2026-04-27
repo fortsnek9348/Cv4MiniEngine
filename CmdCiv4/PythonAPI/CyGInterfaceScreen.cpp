@@ -1,17 +1,15 @@
 ﻿#include "CyGInterfaceScreen.h"
 #include "CyUnit.h"
-#include "CvPythonExtensions.h"
-#include "../Common.h"
-#include "../CvInterface.h"
-#include "../CvEngineEnums.h"
 #include "../CvGInterfaceScreen.h"
-#include "../MainInterfaceControls.h"
-#include "../MainInterface.h"
-#include "../TuiTextCode.h"
-#include "../Minimap.h"
-#include "../RichTextTable.h"
-#include "../RichGuage.h"
+#include "../CvTuiInterface.h"
+#include "../CvTuiMainInterface.h"
 #include "../LineGraph.h"
+#include "../MainInterface.h"
+#include "../MainInterfaceControls.h"
+#include "../Minimap.h"
+#include "../RichGuage.h"
+#include "../RichTextTable.h"
+#include "../TuiTextCode.h"
 #include "../UITheme.h"
 
 #include <CvGameAI.h>
@@ -247,7 +245,7 @@ void CyGInterfaceScreen::registerWithPython(const pybind11::module& m)
 }
 
 // Screens appear to be stored globally somewhere.
-CyGInterfaceScreen::CyGInterfaceScreen(std::string name, int kind) : impl(CvInterface::getInstance().grabPythonScreen(std::move(name), cvengine::ECvScreen(kind)))
+CyGInterfaceScreen::CyGInterfaceScreen(std::string name, int kind) : impl(CvTuiInterface::getInstance().getTuiMainInterface()->grabPythonScreen(std::move(name), cvengine::ECvScreen(kind)))
 {
 }
 
@@ -534,7 +532,7 @@ void CyGInterfaceScreen::newResizableVSplit(std::string parent, std::string name
 }
 void CyGInterfaceScreen::newActionButton(std::string parent, std::string name, WidgetTypes widgetType, int actionIndex, int data2, hecktui::EBorderStyle style)
 {
-	auto ctrl = makeActionButtonWithAutoLabel(gGlobals.getGame(), CvInterface::getInstance(), widgetType, actionIndex, data2);
+	auto ctrl = makeActionButtonWithAutoLabel(gGlobals.getGame(), widgetType, actionIndex, data2);
 	ctrl->setBorderStyle(style);
 	if (widgetType == WIDGET_CLOSE_SCREEN)
 	{
@@ -560,7 +558,7 @@ void CyGInterfaceScreen::newEmptyActionButton(std::string parent, std::string na
 }
 void CyGInterfaceScreen::newActionCheckBox    /**/(std::string parent, std::string name, WidgetTypes widgetType, int actionIndex)
 {
-	auto ctrl = makeActionCheckBoxWithAutoLabel(CvInterface::getInstance(), widgetType, actionIndex);
+	auto ctrl = makeActionCheckBoxWithAutoLabel(widgetType, actionIndex);
 	ctrl->setPythonScreenControlId({
 			.screen = impl.getKind(),
 			//.name = name,
@@ -589,7 +587,7 @@ void CyGInterfaceScreen::newPlotListUnitButton(std::string parent, std::string n
 }
 void CyGInterfaceScreen::newWorldView(std::string parent, std::string name)
 {
-	newControl(parent, name, buildMainInterfaceWorldViewComponent(CvInterface::getInstance().getWorldView()));
+	newControl(parent, name, buildMainInterfaceWorldViewComponent(CvTuiInterface::getInstance().getWorldView()));
 }
 
 void CyGInterfaceScreen::newHRule(std::string parent, std::string name, hecktui::EBorderStyle style)
@@ -814,7 +812,7 @@ void CyGInterfaceScreen::spaceShipLaunch()
 
 void CyGInterfaceScreen::showScreen(PopupStates popupState, bool passInput)
 {
-	CvInterface::getInstance().showScreen(impl.getKind(), popupState, passInput);
+	CvTuiInterface::getInstance().getTuiMainInterface()->showScreen(impl.getKind(), popupState, passInput);
 }
 
 void CyGInterfaceScreen::hideScreen()

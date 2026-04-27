@@ -1,6 +1,5 @@
 ﻿#include "LineGraph.h"
 #include "Graphics.h"
-#include "Common.h"
 #include "TuiTextCode.h"
 
 #include <CommonStuff/range.h>

@@ -1,6 +1,32 @@
 #include "MyCvDLLFeature.h"
 
-class CvFeature
+#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
+
+CvDLLFeatureIFaceBase& cvengine::engine_specific::getFeatureIFace()
+{
+	static constinit MyCvDLLFeature s;
+	return s;
+}
+
+CvDLLSymbolIFaceBase& cvengine::engine_specific::getSymbolIFace()
+{
+	static constinit MyCvDLLSymbol s;
+	return s;
+}
+CvDLLRouteIFaceBase& cvengine::engine_specific::getRouteIFace()
+{
+	static constinit MyCvDLLRoute s;
+	return s;
+}
+
+CvDLLRiverIFaceBase& cvengine::engine_specific::getRiverIFace()
+{
+	static constinit MyCvDLLRiver s;
+	return s;
+}
+
+
+class ::CvFeature
 {
 public:
 	FeatureTypes type = NO_FEATURE;
@@ -48,7 +74,7 @@ void MyCvDLLFeature::resetModel([[maybe_unused]] CvFeature* feature)
 
 ///
 
-class CvSymbol
+class ::CvSymbol
 {
 public:
 	SymbolTypes type = NO_SYMBOL;
@@ -108,7 +134,7 @@ void MyCvDLLSymbol::setTypeYield(CvSymbol*, [[maybe_unused]] int iType, [[maybe_
 
 ///
 
-class CvRoute
+class ::CvRoute
 {
 public:
 	RouteTypes type = NO_ROUTE;
@@ -141,7 +167,7 @@ void MyCvDLLRoute::updateGraphicEra([[maybe_unused]] CvRoute* pObj)
 
 //
 
-class CvRiver
+class ::CvRiver
 {
 public:
 };

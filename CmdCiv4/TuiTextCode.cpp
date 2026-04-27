@@ -1,11 +1,10 @@
 ﻿#include "TuiTextCode.h"
-#include "CvTranslator.h"
-#include "Common.h"
 #include "CvApp.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <CvGlobals.h>
 #include <CvInfos.h>
-
 #include <CvDllTranslator.h>
 
 #include <CommonStuff/StringConversion.h>
@@ -16,26 +15,7 @@
 
 namespace
 {
-	struct TranslatorInfo
-	{
-		CvWString szTagStartIcon;
-		CvWString szTagStartOur;
-		CvWString szTagStartCT;
-		CvWString szTagStartColour;
-		CvWString szTagStartLink;
-		CvWString szTagEndLink;
-		CvWString szEndLinkReplacement;
-		std::map<std::wstring, CvWString> aIconMap;
-		std::map<std::wstring, CvWString> aColourMap;
-	};
-
-	static TranslatorInfo kInfo{};
-
-	const TranslatorInfo& getTranslatorInfo()
-	{
-		return kInfo;
-	}
-
+	
 	std::optional<uint8_t> tryConsumeUInt8(std::wstring_view& s)
 	{
 		int value = 0;
@@ -76,129 +56,6 @@ namespace
 		return std::nullopt;
 	}
 
-	// Why does Civ4 have two layers of textcode. Square brackets or XML, pick one!
-	std::wstring lowerToXml(std::wstring_view textcode)
-	{
-		// This is called during initialisation before `CvDllTranslator::initializeTags` can work.
-		// At least for keybindings.
-		// In such cases, check that there's no tags.
-		if (CvApp::getInstance().symbols.empty())
-		{
-			assert(!textcode.contains(L'['));
-			return std::wstring(textcode);
-		}
-
-		const TranslatorInfo& kTranslatorInfo = getTranslatorInfo();
-
-		// TODO: Where the heck does this value come from. It might be stored in string form somewhere.
-		constexpr int uiForm = 0;
-
-		std::wstring xml;
-
-		CvWString replacement;
-
-		while (textcode.size())
-		{
-			const size_t textSpan = std::min(textcode.find_first_of(L"["), textcode.size());
-			xml += textcode.substr(0, textSpan);
-			textcode.remove_prefix(textSpan);
-
-			if (textcode.empty())
-				break;
-
-			// Escape to XML.
-			//switch (textcode.front())
-			//{
-			//case L'<': xml += L"&lt;"; textcode.remove_prefix(1); continue;
-			//case L'>': xml += L"&gt;"; textcode.remove_prefix(1); continue;
-			//case L'&': xml += L"&amp;"; textcode.remove_prefix(1); continue;
-			//default:
-			//	break;
-			//}
-
-			const size_t tagSpan = textcode.find(L']');
-
-			if (tagSpan == textcode.npos)
-			{
-				// Could not find the end bracket. Just dump the rest of the string.
-				xml += textcode;
-				break;
-			}
-
-			const CvWString tagWithRBracket(textcode.substr(0, tagSpan + 1));
-			const CvWString tag(textcode.substr(0, tagSpan));
-
-			if (tag == L"[SPACE")
-				xml += L' ';
-			else if (tag == L"[NEWLINE")
-				xml += L'\n';
-			else if (tag == L"[TAB")
-				xml += L"    ";
-			else if (tag.starts_with(kTranslatorInfo.szTagStartIcon))
-			{
-				// Auto-insert a space before icons. We're doing the same in CvTranslator.
-				if (xml.size() && !std::iswspace(xml.back()))
-					xml += L' ';
-				xml += kTranslatorInfo.aIconMap.at(tagWithRBracket);
-			}
-			else if (tag.starts_with(kTranslatorInfo.szTagStartOur))
-			{
-				if (CvDllTranslator::replaceOur(tag, uiForm, replacement))
-					xml += replacement;
-				else
-					xml += tag;
-			}
-			else if (tag.starts_with(kTranslatorInfo.szTagStartCT))
-			{
-				if (CvDllTranslator::replaceCt(tag, uiForm, replacement))
-					xml += replacement;
-				else
-					xml += tag;
-			}
-			else if (tag.starts_with(kTranslatorInfo.szTagStartColour))
-				xml += kTranslatorInfo.aColourMap.at(tagWithRBracket);
-			// Cv4MiniEngine extension: Background colour
-			else if (tag.starts_with(L"[BG:COLOR_"))
-			{
-				// Modify the returned XML.
-				std::wstring xmlPiece = kTranslatorInfo.aColourMap.at(L'[' + tagWithRBracket.substr(4));
-				if (xmlPiece.starts_with(L"<color"))
-					xmlPiece.insert(1, L"bg");
-				else if (xmlPiece.starts_with(L"</color"))
-					xmlPiece.insert(2, L"bg");
-				else
-					std::abort();
-				xml += xmlPiece;
-			}
-			else if (tag.starts_with(kTranslatorInfo.szTagStartLink))
-			{
-				const std::wstring_view linkContents = std::wstring_view(tag).substr(kTranslatorInfo.szTagStartLink.size());
-
-				if (linkContents.size() && linkContents.front() == '=')
-				{
-					xml += L"<link='";
-					xml += linkContents.substr(1);
-					xml += L"'>";
-				}
-				else
-					xml += tagWithRBracket;
-			}
-			else if (tag == kTranslatorInfo.szTagEndLink)
-				xml += kTranslatorInfo.szEndLinkReplacement;
-			else if (tag == L"[BOLD")
-				xml += L"<b>";
-			else if (tag == L"[\\BOLD")
-				xml += L"</b>";
-			else if (tag.starts_with(L"[PARAGRAPH:"))
-				xml += L"\n\n";
-			else
-				xml += tagWithRBracket;
-
-			textcode.remove_prefix(tagSpan + 1);
-		}
-
-		return xml;
-	}
 
 	// For XML tags only.
 	//void toAsciiLower(std::wstring& s)
@@ -504,16 +361,17 @@ namespace
 
 	std::wstring replaceSymbolsAsXml(std::wstring str)
 	{
-		if (std::ranges::any_of(str, [](wchar_t c) { return c >= CvTranslator::kFirstSymbolCode; }))
+		const wchar_t firstSymbolCode = CvTranslator::getInstance().firstSymbolCode;
+		if (std::ranges::any_of(str, [firstSymbolCode](wchar_t c) { return c >= CvTranslator::getInstance().firstSymbolCode; }))
 		{
 			std::wstring output;
 			output.reserve(str.size() + 20);
 
 			for (const wchar_t c : str)
 			{
-				if (c >= CvTranslator::kFirstSymbolCode)
+				if (c >= firstSymbolCode)
 				{
-					output += CvTranslator().lookupSymbolChar(c);
+					output += cvengine::lookupSymbolChar(c);
 					// Force spacing before symbols.
 					//if (output.size() && !std::iswspace(uint16_t(output.back().c)))
 					//{
@@ -538,24 +396,10 @@ namespace
 	}
 }
 
-void cvengine::initialiseTextCodeTags()
-{
-	kInfo = {};
-	CvDllTranslator::initializeTags(
-		kInfo.szTagStartIcon, kInfo.szTagStartOur, kInfo.szTagStartCT, kInfo.szTagStartColour, kInfo.szTagStartLink,
-		kInfo.szTagEndLink, kInfo.szEndLinkReplacement, kInfo.aIconMap, kInfo.aColourMap
-	);
-}
-
 std::vector<hecktui::Pixel> cvengine::renderCiv4TextCode(std::wstring_view textcode, hecktui::Pixel defPixel)
 {
 	//return renderCiv4Xml(replaceSymbolsAsXml(lowerToXml(textcode)), defPixel);
 	return renderCiv4Xml(replaceSymbolsAsXml(std::wstring(textcode)), defPixel);
-}
-
-std::wstring cvengine::lowerCiv4TextCodeToXml(std::wstring_view textcode)
-{
-	return lowerToXml(textcode);
 }
 
 hecktui::EColour cvengine::toTuiColour(ColorTypes civ4Colour)

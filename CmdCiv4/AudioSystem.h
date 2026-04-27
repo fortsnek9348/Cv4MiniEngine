@@ -17,8 +17,8 @@ public:
 
 	void loadXmlDefs();
 
-	int getAudioTagIndex(std::string_view name, AudioTag tagType) const;
 	void playSound(std::string_view name);
+	void playScript2DSoundByIndex(int index);
 	void playScript3DSoundByIndex(int index, heck::ivec2 plotCoord);
 	//void setActiveSoundscape(int index, float volume);
 	void updateListener();
@@ -26,8 +26,6 @@ public:
 	void clearSoundScape();
 
 private:
-	struct XmlDefsInternals;
 	struct Internals;
-	std::unique_ptr<XmlDefsInternals> mXmlDefsInternals;
 	std::unique_ptr<Internals> mInternals;
 };

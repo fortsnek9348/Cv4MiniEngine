@@ -1,5 +1,4 @@
 ﻿#include "Graphics.h"
-#include "Common.h"
 
 #include <CommonStuff/range.h>
 

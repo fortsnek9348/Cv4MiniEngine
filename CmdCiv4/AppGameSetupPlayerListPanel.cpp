@@ -1,8 +1,8 @@
 #include "AppGameSetupPlayerListPanel.h"
 #include "AppUIUtil.h"
-
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "CvApp.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
 
 #include <CvGlobals.h>
 #include <CvInitCore.h>
@@ -13,6 +13,7 @@
 
 namespace tui = hecktui;
 using heck::range;
+using namespace cvengine;
 
 static bool isHumanPlayer(PlayerTypes playerI)
 {
@@ -31,7 +32,7 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 
 	Element* const client = this; //getPanel();
 
-	const CvWString teamStr = MyCvDLLUtility::getInstance().getText(L"TXT_KEY_PITBOSS_TEAM");
+	const CvWString teamStr = CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_TEAM");
 	const std::wstring randomStr = cvengine::getRandomText();
 
 	mNumPlayers = MAX_CIV_PLAYERS;
@@ -43,7 +44,7 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 		if (i == 0)
 			row.name = mTxtPlayerName = std::make_shared<tui::Textbox>(initCore.getLeaderName(static_cast<PlayerTypes>(i)));
 		else
-			row.name = std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_AI"));
+			row.name = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_AI"));
 
 		client->addChild(row.name);
 
@@ -113,13 +114,13 @@ void AppGameSetupPlayerListPanel::onComboBoxSelectionChanged(tui::Combobox& ctrl
 	}
 }
 
-void AppGameSetupPlayerListPanel::setupConfig(SimplifiedInitCore& config) const
+void AppGameSetupPlayerListPanel::setupConfig(app::SimplifiedInitCore& config) const
 {
 	config.playerName = mTxtPlayerName->getText();
 
 	for (const int i : range(mNumPlayers))
 	{
-		config.players.push_back(SimplifiedInitCore::Player{
+		config.players.push_back(app::SimplifiedInitCore::Player{
 			.team = static_cast<TeamTypes>(mPlayers[i].team->getSelectionIndex()),
 			.leader = mPlayers[i].getSelectedLeader(),
 			.civ = mPlayers[i].getSelectedCiv(),

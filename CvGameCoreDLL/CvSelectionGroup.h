@@ -163,7 +163,8 @@ public:
 	DllExport CLLNode<IDInfo>* deleteUnitNode(CLLNode<IDInfo>* pNode);
 	DllExport CLLNode<IDInfo>* nextUnitNode(CLLNode<IDInfo>* pNode) const;
 	DllExport int getNumUnits() const;																												// Exposed to Python
-	DllExport int getUnitIndex(CvUnit* pUnit, int maxIndex = -1) const;
+	// fortsnek: const
+	DllExport int getUnitIndex(const CvUnit* pUnit, int maxIndex = -1) const;
 	DllExport CLLNode<IDInfo>* headUnitNode() const;
 	DllExport CvUnit* getHeadUnit() const;
 	DllExport CvUnit* getUnitAt(int index) const;

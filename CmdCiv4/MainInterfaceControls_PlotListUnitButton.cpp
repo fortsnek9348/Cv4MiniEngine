@@ -1,9 +1,12 @@
 ﻿#include "MainInterfaceControls.h"
-#include "Common.h"
-#include "CvTranslator.h"
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "CvApp.h"
+#include "TuiTextCode.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
 
+#include <Cv4CommonEngineLib/CvTranslator.h>
+
+#include <CvSelectionGroup.h>
 #include <CvGlobals.h>
 #include <CvUnit.h>
 #include <CvGameAI.h>
@@ -96,9 +99,9 @@ PlotListUnitButton::PlotListUnitButton(CvUnit* unit) : EmptyButton({}), mUnit(un
 			else
 				strText += std::format(L"{}", str);
 			//richPrinter += L" ";
-			strText = CvTranslator().changeTextColor(std::move(strText), gGlobals.getInfoTypeForString(isHurt ? "COLOR_YELLOW" : "COLOR_POSITIVE_TEXT"));
+			strText = CvTranslator::changeTextColor(std::move(strText), gGlobals.getInfoTypeForString(isHurt ? "COLOR_YELLOW" : "COLOR_POSITIVE_TEXT"));
 			text += strText;
-			text += CvTranslator().lookupSymbolChar((wchar_t)MyCvDLLUtility::getInstance().getSymbolID(STRENGTH_CHAR));
+			text += cvengine::lookupSymbolChar(CvTranslator::getInstance().symbols.at(STRENGTH_CHAR));
 			text += L" ";
 		}
 
@@ -114,9 +117,9 @@ PlotListUnitButton::PlotListUnitButton(CvUnit* unit) : EmptyButton({}), mUnit(un
 			movesText = std::format(L"{}.{:02}/{}", wholeMovesLeft, hundredthsMovesLeft, unit->baseMoves());
 		else
 			movesText = std::format(L"{}/{}", wholeMovesLeft, unit->baseMoves());
-		movesText = CvTranslator().changeTextColor(std::move(movesText), gGlobals.getInfoTypeForString(overlayColour));
+		movesText = CvTranslator::changeTextColor(std::move(movesText), gGlobals.getInfoTypeForString(overlayColour));
 		text += movesText;
-		text += CvTranslator().lookupSymbolChar((wchar_t)MyCvDLLUtility::getInstance().getSymbolID(MOVES_CHAR));
+		text += cvengine::lookupSymbolChar(CvTranslator::getInstance().symbols.at(MOVES_CHAR));
 
 		//richPrinter += L" ";
 
@@ -203,9 +206,9 @@ PlotListUnitButton::PlotListUnitButton(CvUnit* unit) : EmptyButton({}), mUnit(un
 
 	std::wstring activityText(activityGlyph.text);
 	if (activityGlyph.fg)
-		activityText = CvTranslator().changeTextColor(std::move(activityText), gGlobals.getInfoTypeForString(activityGlyph.fg));
+		activityText = CvTranslator::changeTextColor(std::move(activityText), gGlobals.getInfoTypeForString(activityGlyph.fg));
 	if (activityGlyph.bg)
-		activityText = CvTranslator().changeBackColor(std::move(activityText), gGlobals.getInfoTypeForString(activityGlyph.bg));
+		activityText = CvTranslator::changeBackColor(std::move(activityText), gGlobals.getInfoTypeForString(activityGlyph.bg));
 
 	text += L' ';
 	text += activityText;
@@ -226,19 +229,19 @@ PlotListUnitButton::PlotListUnitButton(CvUnit* unit) : EmptyButton({}), mUnit(un
 
 void PlotListUnitButton::onClick(ModifierKeyState modifierKeyState)
 {
-	CvInterface& interfaceController = CvInterface::getInstance();
-	interfaceController.doUnitListUIUnitSelection(mUnit, modifierKeyState.shift, modifierKeyState.ctrl);
+	CvTuiMainInterface& mainInterface = *CvTuiInterface::getInstance().getTuiMainInterface();
+	mainInterface.doUnitListUIUnitSelection(mUnit, modifierKeyState.shift, modifierKeyState.ctrl);
 	//ScreenInteractive::Active()->PostEvent(kUIEvent_UnitSelectionChanged);
-	interfaceController.onGameStateChanged(CvInterface::EGameStateChangeReason::UnitSelection);
+	mainInterface.onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::UnitSelection);
 }
 
 void PlotListUnitButton::onRightClick(hecktui::ModifierKeyState modifierKeyState)
 {
-	CvInterface& interfaceController = CvInterface::getInstance();
+	CvTuiMainInterface& mainInterface = *CvTuiInterface::getInstance().getTuiMainInterface();
 	modifierKeyState.shift = true;
 	const auto oldState = CvApp::getInstance().getUI().exchangeLastModifierKeysState(modifierKeyState);
-	interfaceController.doUnitListUIUnitSelection(mUnit, modifierKeyState.shift, modifierKeyState.ctrl);
-	interfaceController.onGameStateChanged(CvInterface::EGameStateChangeReason::UnitSelection);
+	mainInterface.doUnitListUIUnitSelection(mUnit, modifierKeyState.shift, modifierKeyState.ctrl);
+	mainInterface.onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::UnitSelection);
 	(void)CvApp::getInstance().getUI().exchangeLastModifierKeysState(oldState);
 }
 

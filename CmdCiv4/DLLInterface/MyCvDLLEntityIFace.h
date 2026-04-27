@@ -31,7 +31,7 @@ public:
 	virtual bool IsSelected(const CvEntity*)  const override;
 	virtual void PlayAnimation(CvEntity*, AnimationTypes eAnim, float fSpeed = 1.0f, bool bQueue = false, int iLayer = 0, float fStartPct = 0.0f, float fEndPct = 1.0f) override;
 	virtual void StopAnimation(CvEntity*, AnimationTypes eAnim) override;
-	virtual void StopAnimation(CvEntity * ) override;
+	virtual void StopAnimation(CvEntity*) override;
 	virtual void NotifyEntity(CvUnitEntity*, MissionTypes eMission) override;
 	virtual void MoveTo(CvUnitEntity*, const CvPlot * pkPlot ) override;
 	virtual void QueueMove(CvUnitEntity*, const CvPlot * pkPlot ) override;
@@ -43,6 +43,6 @@ public:
 	virtual void updateEnemyGlow(CvUnitEntity* pEntity) override;
 	virtual void updatePromotionLayers(CvUnitEntity* pEntity) override;
 	virtual void updateGraphicEra(CvUnitEntity* pEntity, EraTypes eOldEra = NO_ERA) override;
-	virtual void SetSiegeTower(CvUnitEntity *pEntity, bool show) override;
-	virtual bool GetSiegeTower(CvUnitEntity *pEntity) override;
+	virtual void SetSiegeTower(CvUnitEntity* pEntity, bool show) override;
+	virtual bool GetSiegeTower(CvUnitEntity* pEntity) override;
 };

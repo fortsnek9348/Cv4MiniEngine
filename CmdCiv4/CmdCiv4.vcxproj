@@ -65,10 +65,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;ZLIB_CONST;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(PUGIXML_DIR)\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -77,8 +77,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-d.lib;zlibstaticd.lib;$(PUGIXML_DIR)\lib\pugixml_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SFML_DIR)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
     </Link>
@@ -88,10 +88,10 @@
       <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;ZLIB_CONST;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(ZLIB_DIR)\include;$(PUGIXML_DIR)\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(ZLIB_DIR)\project;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -102,8 +102,8 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ZLIB_DIR)\lib;$(SFML_DIR)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio.lib;zlibstatic.lib;$(PUGIXML_DIR)\lib\pugixml.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SFML_DIR)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(NFD_DIR)\build\src\$(Configuration)\nfd.lib;flac.lib;ogg.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;sfml-audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <MapExports>false</MapExports>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -122,24 +122,20 @@
     <ClCompile Include="AppMainMenusState.cpp" />
     <ClCompile Include="AppUIUtil.cpp" />
     <ClCompile Include="AudioSystem.cpp" />
-    <ClCompile Include="CivIni.cpp" />
     <ClCompile Include="CommandLine.cpp" />
-    <ClCompile Include="CvButtonPopup.cpp" />
-    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="CvAppStates.cpp" />
+    <ClCompile Include="CvPopupTuiDialog.cpp" />
+    <ClCompile Include="CvTuiMainInterface.cpp" />
+    <ClCompile Include="DLLInterface\MyCvDLLPlotBuilder.cpp" />
+    <ClCompile Include="FileDialogs.cpp" />
     <ClCompile Include="CvApp.cpp" />
     <ClCompile Include="CvAppUI.cpp" />
     <ClCompile Include="CvTUIDiplomacyScreen.cpp" />
-    <ClCompile Include="CvEngine.cpp" />
-    <ClCompile Include="CvEngineEnums.cpp" />
+    <ClCompile Include="CvTuiEngine.cpp" />
     <ClCompile Include="CvGInterfaceScreen.cpp" />
     <ClCompile Include="CvGTurnLogWindow.cpp" />
-    <ClCompile Include="CvInterface.cpp" />
-    <ClCompile Include="CvPopup.cpp" />
-    <ClCompile Include="CvUserProfile.cpp" />
-    <ClCompile Include="CvVFS.cpp" />
-    <ClCompile Include="DLLMessageQueue.cpp" />
+    <ClCompile Include="CvTuiInterface.cpp" />
     <ClCompile Include="DXT.cpp" />
-    <ClCompile Include="IniReader.cpp" />
     <ClCompile Include="LineGraph.cpp" />
     <ClCompile Include="MainInterfaceControls.cpp" />
     <ClCompile Include="MainInterfaceControls_PlotListUnitButton.cpp" />
@@ -147,44 +143,24 @@
     <ClCompile Include="MainInterfaceEventHandling.cpp" />
     <ClCompile Include="MainInterfaceWorldView.cpp" />
     <ClCompile Include="Minimap.cpp" />
-    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
-    <ClCompile Include="CvTranslator.cpp" />
     <ClCompile Include="CvTuiDialog.cpp" />
-    <ClCompile Include="PythonAPI\CyCamera.cpp" />
-    <ClCompile Include="PythonAPI\CyDiplomacy.cpp" />
-    <ClCompile Include="PythonAPI\CyEngine.cpp" />
-    <ClCompile Include="PythonAPI\CyFractal.cpp" />
-    <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
-    <ClCompile Include="PythonAPI\CyGlobeLayerManager.cpp" />
-    <ClCompile Include="PythonAPI\CyInterface.cpp" />
-    <ClCompile Include="PythonAPI\CyPopup.cpp" />
-    <ClCompile Include="PythonAPI\CyPopupInfo.cpp" />
-    <ClCompile Include="PythonAPI\CyPopupReturn.cpp" />
-    <ClCompile Include="PythonAPI\CyPythonMgr.cpp" />
-    <ClCompile Include="PythonAPI\CyStatistics.cpp" />
-    <ClCompile Include="PythonAPI\CyTranslator.cpp" />
-    <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
-    <ClCompile Include="PythonAPI\CyUserProfile.cpp" />
-    <ClCompile Include="DLLInterface\FMPIManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
-    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLEngineIFace.cpp" />
     <ClCompile Include="DLLInterface\MyCvDLLEntityIFace.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLFAStar.cpp" />
     <ClCompile Include="DLLInterface\MyCvDLLFeature.cpp" />
     <ClCompile Include="DLLInterface\MyCvDLLFlagEntity.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLInterfaceIFace.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLPython.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLUtility.cpp" />
-    <ClCompile Include="DLLInterface\MyCvDLLXml.cpp" />
+    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
+    <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
+    <ClCompile Include="PythonAPI\CyPopup.cpp" />
+    <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
+    <ClCompile Include="PythonAPI\PythonRegistration.cpp" />
     <ClCompile Include="PythonPopup.cpp" />
     <ClCompile Include="PythonScreen.cpp" />
-    <ClCompile Include="RawBinaryStream.cpp" />
     <ClCompile Include="RichGuage.cpp" />
     <ClCompile Include="RichTextTable.cpp" />
     <ClCompile Include="TuiFileBrowser.cpp" />
     <ClCompile Include="TuiTextCode.cpp" />
+    <ClCompile Include="TuiTextCodeSymbols.cpp" />
     <ClCompile Include="UITheme.cpp" />
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="WorldView.cpp" />
@@ -194,11 +170,11 @@
     <ProjectReference Include="..\CommonStuff\CommonStuff.vcxproj">
       <Project>{1fb2b809-6581-444e-a356-19cf91b975d2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Cv4CommonEngineLib\Cv4CommonEngineLib.vcxproj">
+      <Project>{67f7cf0a-d595-40c6-86e9-02d7381ffe22}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\CvGameCoreDLL\CvGameCoreDLL.vcxproj">
       <Project>{de380e50-8b7d-4a03-a80e-dd1d1756169e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\FAStar\FAStar.vcxproj">
-      <Project>{c1731c9e-fbb0-4cef-a379-9199627acb53}</Project>
     </ProjectReference>
     <ProjectReference Include="..\HeckConsoleUI\HeckConsoleUI.vcxproj">
       <Project>{5b038b55-7b29-4474-9bdd-f386450096a2}</Project>
@@ -215,61 +191,32 @@
     <ClInclude Include="AppMainMenusState.h" />
     <ClInclude Include="AppUIUtil.h" />
     <ClInclude Include="AudioSystem.h" />
-    <ClInclude Include="CivIni.h" />
     <ClInclude Include="CommandLine.h" />
-    <ClInclude Include="CvButtonPopup.h" />
-    <ClInclude Include="Common.h" />
     <ClInclude Include="CvApp.h" />
+    <ClInclude Include="CvPopupTuiDialog.h" />
     <ClInclude Include="CvTUIDiplomacyScreen.h" />
-    <ClInclude Include="CvEngine.h" />
-    <ClInclude Include="CvEngineEnums.h" />
+    <ClInclude Include="CvTuiEngine.h" />
     <ClInclude Include="CvGInterfaceScreen.h" />
     <ClInclude Include="CvGTurnLogWindow.h" />
-    <ClInclude Include="CvInterface.h" />
-    <ClInclude Include="CvPopup.h" />
-    <ClInclude Include="CvTranslator.h" />
-    <ClInclude Include="CvUserProfile.h" />
-    <ClInclude Include="CvVFS.h" />
-    <ClInclude Include="DLLMessageQueue.h" />
+    <ClInclude Include="CvTuiInterface.h" />
+    <ClInclude Include="CvTuiMainInterface.h" />
+    <ClInclude Include="DLLInterface\MyCvDLLPlotBuilder.h" />
     <ClInclude Include="DXT.h" />
-    <ClInclude Include="IniReader.h" />
     <ClInclude Include="LineGraph.h" />
     <ClInclude Include="MainInterface.h" />
     <ClInclude Include="MainInterfaceControls.h" />
     <ClInclude Include="Minimap.h" />
     <ClInclude Include="CvTuiDialog.h" />
-    <ClInclude Include="PythonAPI\CyCamera.h" />
-    <ClInclude Include="PythonAPI\CyDiplomacy.h" />
-    <ClInclude Include="PythonAPI\CyEngine.h" />
-    <ClInclude Include="PythonAPI\CyFractal.h" />
-    <ClInclude Include="PythonAPI\CyGInterfaceScreen.h" />
-    <ClInclude Include="PythonAPI\CyGlobeLayerManager.h" />
-    <ClInclude Include="PythonAPI\CyInterface.h" />
-    <ClInclude Include="PythonAPI\CvPythonExtensions.h" />
-    <ClInclude Include="PythonAPI\CyPopup.h" />
-    <ClInclude Include="PythonAPI\CyPopupInfo.h" />
-    <ClInclude Include="PythonAPI\CyPopupReturn.h" />
-    <ClInclude Include="PythonAPI\CyPythonMgr.h" />
-    <ClInclude Include="PythonAPI\CyStatistics.h" />
-    <ClInclude Include="PythonAPI\CyTranslator.h" />
-    <ClInclude Include="PythonAPI\CyTuiDialog.h" />
-    <ClInclude Include="PythonAPI\CyUserProfile.h" />
-    <ClInclude Include="DLLInterface\FMPIManager.h" />
     <ClInclude Include="Graphics.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLEngineIFace.h" />
     <ClInclude Include="DLLInterface\MyCvDLLEntityIFace.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLFAStar.h" />
     <ClInclude Include="DLLInterface\MyCvDLLFeature.h" />
     <ClInclude Include="DLLInterface\MyCvDLLFlagEntity.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLInterfaceIFace.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLPython.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLUtility.h" />
-    <ClInclude Include="DLLInterface\MyCvDLLXml.h" />
-    <ClInclude Include="MyFFile.h" />
+    <ClInclude Include="PythonAPI\CyGInterfaceScreen.h" />
+    <ClInclude Include="PythonAPI\CyPopup.h" />
+    <ClInclude Include="PythonAPI\CyTuiDialog.h" />
+    <ClInclude Include="FileDialogs.h" />
     <ClInclude Include="PythonPopup.h" />
     <ClInclude Include="PythonScreen.h" />
-    <ClInclude Include="RawBinaryStream.h" />
     <ClInclude Include="RichGuage.h" />
     <ClInclude Include="RichTextTable.h" />
     <ClInclude Include="TuiFileBrowser.h" />

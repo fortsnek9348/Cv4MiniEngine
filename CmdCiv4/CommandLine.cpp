@@ -30,13 +30,10 @@ Options:
 	-bot <path to DLL/so>
 		Use the specified bot.
 		Press end-turn button with Alt down to handle the next turn.
-	-bot_autorun
-		When in-game, automatically run the bot until victory or bot error.
 )";
 
-//	-bot_headless
-//		When combined with -start_custom_game and -bot_autorun, run in headless
-//		mode with no UI.
+// -bot_autorun
+// When in-game, automatically run the bot until victory or bot error.
 
 namespace
 {
@@ -131,7 +128,7 @@ AppStartupConfig cvengine::parseCommandLine(int argc, const char * const * argv)
 			throw CmdLineException("Missing path.");
 	}
 
-	config.isBotAutorun = tryConsumeOpt(L"-bot_autorun");
+	//config.isBotAutorun = tryConsumeOpt(L"-bot_autorun");
 	//config.isBotHeadless = tryConsumeOpt(L"-bot_headless");
 
 	if (const std::optional<std::wstring_view> save = tryConsumeString())

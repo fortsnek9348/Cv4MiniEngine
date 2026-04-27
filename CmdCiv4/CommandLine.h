@@ -11,7 +11,7 @@ namespace cvengine
 		std::wstring save;
 		std::wstring botPath;
 		bool isAutostart = false;
-		bool isBotAutorun = false;
+		//bool isBotAutorun = false;
 	};
 
 	AppStartupConfig parseCommandLine(int argc, const char * const * argv);

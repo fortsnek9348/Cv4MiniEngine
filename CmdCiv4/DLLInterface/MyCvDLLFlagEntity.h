@@ -5,8 +5,6 @@
 class MyCvDLLFlagEntity : public CvDLLFlagEntityIFaceBase
 {
 public:
-
-
 	// Inherited via CvDLLFlagEntityIFaceBase
 	virtual CvFlagEntity* create(PlayerTypes ePlayer) override;
 	virtual PlayerTypes getPlayer(CvFlagEntity* pkFlag) const override;

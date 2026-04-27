@@ -1,9 +1,11 @@
 #include "CyPopup.h"
-#include "../CvInterface.h"
 #include "../PythonPopup.h"
+#include "../CvTuiInterface.h"
 
 #include <CvGlobals.h>
 #include <CvPlayerAI.h>
+
+using namespace cvengine;
 
 void CyPopup::registerWithPython(const pybind11::module& m)
 {
@@ -252,7 +254,8 @@ void CyPopup::createTable([[maybe_unused]] int iRows, [[maybe_unused]] int iCols
 
 bool CyPopup::launch(bool bCreateOK, PopupStates eState)
 {
-	return CvInterface::getInstance().launchPopup(std::move(mPopup), bCreateOK, eState);
+	CvTuiInterface::getInstance().launchPopup(std::move(mPopup), bCreateOK, eState, 0);
+	return false; // ??
 }
 
 void CyPopup::setBodyString(const std::wstring& szText, [[maybe_unused]] int uiFlags)

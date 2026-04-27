@@ -1,7 +1,7 @@
 #include "PythonPopup.h"
-#include "Common.h"
-#include "DLLInterface/MyCvDLLPython.h"
-#include "PythonAPI/CyPopupReturn.h"
+
+#include <Cv4CommonEngineLib/CyPopupReturn.h>
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <CvPopupReturn.h>
 
@@ -11,6 +11,8 @@
 #include <CyArgsList.h>
 
 #include <pybind11/cast.h>
+
+using namespace cvengine;
 
 PythonPopup::PythonPopup(int eventId, EventContextTypes eventCtxType) : eventId(eventId), eventCtxType(eventCtxType)
 {

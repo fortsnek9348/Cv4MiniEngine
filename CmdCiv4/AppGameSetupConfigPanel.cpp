@@ -2,9 +2,10 @@
 #include "AppGameSetupPlayerListPanel.h"
 #include "AppGameSetupMapScript.h"
 #include "AppGameSetupWindow.h"
-#include "Common.h"
-#include "DLLInterface/MyCvDLLUtility.h"
 #include "CvApp.h"
+
+#include <Cv4CommonEngineLib/CvTranslator.h>
+#include <Cv4CommonEngineLib/CvAppUtil.h>
 
 #include <CvGlobals.h>
 #include <CvInitCore.h>
@@ -16,13 +17,9 @@
 
 namespace tui = hecktui;
 using heck::range;
-using cvengine::MyComboBox;
-using cvengine::MyCheckBox;
-using cvengine::strictStringToUInt;
+using namespace cvengine;
 
 static constexpr tui::EComboboxStyle kSettingsComboboxStyle = tui::EComboboxStyle::Bulky;
-
-
 
 AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, AppGameSetupWindow& singlePlayerCustomWindow, std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel)
 	: ScrollBarPanel(tui::EAxis::Vertical)
@@ -30,7 +27,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 {
 	CvInitCore& initCore = gGlobals.getInitCore();
 
-	const CvWString randomStr = MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
+	const CvWString randomStr = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
 
 	const auto client = getPanel();
 
@@ -71,22 +68,22 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		}));
 
 	auto gameNameRow = settingsPanel;//std::make_shared<tui::Element>();
-	gameNameRow->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_GAME_NAME"))); // French text has colon...
+	gameNameRow->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_GAME_NAME"))); // French text has colon...
 	gameNameRow->addChild(mTxtGameName = std::make_shared<tui::Textbox>(initCore.getGameName()));
 	//gameNameRow->setLayout(std::make_unique<tui::TableLayout>(kNameValueTable));
 	//settingsPanel->addChild(gameNameRow);
 
 	//settingsPanel->addChild(std::make_shared<tui::Label>());
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_PLAYERS")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_PLAYERS")));
 	mLstNumPlayers = std::make_shared<MyComboBox>(*this, kSettingsComboboxStyle);
 	mLstNumPlayers->setListItems(range(MAX_CIV_PLAYERS + 1)
-		| std::views::transform([](int i) { return i <= 0 ? MyCvDLLUtility::getInstance().getText(L"TXT_KEY_WB_CITY_NOCHANGE") : std::to_wstring(i); })
+		| std::views::transform([](int i) { return i <= 0 ? CvTranslator::getInstance().getText(L"TXT_KEY_WB_CITY_NOCHANGE") : std::to_wstring(i); })
 		| std::ranges::to<std::vector>());
 	mLstNumPlayers->setSelectionIndex(0);
 	settingsPanel->addChild(mLstNumPlayers);
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_PITBOSS_DIFFICULTY")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_PITBOSS_DIFFICULTY")));
 	mLstDifficulty = std::make_shared<tui::Combobox>(kSettingsComboboxStyle);
 	mLstDifficulty->setListItems(range(gGlobals.getNumHandicapInfos())
 		| std::views::transform([](int i) -> std::wstring { return gGlobals.getHandicapInfo(static_cast<HandicapTypes>(i)).getDescription(); })
@@ -94,14 +91,14 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	mLstDifficulty->setSelectionIndex(initCore.getHandicap(static_cast<PlayerTypes>(0)));
 	settingsPanel->addChild(mLstDifficulty);
 
-	settingsPanel->addChild(mLblMapSeed = std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_BUG_OPTTAB_MAP") + L' ' + static_cast<std::wstring>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
+	settingsPanel->addChild(mLblMapSeed = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_BUG_OPTTAB_MAP") + L' ' + static_cast<std::wstring>(CvTranslator::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
 	settingsPanel->addChild(mTxtMapSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initCore.getMapRandSeed()), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
 
-	settingsPanel->addChild(mLblSyncSeed = std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_SHORTCUTS_GAME") + L' ' + static_cast<std::wstring>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
+	settingsPanel->addChild(mLblSyncSeed = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_SHORTCUTS_GAME") + L' ' + static_cast<std::wstring>(CvTranslator::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
 	settingsPanel->addChild(mTxtSyncSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initCore.getSyncRandSeed()), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
 
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_MAP")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_MAP")));
 	mLstMapScript = std::make_shared<MyComboBox>(*this, kSettingsComboboxStyle);
 	mLstMapScript->setListItems(mapScripts
 		| std::views::transform([](const AppGameSetupMapScriptInfo& info) { return std::wstring(CvWString(info.moduleName)); })
@@ -113,7 +110,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		mLstMapScript->setSelectionIndex(0);
 	settingsPanel->addChild(mLstMapScript);
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_SIZE")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_SIZE")));
 
 	auto worldSizePanel = std::make_shared<tui::Element>();
 
@@ -146,7 +143,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	//const MapScriptInfo& selMapScriptInfo = mapScripts[mLstMapScript->getSelectionIndex()];
 	//if (selMapScriptInfo.isClimateMap())
 	{
-		settingsPanel->addChild(mLblClimate = std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_CLIMATE")));
+		settingsPanel->addChild(mLblClimate = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_CLIMATE")));
 		mLstClimate = std::make_shared<tui::Combobox>(kSettingsComboboxStyle);
 		items.push_back(randomStr);
 		items.append_range(range<ClimateTypes>(gGlobals.getNumClimateInfos())
@@ -158,7 +155,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	}
 	//if (selMapScriptInfo.isSeaLevelMap())
 	{
-		settingsPanel->addChild(mLblSeaLevel = std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_SEALEVEL")));
+		settingsPanel->addChild(mLblSeaLevel = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_SEALEVEL")));
 		mLstSeaLevel = std::make_shared<tui::Combobox>(kSettingsComboboxStyle);
 		items.push_back(randomStr);
 		items.append_range(range<SeaLevelTypes>(gGlobals.getNumSeaLevelInfos())
@@ -169,7 +166,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		settingsPanel->addChild(mLstSeaLevel);
 	}
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_ERA")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_ERA")));
 	mLstEra = std::make_shared<tui::Combobox>(kSettingsComboboxStyle);
 	items.push_back(randomStr);
 	items.append_range(range<EraTypes>(gGlobals.getNumEraInfos())
@@ -187,7 +184,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		return iEstimateEndTurn;
 		});
 
-	settingsPanel->addChild(std::make_shared<tui::Label>(MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MENU_SPEED")));
+	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_SPEED")));
 	mLstSpeed = std::make_shared<tui::Combobox>(kSettingsComboboxStyle);
 	items.append_range(mGameSpeedOrder |
 		std::views::transform([](GameSpeedTypes i) { return std::wstring(gGlobals.getGameSpeedInfo(i).getDescription()); }));
@@ -238,7 +235,7 @@ std::optional<int> AppGameSetupConfigPanel::getNumPlayers() const
 		return std::nullopt;
 }
 
-void AppGameSetupConfigPanel::setupConfig(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, SimplifiedInitCore& config) const
+void AppGameSetupConfigPanel::setupConfig(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, app::SimplifiedInitCore& config) const
 {
 	config.gameName = mTxtGameName->getText();
 
@@ -264,7 +261,7 @@ void AppGameSetupConfigPanel::addCustomMapOptionControls(const AppGameSetupMapSc
 {
 	const CvInitCore& initCore = gGlobals.getInitCore();
 
-	const CvWString randomStr = MyCvDLLUtility::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
+	const CvWString randomStr = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
 	std::vector<std::wstring> items;
 	for (const int i : range(initCore.getNumCustomMapOptions()))
 	{

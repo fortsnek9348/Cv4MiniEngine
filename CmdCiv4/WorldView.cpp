@@ -1,12 +1,12 @@
 ﻿#include "WorldView.h"
-#include "Common.h"
 #include "Graphics.h"
-#include "CvInterface.h"
 #include "CvApp.h"
 #include "TuiTextCode.h"
-#include "CvTranslator.h"
 #include "WorldViewUtils.h"
-#include "CvEngine.h"
+#include "CvTuiInterface.h"
+
+#include <Cv4CommonEngineLib/CvEngine.h>
+#include <Cv4CommonEngineLib/EngineSpecificsHeader.h>
 
 #include <CvGlobals.h>
 #include <CvMap.h>
@@ -30,9 +30,7 @@
 
 using heck::range;
 using heck::ivec2;
-using cvengine::darken;
-using cvengine::toTuiColour;
-using cvengine::renderCiv4TextCode;
+using namespace cvengine;
 
 // originally 9x5 before zooming
 // NOTE: Round for wider plots because consoles are wide.
@@ -1215,7 +1213,7 @@ static void paintPlotText(WorldViewFramebuffer& fb, ivec2 coord, ivec2 zoomVec, 
 			const PlayerColorTypes playerColourI = CvPlayerAI::getPlayerNonInl(centerUnit->getVisualOwner()).getPlayerColor();
 			const EColour civColour = toTuiColour((ColorTypes)gGlobals.getPlayerColorInfo(playerColourI).getTextColorType());
 
-			const bool selected = CvInterface::getInstance().getSelectionGroup().plot() == &plot;
+			const bool selected = CvTuiInterface::getInstance().getSelectionList()->plot() == &plot;
 			const WorldViewFramebuffer::EColour textColour = civColour; // selected ? WorldViewFramebuffer::White : WorldViewFramebuffer::Silver;
 
 			const std::wstring countStr = std::wstring(1, kCountCharacters[std::min<size_t>(numUnitsOnPlot, kCountCharacters.size() - 1)]);
@@ -1844,7 +1842,7 @@ WorldViewFramebuffer WorldView::draw() const
 	{
 		for (int xplots = visibleMinXPlot; xplots < visibleMaxXPlot; ++xplots)
 		{
-			if (const std::wstring_view label = CvEngine::getInstance().findSignTextAt(GC.getGame().getActivePlayer(), { xplots, yplots }); label.size())
+			if (const std::wstring_view label = engine_specific::getCvEngine().findSignTextAt(GC.getGame().getActivePlayer(), { xplots, yplots }); label.size())
 			{
 				fb.drawText(mapCellToWindowCoord(mWindowDim, mCenterMapCellCoord, plotToTopLeftMapCellCoord({ xplots, yplots }, mZoom)),
 					plotOuterDim.x,

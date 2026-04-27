@@ -1,12 +1,13 @@
 ﻿#include "MainInterfaceControls.h"
-#include "Common.h"
 #include "TuiTextCode.h"
-#include "DLLInterface/MyCvDLLPython.h"
-#include "DLLInterface/MyCvDLLUtility.h"
-#include "CvEngineEnums.h"
-#include "PythonAPI/CyTranslator.h"
 #include "CvApp.h"
 #include "UITheme.h"
+#include "CvTuiInterface.h"
+#include "CvTuiMainInterface.h"
+
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
+#include <Cv4CommonEngineLib/CvTranslator.h>
+#include <Cv4CommonEngineLib/Common.h>
 
 #include <CvDLLWidgetData.h>
 #include <CvInfos.h>
@@ -37,9 +38,10 @@ bool cvengine::doPythonScreenEventHandling(const CvWidgetDataStruct& widgetData,
 	pyArgs.add(-1); // ? self.iItemID = argsList[3]
 	pyArgs.add((int)id.screen); // self.ePythonFileEnum = argsList[4]
 	pyArgs.add(""); // self.szFunctionName = argsList[5]
-	pyArgs.add(MyCvDLLUtility::getInstance().shiftKey()); // self.bShift = argsList[6]
-	pyArgs.add(MyCvDLLUtility::getInstance().ctrlKey()); // self.bCtrl = argsList[7]
-	pyArgs.add(MyCvDLLUtility::getInstance().altKey()); // self.bAlt = argsList[8]
+	const hecktui::ModifierKeyState modifierKeys = CvApp::getInstance().getLastModifierKeysState();
+	pyArgs.add(modifierKeys.shift); // self.bShift = argsList[6]
+	pyArgs.add(modifierKeys.ctrl); // self.bCtrl = argsList[7]
+	pyArgs.add(modifierKeys.alt); // self.bAlt = argsList[8]
 	pyArgs.add(0); // self.iMouseX = argsList[9]
 	pyArgs.add(0); // self.iMouseY = argsList[10]
 	pyArgs.add(widgetData.m_eWidgetType); // self.iButtonType = argsList[11]
@@ -164,7 +166,7 @@ void ActionButton::onClick([[maybe_unused]] ModifierKeyState modifierKeyState)
 	(void)CvDLLWidgetData::getInstance().executeAction(widgetData);
 	// Don't trigger a game update if this is a no-op.
 	if (widgetData.m_eWidgetType != WIDGET_PYTHON && widgetData.m_eWidgetType != WIDGET_GENERAL)
-		CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
+		CvTuiInterface::getInstance().getTuiMainInterface()->onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::Action);
 }
 
 void ActionButton::onRightClick(ModifierKeyState modifierKeyState)
@@ -184,7 +186,7 @@ void ActionButton::onRightClick(ModifierKeyState modifierKeyState)
 		(void)doPythonScreenEventHandling(widgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_RBUTTON | cvengine::MOUSE_RBUTTONUP);
 		
 		(void)CvDLLWidgetData::getInstance().executeAltAction(widgetData);
-		CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
+		CvTuiInterface::getInstance().getTuiMainInterface()->onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::Action);
 	}
 }
 
@@ -228,10 +230,10 @@ std::shared_ptr<Element> ActionButton::createTooltip() const
 }*/
 
 // Used for the on/off checkbox strings, as the text XML doesn't store them without the "Turn On/Off" string.
-static std::wstring guessCommonString(std::wstring_view keyA, std::wstring_view keyB)
+static std::wstring guessCommonString(const std::wstring& keyA, const std::wstring& keyB)
 {
-	const std::wstring textA = MyCvDLLUtility::getInstance().getTextGeneric(keyA, {});
-	const std::wstring textB = MyCvDLLUtility::getInstance().getTextGeneric(keyB, {});
+	const std::wstring textA = CvTranslator::getInstance().getText(keyA);
+	const std::wstring textB = CvTranslator::getInstance().getText(keyB);
 
 	const size_t commonStartLength = std::ranges::mismatch(textA, textB).in1 - textA.begin();
 	const size_t commonEndLength = std::mismatch(textA.rbegin(), textA.rend(), textB.rbegin(), textB.rend()).first - textA.rbegin();
@@ -242,9 +244,9 @@ static std::wstring guessCommonString(std::wstring_view keyA, std::wstring_view 
 		return cvengine::trim(textA.substr(textA.size() - commonEndLength));
 }
 
-static std::wstring makeActionLabel(CvInterface& interfaceController, const CvWidgetDataStruct& widgetInfo)
+static std::wstring makeActionLabel(const CvWidgetDataStruct& widgetInfo)
 {
-	const CvCity* const selCity = interfaceController.getHeadSelectedCity();
+	const CvCity* const selCity = CvTuiInterface::getInstance().getHeadSelectedCity();
 
 	std::wstring name;
 
@@ -308,12 +310,12 @@ static std::wstring makeActionLabel(CvInterface& interfaceController, const CvWi
 	case WIDGET_LEADERHEAD:
 	{
 		const CvPlayer& player = CvPlayerAI::getPlayerNonInl((PlayerTypes)widgetInfo.m_iData1);
-		name = CyTranslator().changeTextColor(player.getName(), gGlobals.getPlayerColorInfo(player.getPlayerColor()).getTextColorType());
+		name = CvTranslator::changeTextColor(player.getName(), gGlobals.getPlayerColorInfo(player.getPlayerColor()).getTextColorType());
 		break;
 	}
 
 	case WIDGET_CLOSE_SCREEN:
-		name = MyCvDLLUtility::getInstance().getTextGeneric(L"TXT_KEY_PEDIA_SCREEN_EXIT", {});
+		name = CvTranslator::getInstance().getText(L"TXT_KEY_PEDIA_SCREEN_EXIT");
 		break;
 	
 	default:
@@ -324,7 +326,7 @@ static std::wstring makeActionLabel(CvInterface& interfaceController, const CvWi
 	return name;
 }
 
-std::shared_ptr<ActionButton> cvengine::makeActionButtonWithAutoLabel(const CvGame& game, CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex, int data2)
+std::shared_ptr<ActionButton> cvengine::makeActionButtonWithAutoLabel(const CvGame& game, WidgetTypes widgetType, int actionIndex, int data2)
 {
 	CvWidgetDataStruct widgetInfo{
 		.m_iData1 = actionIndex, // Probably from python code.
@@ -333,10 +335,10 @@ std::shared_ptr<ActionButton> cvengine::makeActionButtonWithAutoLabel(const CvGa
 		.m_eWidgetType = widgetType,
 	};
 
-	auto btn = std::make_shared<ActionButton>(makeActionLabel(interfaceController, widgetInfo), widgetInfo);
+	auto btn = std::make_shared<ActionButton>(makeActionLabel(widgetInfo), widgetInfo);
 
 	if (widgetType == WIDGET_ACTION)
-		btn->setEnabled(game.canHandleAction(actionIndex, interfaceController.getGotoPlot(), false, false));
+		btn->setEnabled(game.canHandleAction(actionIndex, CvTuiInterface::getInstance().getGotoPlot(), false, false));
 
 	return btn;
 }
@@ -366,10 +368,10 @@ void ActionCheckBox::onCheckChanged()
 {
 	(void)doPythonScreenEventHandling(mWidgetData, mPythonScreenControlId, cvengine::NOTIFY_CLICKED, cvengine::MOUSE_LBUTTON | cvengine::MOUSE_LBUTTONUP);
 	(void)CvDLLWidgetData::getInstance().executeAction(mWidgetData);
-	CvInterface::getInstance().onGameStateChanged(CvInterface::EGameStateChangeReason::Action);
+	CvTuiInterface::getInstance().getTuiMainInterface()->onGameStateChanged(CvTuiMainInterface::EGameStateChangeReason::Action);
 }
 
-std::shared_ptr<ActionCheckBox> cvengine::makeActionCheckBoxWithAutoLabel(CvInterface& interfaceController, WidgetTypes widgetType, int actionIndex)
+std::shared_ptr<ActionCheckBox> cvengine::makeActionCheckBoxWithAutoLabel(WidgetTypes widgetType, int actionIndex)
 {
 	const CvWidgetDataStruct widgetInfo{
 		.m_iData1 = actionIndex,
@@ -378,7 +380,7 @@ std::shared_ptr<ActionCheckBox> cvengine::makeActionCheckBoxWithAutoLabel(CvInte
 		.m_eWidgetType = widgetType,
 	};
 
-	return std::make_shared<ActionCheckBox>(makeActionLabel(interfaceController, widgetInfo), widgetInfo);
+	return std::make_shared<ActionCheckBox>(makeActionLabel(widgetInfo), widgetInfo);
 }
 
 namespace
@@ -407,7 +409,7 @@ std::shared_ptr<hecktui::Combobox> cvengine::makePythonCombobox(WidgetTypes widg
 }
 
 
-TurnMessageDisplay::TurnMessageDisplay() : mFirstSerial(CvInterface::getInstance().getFirstTurnMessageSerial())
+TurnMessageDisplay::TurnMessageDisplay() : mFirstSerial(CvTuiInterface::getInstance().getTuiMainInterface()->getFirstTurnMessageSerial())
 {
 	auto scrollPanel = std::make_shared<ScrollBarPanel>(EAxis::Vertical);
 	scrollPanel->setLayoutSizeOverride({}, 2);
@@ -423,7 +425,7 @@ TurnMessageDisplay::TurnMessageDisplay() : mFirstSerial(CvInterface::getInstance
 
 void TurnMessageDisplay::updateTurnMessageDisplay()
 {
-	const CvInterface& ingameInterfaceController = CvInterface::getInstance();
+	const CvTuiMainInterface& ingameInterfaceController = *CvTuiInterface::getInstance().getTuiMainInterface();
 	AudioSystem& audioSys = *CvApp::getInstance().audioSystem;
 
 	while (mFirstSerial < ingameInterfaceController.getFirstTurnMessageSerial() && mClientPanel->getChildren().size())
@@ -453,7 +455,7 @@ void TurnMessageDisplay::updateTurnMessageDisplay()
 			if (e.type == hecktui::EConsoleEventType::MouseButtonDown && static_cast<const hecktui::MouseButtonEvent&>(e).button == hecktui::EMouseButton::Left)
 			{
 				if (location.x >= 0)
-					CvInterface::getInstance().lookAt(location);
+					CvTuiInterface::getInstance().lookAtPlot(location);
 				return true;
 			}
 
