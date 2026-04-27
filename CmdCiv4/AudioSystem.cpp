@@ -1,4 +1,5 @@
 #include "AudioSystem.h"
+#include "Cv4MiniEngineIni.h"
 #include "CvTuiInterface.h"
 
 #include <Cv4CommonEngineLib/AudioXmlDefs.h>

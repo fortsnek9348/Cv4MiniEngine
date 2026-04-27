@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PlayerBotGameBinding", "Pla
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4CommonEngineLib", "Cv4CommonEngineLib\Cv4CommonEngineLib.vcxproj", "{67F7CF0A-D595-40C6-86E9-02D7381FFE22}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4HeadlessEngine", "Cv4HeadlessEngine\Cv4HeadlessEngine.vcxproj", "{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		DebugEnhanced|x64 = DebugEnhanced|x64
@@ -131,6 +133,14 @@ Global
 		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseEnhanced|x64.Build.0 = Release|x64
 		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseStrict|x64.ActiveCfg = Release|x64
 		{67F7CF0A-D595-40C6-86E9-02D7381FFE22}.ReleaseStrict|x64.Build.0 = Release|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.DebugEnhanced|x64.ActiveCfg = Debug|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.DebugEnhanced|x64.Build.0 = Debug|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.DebugStrict|x64.ActiveCfg = Debug|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.DebugStrict|x64.Build.0 = Debug|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.ReleaseEnhanced|x64.ActiveCfg = Release|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.ReleaseEnhanced|x64.Build.0 = Release|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.ReleaseStrict|x64.ActiveCfg = Release|x64
+		{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}.ReleaseStrict|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -28,18 +28,14 @@ constexpr IniDocKey cvengine::kCivilizationIVIniProp_Map{ "Map", "Map Script fil
 constexpr IniDocKey cvengine::kCivilizationIVIniProp_Alias{ "Alias", "In-game Alias" };
 constexpr IniDocKey cvengine::kCivilizationIVIniProp_QuickHandicap{ "QuickHandicap", "Handicap for quick play" };
 
-constexpr IniDocKey cvengine::kCivilizationIVIniSection_CV4ENGINE{ "CV4MINIENGINE" };
-constexpr IniDocKey cvengine::kCivilizationIVIniProp_VanillaCiv4RootDir{ "VanillaCiv4RootDir", "Path to root directory of your Civilization 4 installation." };
-constexpr IniDocKey cvengine::kCivilizationIVIniProp_LogOutput{ "LogOutput", "stderr, or OutputDebugString, or file [filename]" };
-constexpr IniDocKey cvengine::kCivilizationIVIniProp_EnableRightClickToShiftClickRemap{ "EnableRightClickToShiftClickRemap", "Terminals typically hijack shift left-click, so to get around that, action buttons may remap right-click to shift left-click. This may be disabled for Windows Console." };
-constexpr IniDocKey cvengine::kCivilizationIVIniProp_MaxConcurrentSounds{ "MaxConcurrentSounds", "Limit the maximum number of the same sound that can play at the same time." };
-constexpr IniDocKey cvengine::kCivilizationIVIniProp_MaxConcurrentSoundTimeMilliseconds{ "MaxConcurrentSoundTimeMilliseconds", "Consider playing offsets less than this to be concurrent." };
+constexpr IniDocKey cvengine::kCivilizationIVIniSection_CVGAMECOREDLL_EXTENSION{ "CVGAMECOREDLL_EXTENSION" };
 constexpr IniDocKey cvengine::kCivilizationIVIniProp_WorldSizeMultiplier{ "WorldSizeMultiplier", "Simply scales up the final size of the map. Also used by startingPlotRange." };
 
-static const std::filesystem::path& getPath()
+
+
+static std::filesystem::path getPath()
 {
-	static const std::filesystem::path kPath = cvengine::gCommonEngineConfig.userConfigDirPath / cvengine::gCommonEngineConfig.iniFilename;
-	return kPath;
+	return cvengine::gCommonEngineConfig.userConfigDirPath / cvengine::gCommonEngineConfig.iniFilename;
 }
 
 void cvengine::loadCivIni()

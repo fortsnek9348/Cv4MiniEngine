@@ -111,7 +111,6 @@ sys.meta_path.append(Civ4ModuleImporter())
 			CvEventReporter::getInstance().init();
 
 			(void)pybind11::module::import("CvAppInterface").attr("init")();
-			(void)pybind11::module::import("Cv4MiniEngineEntryPoint").attr("init")();
 		}
 		catch (const pybind11::error_already_set& ex)
 		{

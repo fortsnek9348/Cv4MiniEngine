@@ -162,6 +162,9 @@
     <ClCompile Include="OutputRedirection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Cv4MiniEngineIni.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DLLInterface\MyCvDLLEntityIFace.h">
@@ -282,6 +285,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OutputRedirection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Cv4MiniEngineIni.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

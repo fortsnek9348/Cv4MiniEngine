@@ -1,4 +1,5 @@
 #include "OutputRedirection.h"
+#include "Cv4MiniEngineIni.h"
 
 #include <Cv4CommonEngineLib/CivIni.h>
 
@@ -195,11 +196,11 @@ namespace
 	};
 }
 
-void cvengine::initDebugOutput()
+void cvengine::initDebugOutput(IniData& ini)
 {
 	const std::string defaultTarget = "file log.txt";
 
-	std::istringstream targetSS(gCivilizationIVIni.grab(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_LogOutput, defaultTarget));
+	std::istringstream targetSS(ini.grab(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_LogOutput, defaultTarget));
 	std::string targetToken;
 	bool failedToParseTarget = false;
 	if (!(targetSS >> targetToken))

@@ -210,7 +210,7 @@ static void updateINI()
 
 	gCivilizationIVIni.set(kSection, kCivilizationIVIniProp_QuickHandicap, gGlobals.getHandicapInfo(mainInitCore.getHandicap(static_cast<PlayerTypes>(0))).getType());
 
-	gCivilizationIVIni.set(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_WorldSizeMultiplier, std::to_string(mainInitCore.getWorldSizeMultiplier()));
+	gCivilizationIVIni.set(kCivilizationIVIniSection_CVGAMECOREDLL_EXTENSION, kCivilizationIVIniProp_WorldSizeMultiplier, std::to_string(mainInitCore.getWorldSizeMultiplier()));
 
 	saveCivilizationIniIfChanged();
 }

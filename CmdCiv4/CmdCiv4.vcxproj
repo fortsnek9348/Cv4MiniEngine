@@ -123,6 +123,7 @@
     <ClCompile Include="AppUIUtil.cpp" />
     <ClCompile Include="AudioSystem.cpp" />
     <ClCompile Include="CommandLine.cpp" />
+    <ClCompile Include="Cv4MiniEngineIni.cpp" />
     <ClCompile Include="CvAppStates.cpp" />
     <ClCompile Include="CvPopupTuiDialog.cpp" />
     <ClCompile Include="CvTuiMainInterface.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="AppUIUtil.h" />
     <ClInclude Include="AudioSystem.h" />
     <ClInclude Include="CommandLine.h" />
+    <ClInclude Include="Cv4MiniEngineIni.h" />
     <ClInclude Include="CvApp.h" />
     <ClInclude Include="CvPopupTuiDialog.h" />
     <ClInclude Include="CvTuiDiplomacyScreen.h" />

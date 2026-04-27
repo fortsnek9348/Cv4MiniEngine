@@ -1,6 +1,7 @@
 #include "CvApp.h"
 #include "AppMainMenusState.h"
 #include "CommandLine.h"
+#include "Cv4MiniEngineIni.h"
 #include "FileDialogs.h"
 #include "CvTuiInterface.h"
 #include "CvTuiEngine.h"
@@ -24,13 +25,13 @@
 #include <CvGameCoreDLL/CyArgsList.h>
 #include <CvGameCoreDLL/GeneratePlayerBotHeader.h>
 
-
-
 #include <HeckTextUI/Core.h>
 
 #include <CommonStuff/System.h>
 #include <CommonStuff/range.h>
 #include <CommonStuff/DynamicLib.h>
+
+#include <pybind11/pybind11.h>
 
 #include <iostream>
 #include <chrono>
@@ -66,7 +67,7 @@ void CvApp::start(const AppStartupConfig& config)
 	IniData ini = loadINI(iniPath);
 
 	// Only have to do this before first drawing the UI.
-	initDebugOutput();
+	initDebugOutput(ini);
 
 	std::filesystem::path vanillaCiv4RootDir = ini.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L"");
 	if (vanillaCiv4RootDir.empty())
@@ -146,6 +147,9 @@ void CvApp::start(const AppStartupConfig& config)
 	}
 
 	audioSystem = std::make_unique<AudioSystem>(*mVFS);
+
+	// Patch scripts.
+	(void)pybind11::module::import("Cv4MiniEngineEntryPoint").attr("init")();
 }
 
 const cvengine::CvVFS& CvApp::getVFS() const

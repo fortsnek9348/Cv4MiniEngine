@@ -53,7 +53,7 @@ static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameS
 	constexpr auto& kSectionName = kCivilizationIVIniSection_GAME;
 	initCore.setGameName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameName, CvTranslator::getInstance().getText(L"TXT_KEY_DEFAULT_GAMENAME")));
 	initCore.setWorldSize(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_WorldSize, L"WORLDSIZE_STANDARD"));
-	initCore.setWorldSizeMultiplier(gCivilizationIVIni.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_WorldSizeMultiplier, 1));
+	initCore.setWorldSizeMultiplier(gCivilizationIVIni.get(kCivilizationIVIniSection_CVGAMECOREDLL_EXTENSION, kCivilizationIVIniProp_WorldSizeMultiplier, 1));
 	initCore.setClimate(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Climate, L"CLIMATE_TEMPERATE"));
 	initCore.setSeaLevel(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_SeaLevel, L"SEALEVEL_MEDIUM"));
 	initCore.setEra(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Era, L"ERA_ANCIENT"));

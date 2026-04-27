@@ -1,4 +1,5 @@
 #include "CvApp.h"
+#include "Cv4MiniEngineIni.h"
 
 #include <Cv4CommonEngineLib/CivIni.h>
 
