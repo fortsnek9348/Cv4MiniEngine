@@ -57,6 +57,7 @@
     <ClInclude Include="PythonAPI\CyFractal.h" />
     <ClInclude Include="PythonAPI\CyGlobeLayerManager.h" />
     <ClInclude Include="PythonAPI\CyInterface.h" />
+    <ClInclude Include="PythonAPI\CyPopup.h" />
     <ClInclude Include="PythonAPI\CyPopupInfo.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\CyPopupReturn.h" />
     <ClInclude Include="PythonAPI\CyPythonMgr.h" />
@@ -64,6 +65,7 @@
     <ClInclude Include="PythonAPI\CyTranslator.h" />
     <ClInclude Include="PythonAPI\CyUserProfile.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\RawBinaryStream.h" />
+    <ClInclude Include="PythonPopup.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioXmlDefs.cpp" />
@@ -96,6 +98,7 @@
     <ClCompile Include="PythonAPI\CyFractal.cpp" />
     <ClCompile Include="PythonAPI\CyGlobeLayerManager.cpp" />
     <ClCompile Include="PythonAPI\CyInterface.cpp" />
+    <ClCompile Include="PythonAPI\CyPopup.cpp" />
     <ClCompile Include="PythonAPI\CyPopupInfo.cpp" />
     <ClCompile Include="PythonAPI\CyPopupReturn.cpp" />
     <ClCompile Include="PythonAPI\CyPythonMgr.cpp" />
@@ -103,6 +106,7 @@
     <ClCompile Include="PythonAPI\CyTranslator.cpp" />
     <ClCompile Include="PythonAPI\CyUserProfile.cpp" />
     <ClCompile Include="CompressionBinaryStream.cpp" />
+    <ClCompile Include="PythonPopup.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

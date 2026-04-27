@@ -12,6 +12,7 @@
 #include "CyFractal.h"
 #include "CyGlobeLayerManager.h"
 #include "CyInterface.h"
+#include "CyPopup.h"
 #include "CyPopupInfo.h"
 #include "CyPythonMgr.h"
 #include "CyStatistics.h"
@@ -87,6 +88,7 @@ void cvengine::setupCvPythonExtensionsModule(pybind11::module m)
 	CyPythonMgr::registerWithPython(m);
 	
 	CyGlobeLayerManager::registerWithPython(m);
+	CyPopup::registerWithPython(m);
 	CyPopupInfo::registerWithPython(m);
 	CyPopupReturn::registerWithPython(m);
 	CyStatistics::registerWithPython(m);

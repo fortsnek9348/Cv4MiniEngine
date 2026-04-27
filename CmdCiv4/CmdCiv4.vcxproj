@@ -151,10 +151,8 @@
     <ClCompile Include="DLLInterface\MyCvDLLFlagEntity.cpp" />
     <ClCompile Include="PythonAPI\CvPythonExtensions.cpp" />
     <ClCompile Include="PythonAPI\CyGInterfaceScreen.cpp" />
-    <ClCompile Include="PythonAPI\CyPopup.cpp" />
     <ClCompile Include="PythonAPI\CyTuiDialog.cpp" />
     <ClCompile Include="PythonAPI\PythonRegistration.cpp" />
-    <ClCompile Include="PythonPopup.cpp" />
     <ClCompile Include="PythonScreen.cpp" />
     <ClCompile Include="RichGuage.cpp" />
     <ClCompile Include="RichTextTable.cpp" />
@@ -212,10 +210,8 @@
     <ClInclude Include="DLLInterface\MyCvDLLFeature.h" />
     <ClInclude Include="DLLInterface\MyCvDLLFlagEntity.h" />
     <ClInclude Include="PythonAPI\CyGInterfaceScreen.h" />
-    <ClInclude Include="PythonAPI\CyPopup.h" />
     <ClInclude Include="PythonAPI\CyTuiDialog.h" />
     <ClInclude Include="FileDialogs.h" />
-    <ClInclude Include="PythonPopup.h" />
     <ClInclude Include="PythonScreen.h" />
     <ClInclude Include="RichGuage.h" />
     <ClInclude Include="RichTextTable.h" />

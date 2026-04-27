@@ -132,6 +132,12 @@
     <ClInclude Include="inc\Cv4CommonEngineLib\CvPythonExtensionsSetup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PythonPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PythonAPI\CyPopup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PythonAPI\CvPythonExtensionsSetup.cpp">
@@ -243,6 +249,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PythonAPI\CyCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonPopup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PythonAPI\CyPopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

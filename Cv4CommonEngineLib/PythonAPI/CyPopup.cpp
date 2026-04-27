@@ -1,6 +1,8 @@
 #include "CyPopup.h"
 #include "../PythonPopup.h"
-#include "../CvTuiInterface.h"
+
+#include "../inc/Cv4CommonEngineLib/CvInterface.h"
+#include "../inc/Cv4CommonEngineLib/EngineSpecificsHeader.h"
 
 #include <CvGlobals.h>
 #include <CvPlayerAI.h>
@@ -254,7 +256,7 @@ void CyPopup::createTable([[maybe_unused]] int iRows, [[maybe_unused]] int iCols
 
 bool CyPopup::launch(bool bCreateOK, PopupStates eState)
 {
-	CvTuiInterface::getInstance().launchPopup(std::move(mPopup), bCreateOK, eState, 0);
+	engine_specific::getCvInterface().launchPopup(std::move(mPopup), bCreateOK, eState, 0);
 	return false; // ??
 }
 

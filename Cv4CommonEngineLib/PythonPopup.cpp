@@ -1,7 +1,7 @@
 #include "PythonPopup.h"
 
-#include <Cv4CommonEngineLib/CyPopupReturn.h>
-#include <Cv4CommonEngineLib/MyCvDLLPython.h>
+#include "inc/Cv4CommonEngineLib/CyPopupReturn.h"
+#include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
 
 #include <CvPopupReturn.h>
 
