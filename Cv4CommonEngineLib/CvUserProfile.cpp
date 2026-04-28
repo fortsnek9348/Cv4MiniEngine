@@ -83,6 +83,7 @@ void CvUserProfile::readFromFile()
 		resetOptions(TabGroupTypes::TABGROUP_GRAPHICS);
 		resetOptions(TabGroupTypes::TABGROUP_AUDIO);
 		resetOptions(TabGroupTypes::TABGROUP_CLOCK);
+		writeToFile();
 		return;
 	}
 
