@@ -45,51 +45,17 @@ static std::vector<AppGameSetupMapScriptInfo> enumerateMapScripts(const CvVFS& v
 	return v;
 }
 
-static void loadInitCoreFromIni(CvInitCore& initCore, const std::vector<AppGameSetupMapScriptInfo>& mapScripts)
+static app::SimplifiedInitCore loadInitCoreFromIni(const std::vector<AppGameSetupMapScriptInfo>& mapScripts)
 {
-	initCore.init(GameMode::GAMEMODE_NORMAL);
+	app::SimplifiedInitCore setup = app::getGameSetupFromIni();
 
-	const std::wstring userName = heck::getUserName();
-	constexpr auto& kSectionName = kCivilizationIVIniSection_GAME;
-	initCore.setGameName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameName, CvTranslator::getInstance().getText(L"TXT_KEY_DEFAULT_GAMENAME")));
-	initCore.setWorldSize(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_WorldSize, L"WORLDSIZE_STANDARD"));
-	initCore.setWorldSizeMultiplier(gCivilizationIVIni.get(kCivilizationIVIniSection_CVGAMECOREDLL_EXTENSION, kCivilizationIVIniProp_WorldSizeMultiplier, 1));
-	initCore.setClimate(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Climate, L"CLIMATE_TEMPERATE"));
-	initCore.setSeaLevel(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_SeaLevel, L"SEALEVEL_MEDIUM"));
-	initCore.setEra(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Era, L"ERA_ANCIENT"));
-	initCore.setGameSpeed(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameSpeed, L"GAMESPEED_NORMAL"));
-	initCore.setHandicap(static_cast<PlayerTypes>(0), static_cast<HandicapTypes>(gCivilizationIVIni.getEnum(kSectionName, kCivilizationIVIniProp_QuickHandicap, gGlobals.getNumHandicapInfos(), gGlobals.getDefineINT("STANDARD_HANDICAP"))));
-
-	{
-		const std::string& bits = gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_VictoryConditions, "");
-		for (const size_t i : range(gGlobals.getNumVictoryInfos()))
-			initCore.setVictory(static_cast<VictoryTypes>(i), i < bits.size() ? bits[i] != '0' : true);
-	}
-	{
-		const std::string& bits = gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_GameOptions, "");
-		for (const size_t i : range(gGlobals.getNumGameOptionInfos()))
-			initCore.setOption(static_cast<GameOptionTypes>(i), i < bits.size() ? bits[i] != '0' : gGlobals.getGameOptionInfo(static_cast<GameOptionTypes>(i)).getDefault());
-	}
-
-	{
-		const unsigned int value = gCivilizationIVIni.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
-		initCore.setSyncRandSeed(value ? value : std::random_device()());
-	}
-	{
-		const unsigned int value = gCivilizationIVIni.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
-		initCore.setMapRandSeed(value ? value : std::random_device()());
-	}
-
-	initCore.setType(GameType::GAME_SP_NEW);
-
-	initCore.setMapScriptName(gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Map, "Fractal"));
-	if (!gDLL->pythonMapExists(heck::toAsciiString(initCore.getMapScriptName()).c_str()))
+	if (!gDLL->pythonMapExists(setup.mapScriptName.c_str()))
 	{
 		// If the map script doesn't exist, just pick anything.
-		initCore.setMapScriptName(mapScripts.front().moduleName);
+		setup.mapScriptName = mapScripts.front().moduleName;
 	}
 
-	initCore.setLeaderName(static_cast<PlayerTypes>(0), gCivilizationIVIni.get(kSectionName, kCivilizationIVIniProp_Alias, userName));
+	return setup;
 }
 
 AppGameSetupWindow::AppGameSetupWindow(CvApp& app)
@@ -102,10 +68,11 @@ AppGameSetupWindow::AppGameSetupWindow(CvApp& app)
 	} }
 	, mMapScriptsList(enumerateMapScripts(app.getVFS()))
 {
-	loadInitCoreFromIni(gGlobals.getIniInitCore(), mMapScriptsList);
-	CvInitCore& initCore = gGlobals.getInitCore();
-	initCore.resetGame(&gGlobals.getIniInitCore(), true, false);
-	initCore.resetPlayers(&gGlobals.getIniInitCore(), true, false);
+	const app::SimplifiedInitCore initialSetup = loadInitCoreFromIni(mMapScriptsList);
+	//loadInitCoreFromIni(gGlobals.getIniInitCore(), mMapScriptsList);
+	//CvInitCore& initCore = gGlobals.getInitCore();
+	//initCore.resetGame(&gGlobals.getIniInitCore(), true, false);
+	//initCore.resetPlayers(&gGlobals.getIniInitCore(), true, false);
 
 	const auto client = getClientArea();
 
@@ -119,8 +86,8 @@ AppGameSetupWindow::AppGameSetupWindow(CvApp& app)
 
 	client->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_CUSTOM_GAME")));
 	client->addChild(std::make_shared<tui::HorizontalRule>(tui::EBorderStyle::Thick));
-	mPlayerListPanel = std::make_shared<AppGameSetupPlayerListPanel>(initCore);
-	mGameSetupBottomPanel = std::make_shared<AppGameSetupConfigPanel>(mMapScriptsList, *this, mPlayerListPanel);
+	mPlayerListPanel = std::make_shared<AppGameSetupPlayerListPanel>(initialSetup);
+	mGameSetupBottomPanel = std::make_shared<AppGameSetupConfigPanel>(initialSetup, mMapScriptsList, *this, mPlayerListPanel);
 
 	//client->addChild(mPlayerListPanel);
 	client->addChild(mGameSetupBottomPanel);

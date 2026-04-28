@@ -956,42 +956,14 @@ int main(int argc, const char* argv[])
 	// Patch scripts.
 	(void)pybind11::module::import("Cv4MiniEngineEntryPoint").attr("init")();
 
-	cvengine::app::SimplifiedInitCore gameSetup{
-		.gameName = L"Headless1",
-		.playerName = L"HeadlessPlayer",
-		.difficulty = static_cast<HandicapTypes>(gGlobals.getInfoTypeForString("HANDICAP_SETTLER")),
-		.mapScriptName = L"Pangaea",
-		.worldSizeType = static_cast<WorldSizeTypes>(gGlobals.getInfoTypeForString("WORLDSIZE_STANDARD")),
-		.climateType = static_cast<ClimateTypes>(gGlobals.getInfoTypeForString("CLIMATE_TEMPERATE")),
-		.seaLevelType = static_cast<SeaLevelTypes>(gGlobals.getInfoTypeForString("SEALEVEL_LOW")),
-		.eraType = static_cast<EraTypes>(gGlobals.getInfoTypeForString("ERA_ANCIENT")),
-		.speedType = static_cast<GameSpeedTypes>(gGlobals.getInfoTypeForString("GAMESPEED_NORMAL")),
-		.customMapOptions{},
-		.gameOptions{},
-		.victoryOptions{},
-		.players{},
-		.mapSizeOverrideMultiplier = 1,
-		.mapSeed = 823476,
-		.syncSeed = 34987,
-	};
-
-	gameSetup.gameOptions.resize(gGlobals.getNumGameOptionInfos());
-	gameSetup.victoryOptions.resize(gGlobals.getNumVictoryInfos(), true);
-	const size_t numPlayers = gGlobals.getWorldInfo(gameSetup.worldSizeType).getDefaultPlayers();
-	gameSetup.players.resize(numPlayers);
-	for (size_t i = 0; i < numPlayers; ++i)
-	{
-		gameSetup.players[i] = {
-			.team = static_cast<TeamTypes>(i),
-			.leader = NO_LEADER,
-			.civ = NO_CIVILIZATION,
-		};
-	}
+	cvengine::app::SimplifiedInitCore gameSetup = cvengine::app::getGameSetupFromIni();
+	gameSetup.gameName = L"Headless1";
+	gameSetup.playerName = L"HeadlessPlayer";
 
 	const auto progressCallback = [](std::wstring_view s) { std::wcout << s << '\n'; };
 
 	{
-		cvengine::app::NewGameStartupState state(std::move(gameSetup));
+		cvengine::app::NewGameStartupState state(std::move(gameSetup), false);
 		//cvengine::app::LoadGameState state(LR"(C:\Users\Axolotl\Documents\My Games\Beyond the Sword\Saves (Cv4HeadlessEngine)\single\Autosave turn 420 AD-2000 - Copy.CivBeyondSwordSave)");
 		state.onEnter(progressCallback);
 		state.onLeave();
@@ -1002,10 +974,11 @@ int main(int argc, const char* argv[])
 		state.onEnter(progressCallback);
 	}
 
-	for (size_t i = 0; i < numPlayers; ++i)
+	for (int i = 0; i < gGlobals.getMAX_CIV_PLAYERS(); ++i)
 	{
 		const CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
-		std::wcout << L"Player " << i << L' ' << gGlobals.getLeaderHeadInfo(player.getLeaderType()).getDescription() << L" / " << player.getCivilizationDescription() << std::endl;
+		if (player.isEverAlive())
+			std::wcout << L"Player " << i << L' ' << gGlobals.getLeaderHeadInfo(player.getLeaderType()).getDescription() << L" / " << player.getCivilizationDescription() << std::endl;
 	}
 
 	constexpr int kNumAIAutoplayTurns = 100'000;
@@ -1066,8 +1039,9 @@ int main(int argc, const char* argv[])
 	lastUpdateTurn = game.getGameTurn();
 
 	std::vector<const CvPlayer*> players;
-	for (size_t i = 0; i < numPlayers; ++i)
-		players.push_back(&GET_PLAYER(static_cast<PlayerTypes>(i)));
+	for (int i = 0; i < gGlobals.getMAX_CIV_PLAYERS(); ++i)
+		if (CvPlayer* const player = &GET_PLAYER(static_cast<PlayerTypes>(i)); player->isEverAlive())
+			players.push_back(player);
 
 	std::ranges::stable_sort(players, std::greater(), [&game](const CvPlayer* player) {
 		return game.getPlayerScore(player->getID());

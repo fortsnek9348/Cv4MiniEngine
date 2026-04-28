@@ -26,7 +26,7 @@ static bool isPlayableCiv(CivilizationTypes civI, PlayerTypes playerI)
 	return isHumanPlayer(playerI) ? info.isPlayable() : info.isAIPlayable();
 }
 
-AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initCore) //: ScrollBarPanel(tui::EAxis::Vertical)
+AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const app::SimplifiedInitCore& initialSetup) //: ScrollBarPanel(tui::EAxis::Vertical)
 {
 	buildCivLeaderData();
 
@@ -42,7 +42,7 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 		PlayerRow row{};
 
 		if (i == 0)
-			row.name = mTxtPlayerName = std::make_shared<tui::Textbox>(initCore.getLeaderName(static_cast<PlayerTypes>(i)));
+			row.name = mTxtPlayerName = std::make_shared<tui::Textbox>(initialSetup.playerName);
 		else
 			row.name = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_AI"));
 
@@ -51,7 +51,7 @@ AppGameSetupPlayerListPanel::AppGameSetupPlayerListPanel(const CvInitCore& initC
 		row.team = std::make_shared<tui::Combobox>(tui::EComboboxStyle::Compact);
 		row.team->setListItems(range(MAX_CIV_TEAMS) | std::views::transform([&](int teamI) { return teamStr + L' ' + std::to_wstring(teamI + 1); })
 			| std::ranges::to<std::vector>());
-		row.team->setSelectionIndex(initCore.getTeam(static_cast<PlayerTypes>(i)));
+		row.team->setSelectionIndex(static_cast<TeamTypes>(i));
 		client->addChild(row.team);
 
 
@@ -118,13 +118,14 @@ void AppGameSetupPlayerListPanel::setupConfig(app::SimplifiedInitCore& config) c
 {
 	config.playerName = mTxtPlayerName->getText();
 
+	config.players.resize(mNumPlayers);
 	for (const int i : range(mNumPlayers))
 	{
-		config.players.push_back(app::SimplifiedInitCore::Player{
+		config.players[i] = app::SimplifiedInitCore::Player{
 			.team = static_cast<TeamTypes>(mPlayers[i].team->getSelectionIndex()),
 			.leader = mPlayers[i].getSelectedLeader(),
 			.civ = mPlayers[i].getSelectedCiv(),
-			});
+			};
 	}
 }
 

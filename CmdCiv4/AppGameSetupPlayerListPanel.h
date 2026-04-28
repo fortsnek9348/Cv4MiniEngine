@@ -22,7 +22,7 @@ namespace cvengine
 	class AppGameSetupPlayerListPanel : public hecktui::Element, public cvengine::IWindowChildEventHandler
 	{
 	public:
-		explicit AppGameSetupPlayerListPanel(const CvInitCore& initCore);
+		explicit AppGameSetupPlayerListPanel(const app::SimplifiedInitCore& initialSetup);
 
 		void onPlayerCountChanged(int n);
 

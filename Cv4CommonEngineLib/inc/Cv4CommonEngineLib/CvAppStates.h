@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+class CvInitCore;
+
 namespace cvengine::app
 {
 	struct SimplifiedInitCore
@@ -22,7 +24,7 @@ namespace cvengine::app
 		std::wstring playerName;
 		HandicapTypes difficulty{};
 
-		std::wstring mapScriptName;
+		std::string mapScriptName;
 
 		WorldSizeTypes worldSizeType{}; // can be random
 		ClimateTypes climateType{}; // can be random
@@ -41,6 +43,8 @@ namespace cvengine::app
 		unsigned int syncSeed = 0;
 	};
 
+	SimplifiedInitCore getGameSetupFromIni();
+
 	using ProgressCallback = std::function<void(const std::wstring&)>;
 
 	class IState
@@ -54,11 +58,12 @@ namespace cvengine::app
 	class NewGameStartupState : public IState
 	{
 	public:
-		explicit NewGameStartupState(SimplifiedInitCore);
+		explicit NewGameStartupState(SimplifiedInitCore, bool saveToIni = true);
 		virtual void onEnter(const ProgressCallback& progressCallback) override;
 		virtual void onLeave() override;
 	protected:
 		SimplifiedInitCore mSimplifiedInitCore;
+		bool mSaveToIni = false;
 	};
 
 	class LoadGameState : public IState

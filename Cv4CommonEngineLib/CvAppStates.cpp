@@ -20,9 +20,11 @@
 #include <CvGameCoreDLL/CvInfos.h>
 
 #include <CommonStuff/range.h>
+#include <CommonStuff/System.h>
 
 #include <iostream>
 #include <chrono>
+#include <random>
 
 using heck::range;
 
@@ -70,8 +72,9 @@ static void setupNewGame(const SimplifiedInitCore& config)
 	//mainInitCore.setMapScriptName(L"GalacticPangaea");
 	mainInitCore.setMapScriptName(config.mapScriptName);
 
-	for (const size_t i : range(config.customMapOptions.size()))
+	for (const size_t i : range(std::min<size_t>(mainInitCore.getNumCustomMapOptions(), config.customMapOptions.size())))
 		mainInitCore.setCustomMapOption(static_cast<int>(i), config.customMapOptions[i]);
+	
 
 	mainInitCore.setGameName(config.gameName);
 
@@ -555,8 +558,71 @@ static void loadGame(const std::filesystem::path& path)
 	updatePlayersAreHuman();
 }
 
-NewGameStartupState::NewGameStartupState(SimplifiedInitCore simplifiedInitCore)
+cvengine::app::SimplifiedInitCore cvengine::app::getGameSetupFromIni()
+{
+	constexpr auto& kSectionName = kCivilizationIVIniSection_GAME;
+
+	IniData& ini = gCivilizationIVIni;
+
+	SimplifiedInitCore setup{
+		.gameName = ini.get(kSectionName, kCivilizationIVIniProp_GameName, CvTranslator::getInstance().getText(L"TXT_KEY_DEFAULT_GAMENAME")),
+		.playerName = ini.get(kSectionName, kCivilizationIVIniProp_Alias, heck::getUserName()),
+		.difficulty = static_cast<HandicapTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_QuickHandicap, gGlobals.getNumHandicapInfos(), gGlobals.getDefineINT("STANDARD_HANDICAP"))),
+		.mapScriptName = ini.get(kSectionName, kCivilizationIVIniProp_Map, "Fractal"),
+		.worldSizeType = static_cast<WorldSizeTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_WorldSize, gGlobals.getNumWorldInfos(), gGlobals.getInfoTypeForString("WORLDSIZE_STANDARD"))),
+		.climateType = static_cast<ClimateTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_Climate, gGlobals.getNumClimateInfos(), gGlobals.getInfoTypeForString("CLIMATE_TEMPERATE"))),
+		.seaLevelType = static_cast<SeaLevelTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_SeaLevel, gGlobals.getNumSeaLevelInfos(), gGlobals.getInfoTypeForString("SEALEVEL_MEDIUM"))),
+		.eraType = static_cast<EraTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_Era, gGlobals.getNumEraInfos(), gGlobals.getInfoTypeForString("ERA_ANCIENT"))),
+		.speedType = static_cast<GameSpeedTypes>(ini.getEnum(kSectionName, kCivilizationIVIniProp_GameSpeed, gGlobals.getNumGameSpeedInfos(), gGlobals.getInfoTypeForString("GAMESPEED_NORMAL"))),
+		.customMapOptions{},
+		.gameOptions{},
+		.victoryOptions{},
+		.players{},
+		.mapSizeOverrideMultiplier = ini.get(kCivilizationIVIniSection_CVGAMECOREDLL_EXTENSION, kCivilizationIVIniProp_WorldSizeMultiplier, 1),
+		.mapSeed{},
+		.syncSeed{},
+	};
+	
+	{
+		const std::string& bits = ini.get(kSectionName, kCivilizationIVIniProp_VictoryConditions, "");
+		setup.victoryOptions.resize(gGlobals.getNumVictoryInfos());
+		for (const size_t i : range(gGlobals.getNumVictoryInfos()))
+			setup.victoryOptions[i] = i < bits.size() ? bits[i] != '0' : true;
+	}
+
+	{
+		const std::string& bits = ini.get(kSectionName, kCivilizationIVIniProp_GameOptions, "");
+		setup.gameOptions.resize(gGlobals.getNumGameOptionInfos());
+		for (const size_t i : range(gGlobals.getNumGameOptionInfos()))
+			setup.gameOptions[i] = i < bits.size() ? bits[i] != '0' : gGlobals.getGameOptionInfo(static_cast<GameOptionTypes>(i)).getDefault();
+	}
+
+	{
+		const unsigned int value = ini.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_SyncRandSeed, 0);
+		setup.syncSeed = value ? value : std::random_device()();
+	}
+	{
+		const unsigned int value = ini.getUnsigned(kCivilizationIVIniSection_CONFIG, kCivilizationIVIniProp_MapRandSeed, 0);
+		setup.mapSeed = value ? value : std::random_device()();
+	}
+
+	const size_t numPlayers = gGlobals.getWorldInfo(setup.worldSizeType).getDefaultPlayers();
+	setup.players.resize(numPlayers);
+	for (size_t i = 0; i < numPlayers; ++i)
+	{
+		setup.players[i] = {
+			.team = static_cast<TeamTypes>(i),
+			.leader = NO_LEADER,
+			.civ = NO_CIVILIZATION,
+		};
+	}
+
+	return setup;
+}
+
+NewGameStartupState::NewGameStartupState(SimplifiedInitCore simplifiedInitCore, bool saveToIni)
 	: mSimplifiedInitCore(std::move(simplifiedInitCore))
+	, mSaveToIni(saveToIni)
 {
 }
 void NewGameStartupState::onEnter(const ProgressCallback& progressCallback)
@@ -571,7 +637,8 @@ void NewGameStartupState::onEnter(const ProgressCallback& progressCallback)
 	gCommonEngineConfig.engine->reset();
 
 	setupNewGame(mSimplifiedInitCore);
-	updateINI();
+	if (mSaveToIni)
+		updateINI();
 	startNewGame(progressCallback);
 
 	setPlayerOptions();

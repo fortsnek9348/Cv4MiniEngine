@@ -20,7 +20,12 @@ namespace cvengine
 	class AppGameSetupConfigPanel : public hecktui::ScrollBarPanel, public cvengine::IWindowChildEventHandler
 	{
 	public:
-		explicit AppGameSetupConfigPanel(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, AppGameSetupWindow& singlePlayerCustomWindow, std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel);
+		explicit AppGameSetupConfigPanel(
+			const app::SimplifiedInitCore& setup,
+			const std::vector<AppGameSetupMapScriptInfo>& mapScripts,
+			AppGameSetupWindow& singlePlayerCustomWindow,
+			std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel
+		);
 
 		virtual void onComboBoxSelectionChanged(hecktui::Combobox& ctrl) override;
 		virtual void onCheckBoxValueChanged(hecktui::Checkbox&) override;

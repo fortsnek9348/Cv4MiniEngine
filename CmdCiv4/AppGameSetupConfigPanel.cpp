@@ -20,11 +20,18 @@ using namespace cvengine;
 
 static constexpr tui::EComboboxStyle kSettingsComboboxStyle = tui::EComboboxStyle::Bulky;
 
-AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupMapScriptInfo>& mapScripts, AppGameSetupWindow& singlePlayerCustomWindow, std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel)
+AppGameSetupConfigPanel::AppGameSetupConfigPanel(
+	const app::SimplifiedInitCore& initialSetup,
+	const std::vector<AppGameSetupMapScriptInfo>& mapScripts,
+	AppGameSetupWindow& singlePlayerCustomWindow,
+	std::shared_ptr<AppGameSetupPlayerListPanel> playerListPanel
+)
 	: ScrollBarPanel(tui::EAxis::Vertical)
 	, mSinglePlayerCustomWindow(singlePlayerCustomWindow)
 {
+	// We'll use an init core just to get map custom options.
 	CvInitCore& initCore = gGlobals.getInitCore();
+	initCore.setMapScriptName(initialSetup.mapScriptName);
 
 	const CvWString randomStr = CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_RANDOM");
 
@@ -68,7 +75,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 
 	auto gameNameRow = settingsPanel;//std::make_shared<tui::Element>();
 	gameNameRow->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_GAME_NAME"))); // French text has colon...
-	gameNameRow->addChild(mTxtGameName = std::make_shared<tui::Textbox>(initCore.getGameName()));
+	gameNameRow->addChild(mTxtGameName = std::make_shared<tui::Textbox>(initialSetup.gameName));
 	//gameNameRow->setLayout(std::make_unique<tui::TableLayout>(kNameValueTable));
 	//settingsPanel->addChild(gameNameRow);
 
@@ -87,14 +94,14 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	mLstDifficulty->setListItems(range(gGlobals.getNumHandicapInfos())
 		| std::views::transform([](int i) -> std::wstring { return gGlobals.getHandicapInfo(static_cast<HandicapTypes>(i)).getDescription(); })
 		| std::ranges::to<std::vector>());
-	mLstDifficulty->setSelectionIndex(initCore.getHandicap(static_cast<PlayerTypes>(0)));
+	mLstDifficulty->setSelectionIndex(initialSetup.difficulty);
 	settingsPanel->addChild(mLstDifficulty);
 
 	settingsPanel->addChild(mLblMapSeed = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_BUG_OPTTAB_MAP") + L' ' + static_cast<std::wstring>(CvTranslator::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
-	settingsPanel->addChild(mTxtMapSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initCore.getMapRandSeed()), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
+	settingsPanel->addChild(mTxtMapSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initialSetup.mapSeed), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
 
 	settingsPanel->addChild(mLblSyncSeed = std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_SHORTCUTS_GAME") + L' ' + static_cast<std::wstring>(CvTranslator::getInstance().getText(L"TXT_KEY_MAP_SCRIPT_RANDOM"))));
-	settingsPanel->addChild(mTxtSyncSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initCore.getSyncRandSeed()), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
+	settingsPanel->addChild(mTxtSyncSeed = std::make_shared<tui::Textbox>(L"", std::to_wstring(initialSetup.syncSeed), tui::Colour{}, tui::Colour{}, tui::EColour::Silver));
 
 
 	settingsPanel->addChild(std::make_shared<tui::Label>(CvTranslator::getInstance().getText(L"TXT_KEY_MENU_MAP")));
@@ -102,7 +109,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	mLstMapScript->setListItems(mapScripts
 		| std::views::transform([](const AppGameSetupMapScriptInfo& info) { return std::wstring(CvWString(info.moduleName)); })
 		| std::ranges::to<std::vector>());
-	mLstMapScript->setSelectionIndex(std::ranges::find_if(mapScripts, [selected = heck::toAsciiLower(heck::toAsciiString(initCore.getMapScriptName()))](const AppGameSetupMapScriptInfo& script) {
+	mLstMapScript->setSelectionIndex(std::ranges::find_if(mapScripts, [selected = heck::toAsciiLower(initialSetup.mapScriptName)](const AppGameSetupMapScriptInfo& script) {
 		return selected == heck::toAsciiLower(script.moduleName);
 		}) - mapScripts.begin());
 	if (mLstMapScript->getSelectionIndex() >= mapScripts.size())
@@ -120,14 +127,14 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		| std::views::transform([](WorldSizeTypes i) { return std::wstring(gGlobals.getWorldInfo(i).getDescription()); }));
 	mLstWorldSize->setListItems(items);
 	items.clear();
-	mLstWorldSize->setSelectionIndex(initCore.getWorldSize() + 1);
+	mLstWorldSize->setSelectionIndex(initialSetup.worldSizeType + 1);
 
 	items.append_range(range(1, 10 + 1)
 		| std::views::transform([](int i) { return std::to_wstring(i) + L'x'; }));
 	mLstWorldSizeMultiplier = std::make_shared<MyComboBox>(*this, kSettingsComboboxStyle);
 	mLstWorldSizeMultiplier->setListItems(items);
 	items.clear();
-	mLstWorldSizeMultiplier->setSelectionIndex(initCore.getWorldSizeMultiplier() - 1);
+	mLstWorldSizeMultiplier->setSelectionIndex(initialSetup.mapSizeOverrideMultiplier - 1);
 
 	worldSizePanel->addChild(mLstWorldSize);
 	worldSizePanel->addChild(mLstWorldSizeMultiplier);
@@ -149,7 +156,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 			| std::views::transform([](ClimateTypes i) { return std::wstring(gGlobals.getClimateInfo(i).getDescription()); }));
 		mLstClimate->setListItems(items);
 		items.clear();
-		mLstClimate->setSelectionIndex(initCore.getClimate() + 1);
+		mLstClimate->setSelectionIndex(initialSetup.climateType + 1);
 		settingsPanel->addChild(mLstClimate);
 	}
 	//if (selMapScriptInfo.isSeaLevelMap())
@@ -161,7 +168,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 			| std::views::transform([](SeaLevelTypes i) { return std::wstring(gGlobals.getSeaLevelInfo(i).getDescription()); }));
 		mLstSeaLevel->setListItems(items);
 		items.clear();
-		mLstSeaLevel->setSelectionIndex(initCore.getSeaLevel() + 1);
+		mLstSeaLevel->setSelectionIndex(initialSetup.seaLevelType + 1);
 		settingsPanel->addChild(mLstSeaLevel);
 	}
 
@@ -172,7 +179,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 		| std::views::transform([](EraTypes i) { return std::wstring(gGlobals.getEraInfo(i).getDescription()); }));
 	mLstEra->setListItems(items);
 	items.clear();
-	mLstEra->setSelectionIndex(initCore.getEra() + 1);
+	mLstEra->setSelectionIndex(initialSetup.eraType + 1);
 	settingsPanel->addChild(mLstEra);
 
 	mGameSpeedOrder.assign_range(range<GameSpeedTypes>(gGlobals.getNumGameSpeedInfos()));
@@ -190,7 +197,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	mLstSpeed->setListItems(items);
 	items.clear();
 	{
-		size_t selIndex = std::ranges::find(mGameSpeedOrder, initCore.getGameSpeed()) - mGameSpeedOrder.begin();
+		size_t selIndex = std::ranges::find(mGameSpeedOrder, initialSetup.speedType) - mGameSpeedOrder.begin();
 		if (selIndex >= mGameSpeedOrder.size())
 			selIndex = static_cast<GameSpeedTypes>(gGlobals.getDefineINT("STANDARD_GAMESPEED"));
 		mLstSpeed->setSelectionIndex(selIndex);
@@ -204,7 +211,7 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	for (const auto i : range<GameOptionTypes>(gGlobals.getNumGameOptionInfos()))
 	{
 		auto chk = std::make_shared<MyCheckBox>(*this, tui::ECheckStyle::AsciiX, gGlobals.getGameOptionInfo(i).getDescription());
-		chk->value = initCore.getOption(i);
+		chk->value = initialSetup.gameOptions[i];
 		optionsPanel->addChild(chk);
 		mChkGameOptions.push_back(chk);
 	}
@@ -215,12 +222,12 @@ AppGameSetupConfigPanel::AppGameSetupConfigPanel(const std::vector<AppGameSetupM
 	for (const auto i : range<VictoryTypes>(gGlobals.getNumVictoryInfos()))
 	{
 		auto chk = std::make_shared<tui::Checkbox>(tui::ECheckStyle::AsciiX, gGlobals.getVictoryInfo(i).getDescription());
-		chk->value = initCore.getVictory(i);
+		chk->value = initialSetup.victoryOptions[i];
 		victoriesPanel->addChild(chk);
 		mChkVictoryOptions.push_back(chk);
 	}
 
-	playerListPanel->onUnrestrictedLeadersChanged(initCore.getOption(GAMEOPTION_LEAD_ANY_CIV));
+	playerListPanel->onUnrestrictedLeadersChanged(initialSetup.gameOptions[GAMEOPTION_LEAD_ANY_CIV]);
 }
 
 // Returns nullopt if unknown.
@@ -241,7 +248,7 @@ void AppGameSetupConfigPanel::setupConfig(const std::vector<AppGameSetupMapScrip
 	config.difficulty = static_cast<HandicapTypes>(mLstDifficulty->getSelectionIndex());
 	config.mapSeed = strictStringToUInt(mTxtMapSeed->getText(), mLblMapSeed->getLabel());
 	config.syncSeed = strictStringToUInt(mTxtSyncSeed->getText(), mLblSyncSeed->getLabel());
-	config.mapScriptName = CvWString(mapScripts[mLstMapScript->getSelectionIndex()].moduleName);
+	config.mapScriptName = mapScripts[mLstMapScript->getSelectionIndex()].moduleName;
 	config.worldSizeType = static_cast<WorldSizeTypes>(mLstWorldSize->getSelectionIndex() - 1);
 	config.mapSizeOverrideMultiplier = static_cast<int>(mLstWorldSizeMultiplier->getSelectionIndex() + 1);
 	config.climateType = static_cast<ClimateTypes>(mLstClimate->getSelectionIndex() - 1);
