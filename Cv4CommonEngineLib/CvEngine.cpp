@@ -36,8 +36,9 @@ void CvEngine::clearSigns()
 void CvEngine::autoSave(bool bInitial)
 {
 	// This is called every turn.
-	const int interval = gCivilizationIVIni.get(kCivilizationIVIniSection_CONFIG, { "AutoSaveInterval" }, 4);
-	const int maxSaves = gCivilizationIVIni.get(kCivilizationIVIniSection_CONFIG, { "MaxAutoSaves" }, 5);
+	const int interval = gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, { "AutoSaveInterval" }, 4);
+	const int maxSaves = gCivilizationIVIni.grab(kCivilizationIVIniSection_CONFIG, { "MaxAutoSaves" }, 5);
+	saveCivilizationIniIfChanged();
 	if (bInitial || (interval > 0 && ++mAutoSaveCounter >= interval))
 	{
 		mAutoSaveCounter = 0;
