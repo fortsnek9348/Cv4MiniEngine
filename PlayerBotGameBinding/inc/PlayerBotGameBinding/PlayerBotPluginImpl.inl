@@ -7,7 +7,7 @@ __declspec(dllexport)
 #else
 __attribute__((__visibility__("default")))
 #endif
-const cvbot::IPlayerBotPlugin& getPlayerBotPlugin()
+const cvbot::IPlayerBotPlugin* getPlayerBotPlugin()
 {
-	return kPlayerBotPlugin;
+	return &kPlayerBotPlugin;
 }

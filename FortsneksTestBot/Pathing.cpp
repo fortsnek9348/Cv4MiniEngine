@@ -65,7 +65,6 @@ DynamicArray2D<MultipleSourceDistanceFieldCell> mybot::computeMultipleSourcePath
 		const auto [coord, index] = frontier.back();
 		frontier.pop_back();
 
-		const ivec2 source = starts[index];
 		const unsigned int srcPathLength = field[coord].distance;
 
 		// This can be accelerated by SIMD if necessary.

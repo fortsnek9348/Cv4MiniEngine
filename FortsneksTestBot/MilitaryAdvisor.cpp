@@ -47,7 +47,7 @@ namespace
 	// Bigger values reduce the effect of distance.
 	constexpr int kDistancePenaltyDivisionOffset = 3;
 	constexpr int kFortifyBonus = 25;
-	constexpr int kNumFortifyTurns = 5;
+	[[maybe_unused]] constexpr int kNumFortifyTurns = 5;
 
 	// Priority order
 	enum class ETask
@@ -126,12 +126,12 @@ namespace
 			};
 		}
 
-		friend bool operator==(CityDefenceTask, CityDefenceTask) = default;
+		//friend bool operator==(CityDefenceTask, CityDefenceTask) = default;
 
-		friend std::strong_ordering operator<=>(CityDefenceTask a, CityDefenceTask b)
-		{
-			return a.city->coord <=> b.city->coord;
-		}
+		//friend std::strong_ordering operator<=>(CityDefenceTask a, CityDefenceTask b)
+		//{
+		//	return a.city->coord <=> b.city->coord;
+		//}
 	};
 
 	struct MilitaryPolice
@@ -165,12 +165,12 @@ namespace
 			};
 		}
 
-		friend bool operator==(MilitaryPolice, MilitaryPolice) = default;
-
-		friend std::strong_ordering operator<=>(MilitaryPolice a, MilitaryPolice b)
-		{
-			return a.city->coord <=> b.city->coord;
-		}
+		//friend bool operator==(MilitaryPolice, MilitaryPolice) = default;
+		//
+		//friend std::strong_ordering operator<=>(MilitaryPolice a, MilitaryPolice b)
+		//{
+		//	return a.city->coord <=> b.city->coord;
+		//}
 	};
 
 	struct SettlerEscortTask
@@ -208,12 +208,12 @@ namespace
 			};
 		}
 
-		friend bool operator==(SettlerEscortTask, SettlerEscortTask) = default;
-
-		friend std::strong_ordering operator<=>(SettlerEscortTask a, SettlerEscortTask b)
-		{
-			return a.settler->id <=> b.settler->id;
-		}
+		//friend bool operator==(SettlerEscortTask, SettlerEscortTask) = default;
+		//
+		//friend std::strong_ordering operator<=>(SettlerEscortTask a, SettlerEscortTask b)
+		//{
+		//	return a.settler->id <=> b.settler->id;
+		//}
 	};
 
 	struct FutureSettlerEscortTask
@@ -248,9 +248,9 @@ namespace
 			};
 		}
 
-		friend bool operator==(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
-
-		friend std::strong_ordering operator<=>(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
+		//friend bool operator==(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
+		//
+		//friend std::strong_ordering operator<=>(FutureSettlerEscortTask, FutureSettlerEscortTask) = default;
 	};
 
 	struct AntiBarbTask
@@ -289,15 +289,15 @@ namespace
 			};
 		}
 
-		friend bool operator==(AntiBarbTask a, AntiBarbTask b)
-		{
-			return a.barbs[0]->coord == b.barbs[0]->coord;
-		}
-
-		friend std::strong_ordering operator<=>(AntiBarbTask a, AntiBarbTask b)
-		{
-			return a.barbs[0]->coord <=> b.barbs[0]->coord;
-		}
+		//friend bool operator==(AntiBarbTask a, AntiBarbTask b)
+		//{
+		//	return a.barbs[0]->coord == b.barbs[0]->coord;
+		//}
+		//
+		//friend std::strong_ordering operator<=>(AntiBarbTask a, AntiBarbTask b)
+		//{
+		//	return a.barbs[0]->coord <=> b.barbs[0]->coord;
+		//}
 	};
 
 	struct ScoutingTask
@@ -330,7 +330,7 @@ namespace
 			};
 		}
 
-		friend std::strong_ordering operator<=>(ScoutingTask, ScoutingTask) = default;
+		//friend std::strong_ordering operator<=>(ScoutingTask, ScoutingTask) = default;
 	};
 
 	using Task = std::variant<ScoutingTask, FutureSettlerEscortTask, MilitaryPolice, SettlerEscortTask, AntiBarbTask, CityDefenceTask>;
@@ -455,7 +455,7 @@ namespace
 	int computePowerRatioPercentForShowOfForce(EPlayer activePlayerI, std::span<const std::optional<Player>> players)
 	{
 		int myPower{};
-		int sumPower{};
+		[[maybe_unused]] int sumPower{};
 		int numPowerKnown{};
 		int maxPower{};
 		for (const size_t i : range(players.size()))
@@ -465,7 +465,7 @@ namespace
 
 			const int power = players[i]->optVisibleDemographics->power;
 
-			if (i == activePlayerI)
+			if (i == static_cast<size_t>(activePlayerI))
 			{
 				myPower = power;
 				continue;

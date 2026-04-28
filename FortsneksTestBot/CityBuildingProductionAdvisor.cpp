@@ -657,7 +657,7 @@ std::vector<CityBuildingProductionRecomendation> mybot::computeCityBuildingProdu
 	bestBuildChoicesPreWorldSolve.resize(myCities.size());
 	for (const size_t i : range(myCities.size()))
 	{
-		BuildChoiceEvaluation best{ std::monostate(), 0 };
+		BuildChoiceEvaluation best{ CityBuildChoice(std::monostate()), 0 };
 		for (const BuildChoiceEvaluation& eval : buildEvaluations[i])
 		{
 			if (eval.value > best.value)

@@ -1208,13 +1208,13 @@ static CvSelectionGroup* regroup(CommandUnitGroup group)
 	CvUnit& firstUnit = **unitsView.begin();
 	
 	if (CvSelectionGroup* const firstGroup = firstUnit.getGroup(); static_cast<size_t>(firstGroup->getNumUnits()) == numValidUnits)
-		if (std::ranges::all_of(unitsView, [&player, firstGroup](const CvUnit* unit) { return unit->getGroup() == firstGroup; }))
+		if (std::ranges::all_of(unitsView, [firstGroup](const CvUnit* unit) { return unit->getGroup() == firstGroup; }))
 			return firstGroup;
 
 
 	// Need to split and make a new group.
 	// If there's any unit in its own group, then join that group.
-	const auto it = std::ranges::find_if(unitsView, [&player](const CvUnit* unit) {
+	const auto it = std::ranges::find_if(unitsView, [](const CvUnit* unit) {
 		return unit->getGroup()->getNumUnits() == 1;
 		});
 

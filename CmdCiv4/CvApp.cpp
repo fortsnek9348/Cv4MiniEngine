@@ -110,7 +110,7 @@ void CvApp::start(const AppStartupConfig& config)
 
 		heck::DynamicLibrary lib(config.botPath.c_str());
 
-		mPlayerBotPlugin = &reinterpret_cast<const cvbot::IPlayerBotPlugin&(*)()>(lib.resolve("getPlayerBotPlugin"))();
+		mPlayerBotPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
 	}
 
 	

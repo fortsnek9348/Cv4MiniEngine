@@ -334,7 +334,7 @@ namespace cvbot
 		std::optional<EReligion> optStateReligion{};
 		std::vector<ECivic> civics{};
 		std::vector<TechState> techs{};
-		std::vector<int> projectCounts;
+		std::vector<int> projectCounts{};
 
 		// This is the value used to calculate researchRates.
 		int techStatesReferenceSliderOutput{};

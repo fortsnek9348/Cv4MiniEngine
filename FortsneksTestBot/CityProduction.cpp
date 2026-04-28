@@ -140,7 +140,7 @@ void mybot::assignCityProduction(
 		limitedDemands.insert(limitedDemands.end(), demand.count, singleDemand);
 	}
 	std::ranges::stable_sort(limitedDemands, std::greater(), &UnitProductionDemand::urgency);
-	if (limitedDemands.size() > maxUnitDemand)
+	if (static_cast<int>(limitedDemands.size()) > maxUnitDemand)
 		limitedDemands.resize(maxUnitDemand);
 
 	// Now generate assignment solver input.
@@ -186,7 +186,7 @@ void mybot::assignCityProduction(
 		const size_t taskI = taskIndices[workerI];
 		if (taskI >= totalTasks) // -1
 			game.tryChangeProduction(cityCoord, std::monostate());
-		else if (taskI < static_cast<int>(buildingRecommendations.size()))
+		else if (taskI < buildingRecommendations.size())
 		{
 			if (taskI == workerI) // A city should only build its own buildings... Other building tasks have a value of zero, so shouldn't be selected.
 				game.tryChangeProduction(cityCoord, buildingRecommendations[workerI].choice);

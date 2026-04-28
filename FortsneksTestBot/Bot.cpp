@@ -37,28 +37,9 @@ using namespace mybot;
 // TODO: Abstract empire simulation.
 // TODO: Abstract game simulation.
 
-static constexpr EBuildingClass kCityBuildingOrder[]{
-	EBuildingClass::Granary,
-	EBuildingClass::Lighthouse,
-	EBuildingClass::Barracks,
-	EBuildingClass::Library,
-	EBuildingClass::Forge,
-	EBuildingClass::Courthouse,
-};
-
 static auto filterProj(auto value, auto proj)
 {
 	return std::views::filter([proj = std::forward<decltype(proj)>(proj), value = std::forward<decltype(value)>(value)](auto&& x) { return std::invoke(proj, x) == value; });
-}
-
-static auto projGetCityOrder()
-{
-	return [](const City& city) -> ProductionChoice {
-		if (city.optInspectableCityInfo)
-			return city.optInspectableCityInfo->productionChoice;
-		else
-			return std::monostate();
-		};
 }
 
 class MyBot : public IBot

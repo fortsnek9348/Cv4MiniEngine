@@ -138,6 +138,7 @@ CvSign CvEngine::getSignByIndex(size_t i) const
 	{
 		return {
 			.playerI = NO_PLAYER,
+			.caption = {},
 		};
 	}
 	const auto it = std::next(mSigns.begin(), i);

@@ -20,10 +20,6 @@ option(ENABLE_AVX512 "Compile everything with AVX512/x86-64-v4 support." OFF)
 option(ENABLE_NFD "Use native file dialogs via nativefiledialog-extended. Don't enable on pure console systems." OFF)
 option(ENABLE_PLAYER_BOT "Enable player bot support. Must be disabled if headers have not yet been generated." ON)
 
-# Doesn't work for some reason
-#option(ENABLE_PGO_GENERATE "Enable DLL PGO instrumentation." OFF)
-#option(ENABLE_PGO_USE "Enable DLL PGO optimisation using instrumentation output." OFF)
-
 # Break glass in case of emergency
 #add_compile_options(-fsanitize=address -static-libasan)
 #add_link_options(-fsanitize=address -static-libasan)
@@ -129,10 +125,20 @@ if(MSVC)
 endif()
 
 # ============================================================================= CvGameCoreDLL
+add_library(CvGameCoreDLL SHARED)
+
 file(GLOB_RECURSE SRCS "CvGameCoreDLL/*.cpp")
 list(FILTER SRCS EXCLUDE REGEX "_precompile")
-add_library(CvGameCoreDLL SHARED ${SRCS})
-target_include_directories(CvGameCoreDLL INTERFACE "CvGameCoreDLL")
+target_sources(
+    CvGameCoreDLL
+    PRIVATE
+        ${SRCS}
+    PUBLIC
+		FILE_SET HEADERS
+		BASE_DIRS CvGameCoreDLL/inc
+)
+
+#target_include_directories(CvGameCoreDLL INTERFACE "CvGameCoreDLL")
 add_dependencies(CvGameCoreDLL pybind11_codegen)
 target_include_directories(CvGameCoreDLL PUBLIC ${CMAKE_BINARY_DIR}/generated ${PYBIND11_INC_DIR})
 target_include_directories(CvGameCoreDLL SYSTEM PUBLIC "${Python2_INCLUDE_DIRS}") # Macro redef error without SYSTEM.
@@ -146,12 +152,6 @@ if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 	target_compile_options(CvGameCoreDLL PRIVATE /bigobj)
 else()
 	target_compile_definitions(CvGameCoreDLL PUBLIC register=)
-
-	#if (ENABLE_PGO_GENERATE)
-	#	target_compile_options(CvGameCoreDLL PRIVATE -fprofile-instr-generate)
-	#elseif(ENABLE_PGO_USE)
-	#	target_compile_options(CvGameCoreDLL PRIVATE -fprofile-instr-use=CvGameCoreDLL.profdata)
-	#endif()
 endif()
 target_compile_definitions(CvGameCoreDLL PRIVATE _USRDLL=1)
 target_compile_definitions(CvGameCoreDLL PUBLIC PYBIND11_EXPORT=)
@@ -169,16 +169,14 @@ if (WIN32)
 	target_link_libraries(CvGameCoreDLL PRIVATE winmm.lib)
 endif()
 
-if (MSVC)
-	set(AVX512Flag /arch:AVX512)
-else()
-	set(AVX512Flag -march=x86-64-v4)
-endif()
-
 if (ENABLE_GAMECOREDLL_ENHANCEMENTS)
 	target_compile_definitions(CvGameCoreDLL PRIVATE ENABLE_GAMECOREDLL_ENHANCEMENTS=1)
 	if (ENABLE_AVX512)
-		target_compile_options(CommonStuff PUBLIC ${AVX512Flag})
+		if (MSVC)
+			target_compile_options(CommonStuff PUBLIC /arch:AVX512)
+		else()
+			target_compile_options(CommonStuff PUBLIC -march=x86-64-v4)
+		endif()
 		set(CvGameCoreDLL_NameSuffix "Enhanced AVX512")
 	else()
 		set(CvGameCoreDLL_NameSuffix "Enhanced AVX2")
@@ -191,14 +189,27 @@ endif()
 if (ENABLE_BUILD_ENGINE)
 	file(GLOB_RECURSE SRCS "FAStar/*.cpp")
 	add_library(FAStar STATIC ${SRCS})
+	target_sources(
+		FAStar
+		PRIVATE
+			${SRCS}
+		PUBLIC
+			FILE_SET HEADERS
+			BASE_DIRS FAStar
+	)
 	target_link_libraries(FAStar PRIVATE CommonStuff)
 	target_link_libraries(FAStar PRIVATE $<COMPILE_ONLY:CvGameCoreDLL>)
-	target_include_directories(FAStar INTERFACE "FAStar")
-	# =============================================================================
+	# ============================================================================= HeckTUI
 	file(GLOB SRCS "HeckConsoleUI/*.cpp")
-	add_library(HeckTUI SHARED ${SRCS})
-
-	target_include_directories(HeckTUI INTERFACE "HeckConsoleUI/inc")
+	add_library(HeckTUI SHARED)
+	target_sources(
+		HeckTUI
+		PRIVATE
+			${SRCS}
+		PUBLIC
+			FILE_SET HEADERS
+			BASE_DIRS "HeckConsoleUI/inc"
+	)
 	target_link_libraries(HeckTUI PUBLIC CommonStuff)
 	target_compile_definitions(HeckTUI PRIVATE HECKCONSOLEUI_EXPORTS=1)
 	
@@ -206,15 +217,19 @@ if (ENABLE_BUILD_ENGINE)
 	add_executable(HeckTUIInputTest ${SRCS})
 	target_link_libraries(HeckTUIInputTest PRIVATE CommonStuff)
 	target_link_libraries(HeckTUIInputTest PRIVATE HeckTUI)
-	# =============================================================================
-	file(GLOB_RECURSE SRCS "CmdCiv4/*.cpp")
-	find_path(S3TC_DIR "s3tc.cpp" REQUIRED)
-	add_executable(Cv4MiniEngine ${SRCS} "${S3TC_DIR}/s3tc.cpp")
-	target_link_libraries(Cv4MiniEngine PRIVATE HeckTUI)
-	target_link_libraries(Cv4MiniEngine PRIVATE CvGameCoreDLL)
-	target_link_libraries(Cv4MiniEngine PRIVATE FAStar)
-
-	target_link_libraries(Cv4MiniEngine PRIVATE SFML::Audio SFML::System)
+	# ============================================================================= Cv4CommonEngineLib
+	file(GLOB_RECURSE SRCS "Cv4CommonEngineLib/*.cpp")
+	add_library(Cv4CommonEngineLib STATIC)
+	target_sources(
+		Cv4CommonEngineLib
+		PRIVATE
+			${SRCS}
+		PUBLIC
+			FILE_SET HEADERS
+			BASE_DIRS "Cv4CommonEngineLib/inc"
+	)
+	target_link_libraries(Cv4CommonEngineLib PUBLIC CvGameCoreDLL)
+	target_link_libraries(Cv4CommonEngineLib PRIVATE FAStar)
 
 	if (WIN32)
 		# This gets the GUI to prompt for zlib.
@@ -224,12 +239,40 @@ if (ENABLE_BUILD_ENGINE)
 	#set(CMAKE_FIND_DEBUG_MODE TRUE)
 	find_package(ZLIB REQUIRED)
 	#set(CMAKE_FIND_DEBUG_MODE FALSE)
-	target_link_libraries(Cv4MiniEngine PRIVATE ZLIB::ZLIB)
-	target_compile_definitions(Cv4MiniEngine PRIVATE ZLIB_CONST=1)
+	target_link_libraries(Cv4CommonEngineLib PUBLIC ZLIB::ZLIB)
+	target_compile_definitions(Cv4CommonEngineLib PRIVATE ZLIB_CONST=1)
 
 	# 1.15 needed for string_view.
 	find_package(pugixml 1.15 REQUIRED)
-	target_link_libraries(Cv4MiniEngine PRIVATE pugixml::pugixml)
+	target_link_libraries(Cv4CommonEngineLib PUBLIC pugixml::pugixml)
+
+	if (NOT MSVC)
+		# If not MSVC, pybind11 won't link the lib automatically.
+		target_link_libraries(Cv4CommonEngineLib PUBLIC Python2::Python)
+	endif()
+	# ============================================================================= Cv4HeadlessEngine
+	file(GLOB_RECURSE SRCS "Cv4HeadlessEngine/*.cpp")
+	add_executable(Cv4HeadlessEngine)
+	target_sources(
+		Cv4HeadlessEngine
+		PRIVATE
+			${SRCS}
+	)
+	target_link_libraries(Cv4HeadlessEngine PRIVATE Cv4CommonEngineLib)
+
+	# ============================================================================= Cv4MiniEngine
+	file(GLOB_RECURSE SRCS "CmdCiv4/*.cpp")
+	find_path(S3TC_DIR "s3tc.cpp" REQUIRED)
+	add_executable(Cv4MiniEngine)
+	target_sources(
+		Cv4MiniEngine
+		PRIVATE
+			${SRCS} "${S3TC_DIR}/s3tc.cpp"
+	)
+	target_link_libraries(Cv4MiniEngine PRIVATE Cv4CommonEngineLib)
+	target_link_libraries(Cv4MiniEngine PRIVATE HeckTUI)
+
+	target_link_libraries(Cv4MiniEngine PRIVATE SFML::Audio SFML::System)
 
 	if (WIN32)
 		find_path(STB_INC_DIR stb REQUIRED)
@@ -242,21 +285,15 @@ if (ENABLE_BUILD_ENGINE)
 		target_compile_definitions(Cv4MiniEngine PRIVATE ${STB_CFLAGS_OTHER})
 	endif()
 
-
 	target_include_directories(Cv4MiniEngine PRIVATE ${S3TC_DIR})
 	
-	if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-		if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-			target_compile_options(Cv4MiniEngine PRIVATE "/clang:-Wno-error=unused-variable")
-		endif()
-	else()
-		target_compile_options(Cv4MiniEngine PRIVATE "-Wno-error=unused-variable")
-	endif()
-
-	if (NOT MSVC)
-		# If not MSVC, pybind11 won't link the lib automatically.
-		target_link_libraries(Cv4MiniEngine PRIVATE Python2::Python)
-	endif()
+	#if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+	#	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	#		target_compile_options(Cv4MiniEngine PRIVATE "/clang:-Wno-error=unused-variable")
+	#	endif()
+	#else()
+	#	target_compile_options(Cv4MiniEngine PRIVATE "-Wno-error=unused-variable")
+	#endif()
 
 	if (ENABLE_NFD)
 		find_package(nfd REQUIRED)
@@ -288,12 +325,69 @@ if (ENABLE_BUILD_ENGINE)
 	else()
 		message(WARNING "Git not found. Can't embed version string.")
 	endif()
+	# ============================================================================= Player Bot
+	if (ENABLE_PLAYER_BOT)
+		target_compile_definitions(CvGameCoreDLL PUBLIC ENABLE_PLAYER_BOT=1)
+
+		add_library(PlayerBotGameBinding STATIC)
+
+		target_sources(
+			PlayerBotGameBinding
+			PRIVATE
+				PlayerBotGameBinding/DLLDefs.cpp
+				PlayerBotGameBinding/EnumStrings.cpp
+				PlayerBotGameBinding/GameStructs.cpp
+
+			PUBLIC
+				FILE_SET HEADERS
+				BASE_DIRS PlayerBotGameBinding/inc
+				FILES
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/Common.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/DLLDefs.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumDefs.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumStrings.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/GameStructs.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/IGame.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/Infos.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBot.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBotPlugin.h
+					PlayerBotGameBinding/inc/PlayerBotGameBinding/PlayerBotPluginImpl.inl
+		)
+
+		target_link_libraries(CvGameCoreDLL PUBLIC PlayerBotGameBinding)
+
+		#install(TARGETS PlayerBotGameBinding EXPORT PlayerBotGameBinding FILE_SET HEADERS)
+		#include(GNUInstallDirs)
+		#install(EXPORT PlayerBotGameBinding DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PlayerBotGameBinding)
+
+		add_library(FortsneksTestBot SHARED)
+		target_link_libraries(FortsneksTestBot PUBLIC CommonStuff PlayerBotGameBinding)
+
+		target_sources(
+			FortsneksTestBot
+			PRIVATE
+				FortsneksTestBot/AssignmentProblem.cpp
+				FortsneksTestBot/Bot.cpp
+				FortsneksTestBot/CityBuildingProductionAdvisor.cpp
+				FortsneksTestBot/CityProduction.cpp
+				FortsneksTestBot/dllmain.cpp
+				FortsneksTestBot/DomesticAnalysis.cpp
+				FortsneksTestBot/MilitaryAdvisor.cpp
+				FortsneksTestBot/Pathing.cpp
+				FortsneksTestBot/ResearchAdvisor.cpp
+				FortsneksTestBot/SettlingAdvisor.cpp
+		)
+
+		install(TARGETS FortsneksTestBot RUNTIME DESTINATION "Bots")
+	endif()
+	# ============================================================================= Install
 
 	# What is this. "RPATH"? Why can't you just search for libs in the current directory?
 	set_target_properties(Cv4MiniEngine PROPERTIES INSTALL_RPATH .)
+	set_target_properties(Cv4HeadlessEngine PROPERTIES INSTALL_RPATH .)
 	set_target_properties(HeckTUIInputTest PROPERTIES INSTALL_RPATH .)
 
-	install(TARGETS Cv4MiniEngine HeckTUIInputTest DESTINATION .)
+	install(TARGETS Cv4HeadlessEngine Cv4MiniEngine HeckTUIInputTest DESTINATION .)
 	
 	# SFML too as we're building from source.
 	install(IMPORTED_RUNTIME_ARTIFACTS SFML::Audio SFML::System DESTINATION .)
@@ -326,57 +420,6 @@ if (ENABLE_BUILD_ENGINE)
 
 	install(DIRECTORY "Data/CustomAssets" DESTINATION . PATTERN "*.bak" EXCLUDE)
 	install(DIRECTORY "Data/PublicMaps" DESTINATION . PATTERN "*.bak" EXCLUDE)
-endif()
-
-if (ENABLE_PLAYER_BOT)
-	target_compile_definitions(CvGameCoreDLL PUBLIC ENABLE_PLAYER_BOT=1)
-
-	add_library(PlayerBotGameBinding STATIC)
-
-	target_sources(
-		PlayerBotGameBinding
-		PRIVATE
-			PlayerBotGameBinding/DLLDefs.cpp
-			PlayerBotGameBinding/EnumStrings.cpp
-			PlayerBotGameBinding/GameStructs.cpp
-
-		PUBLIC
-			FILE_SET HEADERS
-			BASE_DIRS PlayerBotGameBinding/inc
-			FILES
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/Common.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/DLLDefs.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumDefs.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/EnumStrings.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/GameStructs.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/IGame.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/Infos.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBot.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/IPlayerBotPlugin.h
-				PlayerBotGameBinding/inc/PlayerBotGameBinding/PlayerBotPluginImpl.inl
-	)
-
-	target_link_libraries(CvGameCoreDLL PUBLIC PlayerBotGameBinding)
-
-	#install(TARGETS PlayerBotGameBinding EXPORT PlayerBotGameBinding FILE_SET HEADERS)
-	#include(GNUInstallDirs)
-	#install(EXPORT PlayerBotGameBinding DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PlayerBotGameBinding)
-
-	add_library(FortsneksTestBot SHARED)
-	target_link_libraries(FortsneksTestBot PUBLIC CommonStuff PlayerBotGameBinding)
-
-	target_sources(
-		FortsneksTestBot
-		PRIVATE
-			FortsneksTestBot/Bot.cpp
-			FortsneksTestBot/dllmain.cpp
-			FortsneksTestBot/MilitaryAdvisor.cpp
-			FortsneksTestBot/Pathing.cpp
-			FortsneksTestBot/ResearchAdvisor.cpp
-			FortsneksTestBot/SettlingAdvisor.cpp
-	)
-
-	install(TARGETS FortsneksTestBot RUNTIME DESTINATION "Bots")
 endif()
 
 if (WIN32)

@@ -687,7 +687,7 @@ public:
 	virtual void destroyEntity(CvEntity*&, bool) override {}
 	virtual void updatePosition(CvEntity*) override {}
 	virtual void setupFloodPlains(CvRiver*) override {}
-	virtual bool IsSelected(const CvEntity*)  const
+	virtual bool IsSelected(const CvEntity*) const override
 	{
 		return false;
 	}
@@ -850,9 +850,10 @@ struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 	}
 };
 
-int main()
+int main() try
 {
 	const std::filesystem::path vanillaRoot = heck::findEnvironmentVariable(L"CV4HEADLESSENGINE_VANILLA_ROOT").value();
+	const std::filesystem::path engineAssetsOverrideDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L".");
 	const std::filesystem::path modRelPath{};
 
 	const std::filesystem::path userDataDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Data);
@@ -869,15 +870,17 @@ int main()
 	const std::filesystem::path playerBotPluginPath = L"FortsneksTestBot_Debug_x64.dll";
 #endif
 
+	const cvbot::IPlayerBotPlugin* botPlugin = nullptr;
+
 	// Load player bot DLL.
-	//if (!config.botPath.empty())
+	//if (!playerBotPluginPath.empty())
 	//{
 	//	if (!hasCvGameCoreDLLPlayerBotSupport())
 	//		throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
 	//
-	//	heck::DynamicLibrary lib(config.botPath.c_str());
+	//	heck::DynamicLibrary lib(playerBotPluginPath.c_str());
 	//
-	//	mPlayerBotPlugin = &reinterpret_cast<const cvbot::IPlayerBotPlugin&(*)()>(lib.resolve("getPlayerBotPlugin"))();
+	//	botPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
 	//}
 
 	CvHeadlessInterface interface;
@@ -892,23 +895,10 @@ int main()
 
 	HeadlessApp app;
 
-	const cvbot::IPlayerBotPlugin* botPlugin = nullptr;
-
-	// Load player bot DLL.
-	if (!playerBotPluginPath.empty())
-	{
-		if (!hasCvGameCoreDLLPlayerBotSupport())
-			throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
-	
-		heck::DynamicLibrary lib(playerBotPluginPath.c_str());
-	
-		botPlugin = &reinterpret_cast<const cvbot::IPlayerBotPlugin&(*)()>(lib.resolve("getPlayerBotPlugin"))();
-	}
-
-	const cvengine::CommonEngineInitResult initResult = cvengine::initialiseCommonEngine(std::wcout, cvengine::CommonEngineConfig{
+	[[maybe_unused]] const cvengine::CommonEngineInitResult initResult = cvengine::initialiseCommonEngine(std::wcout, cvengine::CommonEngineConfig{
 		.civ4InstallationRoot = vanillaRoot,
 		.optModRelPath = !modRelPath.empty() ? std::optional(modRelPath) : std::nullopt,
-		.optEngineAssetsOverrideDir = L"../Data",
+		.optEngineAssetsOverrideDir = engineAssetsOverrideDir,
 		.userDataDirPath = userDataDirPath,
 		.userConfigDirPath = userDataDirPath,
 		.cacheDirPath = cacheDirPath,
@@ -1082,4 +1072,9 @@ int main()
 	cvengine::shutdownCommonEngine();
 
 	return 0;
+}
+catch (const std::runtime_error& ex)
+{
+	std::cerr << ex.what() << '\n';
+	return 1;
 }

@@ -80,7 +80,7 @@ namespace cvengine
 		virtual CLLNode<IDInfo>* headSelectedCitiesNode() override;
 		virtual bool isCityScreenUp() const override;
 
-		virtual void addTurnMessageDisplayEntry(CvTalkingHeadMessage msg);
+		virtual void addTurnMessageDisplayEntry(CvTalkingHeadMessage msg) override;
 		virtual void addMessage(PlayerTypes ePlayer, bool bForce, int iLength, CvWString szString, const TCHAR* pszSound,
 			InterfaceMessageTypes eType, const char* pszIcon, ColorTypes eFlashColor,
 			int iFlashX, int iFlashY, bool bShowOffScreenArrows, bool bShowOnScreenArrows) override;

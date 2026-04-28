@@ -53,7 +53,7 @@ void SettlingAdvisor::update(
 
 	// NOTE: When the previous optTarget becomes non-visible, it is stale and hasFoundActionAt isn't reliable. So only invalidate is the plot is also visible.
 	//       If the plot is not settleable, we'll find out when the settle arrives.
-	if (bestLocation && (map[*bestLocation].isVisible && !game.hasFoundActionAt(*bestLocation) || !settlingPathPengthAnalysis[*bestLocation].isReachable()))
+	if (bestLocation && ((map[*bestLocation].isVisible && !game.hasFoundActionAt(*bestLocation)) || !settlingPathPengthAnalysis[*bestLocation].isReachable()))
 		bestLocation = std::nullopt;
 	int bestValue = bestLocation ? evalSettleLocation(geom, map, *bestLocation, stepDistanceAnalysis) : minFoundValue;
 

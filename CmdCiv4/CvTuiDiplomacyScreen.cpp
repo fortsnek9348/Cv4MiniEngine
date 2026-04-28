@@ -1,4 +1,4 @@
-#include "CvTUIDiplomacyScreen.h"
+#include "CvTuiDiplomacyScreen.h"
 #include "MainInterfaceControls.h"
 #include "UITheme.h"
 #include "CvTuiInterface.h"

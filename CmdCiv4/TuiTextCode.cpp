@@ -362,7 +362,7 @@ namespace
 	std::wstring replaceSymbolsAsXml(std::wstring str)
 	{
 		const wchar_t firstSymbolCode = CvTranslator::getInstance().firstSymbolCode;
-		if (std::ranges::any_of(str, [firstSymbolCode](wchar_t c) { return c >= CvTranslator::getInstance().firstSymbolCode; }))
+		if (std::ranges::any_of(str, [firstSymbolCode](wchar_t c) { return c >= firstSymbolCode; }))
 		{
 			std::wstring output;
 			output.reserve(str.size() + 20);
