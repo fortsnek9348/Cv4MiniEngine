@@ -16,6 +16,7 @@
     <ProjectGuid>{c70ab3ac-b05c-46b6-acc3-82840a77ff4d}</ProjectGuid>
     <RootNamespace>Cv4HeadlessEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Cv4HeadlessMiniEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
