@@ -178,6 +178,9 @@ CvPlot* MyCvDLLInterfaceIFace::getOriginalPlot()
 
 void MyCvDLLInterfaceIFace::playGeneralSound(const TCHAR* pszSound, NiPoint3 vPos)
 {
+	if (!pszSound || !pszSound[0])
+		return;
+
 	const cvengine::AudioXmlDefs& xmlDefs = cvengine::AudioXmlDefs::getInstance();
 	const auto it = xmlDefs.tagIndexLookup.find(pszSound);
 	if (it->second.type == xmlDefs.scriptType2D)

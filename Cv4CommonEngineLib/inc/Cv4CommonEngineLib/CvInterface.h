@@ -214,7 +214,7 @@ public:
 	// What is offset?
 	// int iUnitIndex = widgetDataStruct.m_iData1 + gDLL->getInterfaceIFace()->getPlotListColumn() - gDLL->getInterfaceIFace()->getPlotListOffset();
 	int getPlotListOffset() const;
-	void cacheInterfacePlotUnits(CvPlot& plot);
+	void cacheInterfacePlotUnits(const CvPlot* plot);
 	// Used by main interface
 	int countEntities(UnitTypes unitType);
 	// How does the indexing lagic work in CvMainInterface?

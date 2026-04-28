@@ -205,9 +205,8 @@ void CyInterface::addSelectedCity(CyCity pNewValue)
 
 void CyInterface::cacheInterfacePlotUnits(CyPlot* pyPlot)
 {
-	if (pyPlot)
-		if (auto* const plot = pyPlot->getPlot())
-			gCommonEngineConfig.interface->cacheInterfacePlotUnits(*plot);
+	// If plot null, then list should still be cleared.
+	gCommonEngineConfig.interface->cacheInterfacePlotUnits(pyPlot ? pyPlot->getPlot() : nullptr);
 }
 
 bool CyInterface::canCreateGroup()

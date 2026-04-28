@@ -197,15 +197,14 @@ int CvInterface::getPlotListOffset() const
 	// ???
 	return 0;
 }
-void CvInterface::cacheInterfacePlotUnits(CvPlot& plot)
+void CvInterface::cacheInterfacePlotUnits(const CvPlot* plot)
 {
 	mCachedPlotList.unitIds.clear();
-	for (auto* node = plot.headUnitNode(); node; node = plot.nextUnitNode(node))
-	{
-		CvUnit* const unit = ::getUnit(node->m_data);
-		if (unit && isActiveVisibleUnit(*unit))
-			mCachedPlotList.unitIds.push_back(node->m_data);
-	}
+	if (plot)
+		for (auto* node = plot->headUnitNode(); node; node = plot->nextUnitNode(node))
+			if (CvUnit* const unit = ::getUnit(node->m_data))
+				if (isActiveVisibleUnit(*unit))
+					mCachedPlotList.unitIds.push_back(node->m_data);
 }
 int CvInterface::countEntities(UnitTypes unitType)
 {
@@ -250,5 +249,5 @@ int CvInterface::getNumVisibleUnits() const
 
 bool CvInterface::isActiveVisibleUnit(const CvUnit& unit)
 {
-	return unit.isInvisible(gGlobals.getGame().getActiveTeam(), false) && unit.plot()->isActiveVisible(false);
+	return !unit.isInvisible(gGlobals.getGame().getActiveTeam(), false) && unit.plot()->isActiveVisible(false);
 }

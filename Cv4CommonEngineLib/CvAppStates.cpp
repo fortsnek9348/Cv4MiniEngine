@@ -510,19 +510,20 @@ static void setupGraphical()
 static void preGameStart()
 {
 	// HACK: Limit all mission timers to 1, as there is no realtime update. Needed for Nukes.
-	for (const auto i : range<MissionTypes>(gGlobals.getNumMissionInfos()))
-	{
-		struct Hack : CvMissionInfo
-		{
-			static int& getTime(CvMissionInfo& info)
-			{
-				return info.*&Hack::m_iTime;
-			}
-		};
-
-		auto& info = gGlobals.getMissionInfo(i);
-		Hack::getTime(info) = std::min(Hack::getTime(info), 1);
-	}
+	// Probably not needed anymore.
+	//for (const auto i : range<MissionTypes>(gGlobals.getNumMissionInfos()))
+	//{
+	//	struct Hack : CvMissionInfo
+	//	{
+	//		static int& getTime(CvMissionInfo& info)
+	//		{
+	//			return info.*&Hack::m_iTime;
+	//		}
+	//	};
+	//
+	//	auto& info = gGlobals.getMissionInfo(i);
+	//	Hack::getTime(info) = std::min(Hack::getTime(info), 1);
+	//}
 
 	cvengine::gCommonEngineConfig.interface->reset();
 

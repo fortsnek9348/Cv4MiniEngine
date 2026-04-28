@@ -335,8 +335,7 @@ bool CvTuiInterface::isCombatFocus() const
 }
 void CvTuiInterface::setCombatFocus([[maybe_unused]] bool bNewValue)
 {
-	if (bNewValue)
-		std::abort();
+	// Ignoring.
 }
 //void setDiploQueue(CvDiploParameters* pDiploParams, PlayerTypes ePlayer) override;
 
