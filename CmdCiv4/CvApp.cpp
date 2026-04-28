@@ -119,7 +119,7 @@ void CvApp::start(const AppStartupConfig& config)
 		.optModRelPath = !config.modRelPath.empty() ? std::optional(config.modRelPath) : std::nullopt,
 		.optEngineAssetsOverrideDir = dataDir,
 		.userDataDirPath = userDataDirPath,
-		.userConfigDirPath = userDataDirPath,
+		.userConfigDirPath = userConfigDirPath,
 		.cacheDirPath = cacheDirPath,
 		.replaysDirName = replaysDirName,
 		.savesDirName = savesDirName,
