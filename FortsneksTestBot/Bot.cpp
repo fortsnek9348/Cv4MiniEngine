@@ -330,6 +330,9 @@ public:
 			game.launchSpaceship();
 
 		hasAnalyses = true;
+
+		std::clog << std::flush;
+		std::wclog << std::flush;
 	}
 
 	virtual std::string buildPlotDebugString(const IGame&, ivec2 coord) const override
