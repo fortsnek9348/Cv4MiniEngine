@@ -4,6 +4,7 @@
 #include <array>
 #include <stdexcept>
 #include <span>
+#include <cstdint>
 
 namespace cvbot
 {

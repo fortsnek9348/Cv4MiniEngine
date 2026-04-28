@@ -3,6 +3,7 @@
 #include <span>
 #include <stdexcept>
 #include <cassert>
+#include <cstdint>
 
 namespace cvbot
 {
@@ -123,5 +124,5 @@ namespace cvbot
 
 	// Avoiding dependency on CommonStuff.
 	// Returns ceil(x / y).
-	int cdiv(int x, std::same_as<uint32_t> auto y);
+	int cdiv(int x, std::same_as<std::uint32_t> auto y);
 }

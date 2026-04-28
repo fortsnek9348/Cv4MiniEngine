@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <filesystem>
 #include <memory>
 
 namespace heck
@@ -11,7 +12,7 @@ namespace heck
 		DynamicLibrary() = default;
 
 		// Throws if not found.
-		explicit DynamicLibrary(const wchar_t* name);
+		explicit DynamicLibrary(const std::filesystem::path& path);
 
 		void* resolve(const char* name) const;
 

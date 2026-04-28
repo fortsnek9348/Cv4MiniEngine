@@ -49,8 +49,8 @@ Tested with VS 2026 MSVC and Clang-CL, Ubuntu Clang 20, and Ubuntu 25.10 G++ 15.
 * `export CC=clang-20 CXX=clang++-20`
 * Grab SFML 3 sources and build them:
 	```
-	unzip SFML-3.0.2-sources.zip
-	cd SFML-3.0.2
+	unzip SFML-3.1.0.zip
+	cd SFML-3.1.0
 	mkdir BuildDebug BuildRelease BuildInstall
 	cmake -DCMAKE_BUILD_TYPE=Debug   -DCMAKE_DEBUG_POSTFIX=d -DSFML_BUILD_WINDOW=OFF -DSFML_BUILD_GRAPHICS=OFF -DSFML_BUILD_NETWORK=OFF -DBUILD_SHARED_LIBS=ON -B BuildDebug   -S . && cmake --build BuildDebug   && cmake --install BuildDebug   --prefix BuildInstall
 	cmake -DCMAKE_BUILD_TYPE=Release                         -DSFML_BUILD_WINDOW=OFF -DSFML_BUILD_GRAPHICS=OFF -DSFML_BUILD_NETWORK=OFF -DBUILD_SHARED_LIBS=ON -B BuildRelease -S . && cmake --build BuildRelease && cmake --install BuildRelease --prefix BuildInstall
@@ -76,14 +76,15 @@ Tested with VS 2026 MSVC and Clang-CL, Ubuntu Clang 20, and Ubuntu 25.10 G++ 15.
 	* `sudo apt install libgtk-3-dev`
 	* Build with cmake, add to package prefix.
 * Cobble together your cmake command line:
-	* Add `-DENABLE_GAMECOREDLL_ENHANCEMENTS=ON` to enable DLL enhancements.
-	* Add `-DENABLE_AVX512=ON` to build for AVX-512.
-	* Add `-DENABLE_NFD=ON` to enable native file dialogs.
-	* Add `-DENABLE_BUILD_ENGINE=OFF` to build an extra DLL without rebuilding the engine.
+	* Add `-DENABLE_GAMECOREDLL_ENHANCEMENTS=ON` to enable DLL enhancements (default OFF).
+	* Add `-DENABLE_AVX512=ON` to build for AVX-512 (default OFF).
+	* Add `-DENABLE_NFD=ON` to enable native file dialogs (default OFF).
+	* Add `-DENABLE_BUILD_ENGINE=OFF` to build an extra DLL without rebuilding the engine (default ON).
+	* Add `-DENABLE_PLAYER_BOT=OFF` to disable player bot support (default ON).
 	```
 	cmake -DCMAKE_BUILD_TYPE=Release            \
 		-DPYBIND11_INC_DIR=~/pybind11/include                              \
-		-DCMAKE_PREFIX_PATH="~/SFML-3.0.2/BuildInstall;~/pugixml-1.15/BuildInstall;~/python27-install;~/nfd-build/install" \
+		-DCMAKE_PREFIX_PATH="~/SFML-3.1.0/BuildInstall;~/pugixml-1.15/BuildInstall;~/python27-install;~/nfd-build/install" \
 		-DS3TC_DIR=~/s3tc-dxt-decompression                                \
 		-DCMAKE_LINKER_TYPE=MOLD                                           \
 		-DENABLE_NFD=ON                                                    \

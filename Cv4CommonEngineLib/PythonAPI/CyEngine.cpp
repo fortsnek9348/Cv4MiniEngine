@@ -121,7 +121,7 @@ void CyEngine::addLandmarkPopup([[maybe_unused]] CyPlot pPlot)
 void CyEngine::addSign(CyPlot pyPlot, PlayerTypes playerType, const std::wstring& caption)
 {
 	if (const CvPlot* const plot = pyPlot.getPlot())
-		cvengine::gCommonEngineConfig.engine->setSignText(playerType, { plot->getX(), plot->getY() }, std::move(caption));
+		cvengine::gCommonEngineConfig.engine->setSignText(playerType, { plot->getX(), plot->getY() }, caption);
 }
 
 void CyEngine::clearAreaBorderPlots(int iLayer)

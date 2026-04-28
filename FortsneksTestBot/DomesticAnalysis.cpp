@@ -5,6 +5,8 @@
 #include <PlayerBotGameBinding/Infos.h>
 #include <PlayerBotGameBinding/EnumDefs.h>
 
+#include <climits>
+
 using namespace mybot;
 
 namespace

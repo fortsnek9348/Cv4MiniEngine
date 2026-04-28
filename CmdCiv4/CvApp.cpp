@@ -108,7 +108,7 @@ void CvApp::start(const AppStartupConfig& config)
 		if (!hasCvGameCoreDLLPlayerBotSupport())
 			throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
 
-		heck::DynamicLibrary lib(config.botPath.c_str());
+		heck::DynamicLibrary lib(config.botPath);
 
 		mPlayerBotPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
 	}

@@ -2,7 +2,7 @@
 
 constinit MyCvDLLFlagEntity MyCvDLLFlagEntity::gInstance;
 
-class ::CvFlagEntity
+class CvFlagEntity
 {
 public:
     PlayerTypes playerI = NO_PLAYER;

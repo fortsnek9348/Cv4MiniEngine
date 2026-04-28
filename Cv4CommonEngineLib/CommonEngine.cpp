@@ -21,7 +21,9 @@
 #include <CvGameCoreDLL/CvEventReporter.h>
 #include <CvGameCoreDLL/CvArtFileMgr.h>
 
+#include <chrono>
 #include <iostream>
+
 
 cvengine::CommonEngineConfig cvengine::gCommonEngineConfig;
 std::unique_ptr<cvengine::CvVFS> cvengine::gVFS;
@@ -143,6 +145,8 @@ cvengine::CommonEngineInitResult cvengine::initialiseCommonEngine(std::wostream&
 	const auto t0 = std::chrono::steady_clock::now();
 	gVFS = std::make_unique<CvVFS>(config.civ4InstallationRoot, config.userConfigDirPath, config.optModRelPath, config.optEngineAssetsOverrideDir, config.enableCustomAssets);
 	const auto t1 = std::chrono::steady_clock::now();
+	// Converting string. GCC doesn't support `wostream << duration`.
+	//log << L"VFS initialisation took " << heck::convertUtf8ToWide((std::ostringstream() << std::chrono::duration<double, std::milli>(t1 - t0)).str()) << std::endl;
 	log << L"VFS initialisation took " << std::chrono::duration<double, std::milli>(t1 - t0) << std::endl;
 
 	if (config.optPlayerBotPlugin && config.optPlayerBotPlugin->getModName() != gVFS->getModName(false))

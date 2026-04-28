@@ -63,6 +63,8 @@ else()
 
 	if (UNIX)
 		target_link_libraries(CommonStuff PUBLIC atomic)
+		# Get coloured output to work with Ninja
+		add_compile_options(-fdiagnostics-color=always)
 	endif()
 endif()
 
@@ -102,22 +104,14 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated/pybind11)
 #	COMMAND_ERROR_IS_FATAL ANY)
 
 
-if (WIN32)
-	# Patch manually
-	file(READ "${PYBIND11_INC_DIR}/pybind11/stl.h" temp)
-	string(REPLACE "forward_like" "forward_like_pybind11" temp "${temp}")
-	string(REPLACE [[#include "pybind11.h"]] [[#include <pybind11/pybind11.h>]] temp "${temp}")
-	string(REPLACE [[#include "detail/common.h"]] [[#include <pybind11/detail/common.h>]] temp "${temp}")
-	#file(WRITE "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${temp}")
-	file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" CONTENT "${temp}")
-else()
-	find_package(Patch REQUIRED)
-	add_custom_command(OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h"
-		COMMAND "${Patch_EXECUTABLE}" -p1 -o "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${PYBIND11_INC_DIR}/pybind11/stl.h" -i "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pybind11_stl.patch"
-		DEPENDS "${PYBIND11_INC_DIR}/pybind11/stl.h" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/pybind11_stl.patch"
-		VERBATIM
-	)
-endif()
+
+file(READ "${PYBIND11_INC_DIR}/pybind11/stl.h" temp)
+string(REPLACE "forward_like" "forward_like_pybind11" temp "${temp}")
+string(REPLACE [[#include "pybind11.h"]] [[#include <pybind11/pybind11.h>]] temp "${temp}")
+string(REPLACE [[#include "detail/common.h"]] [[#include <pybind11/detail/common.h>]] temp "${temp}")
+#file(WRITE "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" "${temp}")
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h" CONTENT "${temp}")
+
 add_custom_target(pybind11_codegen DEPENDS "${CMAKE_BINARY_DIR}/generated/pybind11/stl.h")
 
 if(MSVC)
@@ -378,7 +372,11 @@ if (ENABLE_BUILD_ENGINE)
 				FortsneksTestBot/SettlingAdvisor.cpp
 		)
 
-		install(TARGETS FortsneksTestBot RUNTIME DESTINATION "Bots")
+		if (WIN32)
+			install(TARGETS FortsneksTestBot RUNTIME DESTINATION "Bots")
+		else()
+			install(TARGETS FortsneksTestBot LIBRARY DESTINATION "Bots")
+		endif()
 	endif()
 	# ============================================================================= Install
 

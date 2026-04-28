@@ -9,6 +9,7 @@
 #include <CommonStuff/NoCopy.h>
 
 #include <bitset>
+#include <list>
 #include <map>
 #include <memory>
 

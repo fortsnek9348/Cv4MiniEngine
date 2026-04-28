@@ -5,7 +5,7 @@ constinit MyCvDLLSymbol MyCvDLLSymbol::gInstance;
 constinit MyCvDLLRoute MyCvDLLRoute::gInstance;
 constinit MyCvDLLRiver MyCvDLLRiver::gInstance;
 
-class ::CvFeature
+class CvFeature
 {
 public:
 	FeatureTypes type = NO_FEATURE;
@@ -53,7 +53,7 @@ void MyCvDLLFeature::resetModel([[maybe_unused]] CvFeature* feature)
 
 ///
 
-class ::CvSymbol
+class CvSymbol
 {
 public:
 	SymbolTypes type = NO_SYMBOL;
@@ -113,7 +113,7 @@ void MyCvDLLSymbol::setTypeYield(CvSymbol*, [[maybe_unused]] int iType, [[maybe_
 
 ///
 
-class ::CvRoute
+class CvRoute
 {
 public:
 	RouteTypes type = NO_ROUTE;
@@ -146,7 +146,7 @@ void MyCvDLLRoute::updateGraphicEra([[maybe_unused]] CvRoute* pObj)
 
 //
 
-class ::CvRiver
+class CvRiver
 {
 public:
 };

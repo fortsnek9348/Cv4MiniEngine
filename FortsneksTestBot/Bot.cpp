@@ -15,14 +15,15 @@
 #include <PlayerBotGameBinding/Infos.h>
 
 #include <algorithm>
-#include <memory>
-#include <stdexcept>
-#include <ostream>
-#include <ranges>
-#include <random>
 #include <cassert>
-#include <sstream>
+#include <functional>
 #include <iostream>
+#include <memory>
+#include <ostream>
+#include <random>
+#include <ranges>
+#include <sstream>
+#include <stdexcept>
 
 using namespace mybot;
 
@@ -101,8 +102,8 @@ public:
 
 		const std::vector<City> allRevealedCities = game.getRevealedCities();
 
-		const std::vector<Unit> myUnits = allVisibleUnits | filterProj(setup.activePlayerI, &Unit::owner) | std::ranges::to<std::vector>();
-		std::vector<City> myCities = allRevealedCities | filterProj(setup.activePlayerI, &City::owner) | std::ranges::to<std::vector>();
+		const std::vector<Unit> myUnits = std::views::all(allVisibleUnits) | filterProj(setup.activePlayerI, &Unit::owner) | std::ranges::to<std::vector>();
+		std::vector<City> myCities = std::views::all(allRevealedCities) | filterProj(setup.activePlayerI, &City::owner) | std::ranges::to<std::vector>();
 
 		if (myCities.empty())
 			if (const auto it = std::ranges::find(myUnits, EUnitClass::Settler, &Unit::klass); it != myUnits.end())

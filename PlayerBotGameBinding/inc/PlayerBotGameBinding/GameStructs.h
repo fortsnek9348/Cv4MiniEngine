@@ -5,6 +5,7 @@
 // Only forward declarations. This makes CvGameCoreDLL independent of how many infos there are.
 #include "EnumFwd.h"
 
+#include <algorithm>
 #include <bitset>
 #include <span>
 #include <variant>

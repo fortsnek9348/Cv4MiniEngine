@@ -5,7 +5,7 @@
 #include "CvTuiInterface.h"
 #include "CvTuiMainInterface.h"
 
-#include <Cv4CommonEngineLib\MyCvDLLPython.h>
+#include <Cv4CommonEngineLib/MyCvDLLPython.h>
 
 #include <CvGameCoreDLL/CvGlobals.h>
 #include <CvGameCoreDLL/CvMap.h>

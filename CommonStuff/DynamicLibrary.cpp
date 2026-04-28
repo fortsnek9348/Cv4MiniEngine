@@ -12,16 +12,16 @@
 
 using namespace heck;
 
-DynamicLibrary::DynamicLibrary(const wchar_t* name)
+DynamicLibrary::DynamicLibrary(const std::filesystem::path& path)
 {
 #ifdef _WIN32
-	mPtr = LoadLibraryW(name);
+	mPtr = LoadLibraryW(path.c_str());
 #else
-	mPtr = dlopen(convertWideToUtf8(std::wstring(name)), RTLD_NOW | RTLD_LOCAL);
+	mPtr = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 #endif
 
 	if (!mPtr)
-		throw std::runtime_error("Could not load dynamic library '" + convertWideToUtf8(std::wstring(name)) + "'.");
+		throw std::runtime_error("Could not load dynamic library '" + convertWideToUtf8(std::wstring(path.wstring())) + "'.");
 }
 
 void* DynamicLibrary::resolve(const char* name) const

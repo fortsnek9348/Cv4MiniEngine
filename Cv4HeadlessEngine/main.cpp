@@ -709,7 +709,7 @@ public:
 	virtual bool GetSiegeTower(CvUnitEntity*) override { return false; }
 };
 
-class ::CvFeature
+class CvFeature
 {
 public:
 	FeatureTypes type = NO_FEATURE;
@@ -750,7 +750,7 @@ public:
 	virtual void setTypeYield(CvSymbol*, int, int) override {}
 };
 
-class ::CvRoute
+class CvRoute
 {
 public:
 	RouteTypes type = NO_ROUTE;
@@ -771,7 +771,7 @@ public:
 	virtual void updateGraphicEra(CvRoute*) override {}
 };
 
-class ::CvRiver
+class CvRiver
 {
 public:
 };
@@ -850,8 +850,19 @@ struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 	}
 };
 
-int main() try
+int main()// try
 {
+	// Don't you just hate it when you can't see error messages because the error output is in fail state?
+	std::cout.exceptions(~std::ios::goodbit);
+	std::clog.exceptions(~std::ios::goodbit);
+	std::cerr.exceptions(~std::ios::goodbit);
+	std::wcout.exceptions(~std::ios::goodbit);
+	std::wclog.exceptions(~std::ios::goodbit);
+	std::wcerr.exceptions(~std::ios::goodbit);
+	// So it seems you can't mix std stream encodings on Linux. Well... that's just great isn't it.
+	// Oh, just had to add this:
+	std::ios::sync_with_stdio(false);
+
 	const std::filesystem::path vanillaRoot = heck::findEnvironmentVariable(L"CV4HEADLESSENGINE_VANILLA_ROOT").value();
 	const std::filesystem::path engineAssetsOverrideDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L".");
 	const std::filesystem::path modRelPath{};
@@ -873,15 +884,15 @@ int main() try
 	const cvbot::IPlayerBotPlugin* botPlugin = nullptr;
 
 	// Load player bot DLL.
-	//if (!playerBotPluginPath.empty())
-	//{
-	//	if (!hasCvGameCoreDLLPlayerBotSupport())
-	//		throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
-	//
-	//	heck::DynamicLibrary lib(playerBotPluginPath.c_str());
-	//
-	//	botPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
-	//}
+	if (!playerBotPluginPath.empty())
+	{
+		if (!hasCvGameCoreDLLPlayerBotSupport())
+			throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
+	
+		heck::DynamicLibrary lib(playerBotPluginPath);
+	
+		botPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
+	}
 
 	CvHeadlessInterface interface;
 	CvHeadlessEngine graphicsEngine;
@@ -900,7 +911,7 @@ int main() try
 		.optModRelPath = !modRelPath.empty() ? std::optional(modRelPath) : std::nullopt,
 		.optEngineAssetsOverrideDir = engineAssetsOverrideDir,
 		.userDataDirPath = userDataDirPath,
-		.userConfigDirPath = userDataDirPath,
+		.userConfigDirPath = userConfigDirPath,
 		.cacheDirPath = cacheDirPath,
 		.replaysDirName = replaysDirName,
 		.savesDirName = savesDirName,
@@ -1073,8 +1084,8 @@ int main() try
 
 	return 0;
 }
-catch (const std::runtime_error& ex)
-{
-	std::cerr << ex.what() << '\n';
-	return 1;
-}
+//catch (const std::exception& ex)
+//{
+//	std::cerr << ex.what() << '\n';
+//	return 1;
+//}

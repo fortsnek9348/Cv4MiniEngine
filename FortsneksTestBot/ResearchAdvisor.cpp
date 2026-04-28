@@ -8,6 +8,8 @@
 #include <CommonStuff/range.h>
 
 #include <algorithm>
+#include <climits>
+#include <cmath>
 #include <ranges>
 #include <fstream>
 #include <sstream>
@@ -550,12 +552,14 @@ namespace
 
 	int calculateTechValue(const EvalInput& input, ETech tech)
 	{
-		using enum EBonus;
+		//using enum EBonus;
+		using enum cvbot::enums::Bonus::Enum; // GCC is fussy
 		const int turnsNeeded = ((input.civState.techs[tech].cost - input.civState.techs[tech].progress) + input.researchRate - 1) / input.researchRate;
 		const int finishTurn = input.researchStartTurn + turnsNeeded;
 		switch (tech)
 		{
-			using enum ETech;
+			//using enum ETech;
+			using enum cvbot::enums::Tech::Enum; // GCC is fussy
 
 			// Techs by column.
 

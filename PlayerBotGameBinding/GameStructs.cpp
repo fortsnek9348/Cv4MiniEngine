@@ -1,17 +1,19 @@
 #include "inc/PlayerBotGameBinding/GameStructs.h"
 #include "inc/PlayerBotGameBinding/Infos.h"
 
+#include <climits>
+
 using namespace cvbot;
 
 // Avoiding dependency on CommonStuff.
 // Returns ceil(x / y).
-int cvbot::cdiv(int x, std::same_as<uint32_t> auto y)
+int cvbot::cdiv(int x, std::same_as<std::uint32_t> auto y)
 {
 	const int q = int(x / (int64_t)y);
 	return q + (x % (int64_t)y > 0);
 }
 
-template int cvbot::cdiv(int, uint32_t);
+template int cvbot::cdiv(int, std::uint32_t);
 
 // Which values when divided by `denom` will result in `b`?
 // b = a / denom. a = ?
