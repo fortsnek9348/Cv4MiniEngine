@@ -141,7 +141,7 @@ cvengine::CommonEngineInitResult cvengine::initialiseCommonEngine(std::wostream&
 	log << L'\t' << L"optEngineAssetsOverrideDir = " << (config.optEngineAssetsOverrideDir ? config.optEngineAssetsOverrideDir->wstring() : L"") << L'\n';
 
 	const auto t0 = std::chrono::steady_clock::now();
-	gVFS = std::make_unique<CvVFS>(config.civ4InstallationRoot, config.userConfigDirPath, config.optModRelPath, config.optEngineAssetsOverrideDir);
+	gVFS = std::make_unique<CvVFS>(config.civ4InstallationRoot, config.userConfigDirPath, config.optModRelPath, config.optEngineAssetsOverrideDir, config.enableCustomAssets);
 	const auto t1 = std::chrono::steady_clock::now();
 	log << L"VFS initialisation took " << std::chrono::duration<double, std::milli>(t1 - t0) << std::endl;
 

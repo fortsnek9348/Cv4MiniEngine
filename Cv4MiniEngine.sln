@@ -38,6 +38,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4CommonEngineLib", "Cv4CommonEngineLib\Cv4CommonEngineLib.vcxproj", "{67F7CF0A-D595-40C6-86E9-02D7381FFE22}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cv4HeadlessEngine", "Cv4HeadlessEngine\Cv4HeadlessEngine.vcxproj", "{C70AB3AC-B05C-46B6-ACC3-82840A77FF4D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8} = {87FF0C3E-A62D-4D8E-949F-488AA0CA4BD8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

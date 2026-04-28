@@ -136,22 +136,7 @@ class ScoreboardColumnId:
 	MOBILISING    = 14
 	CITIES        = 15
 
-kScoreboardDesc = (
-	(ScoreboardColumnId.WAR_PEACE  , EJustilign.Start),
-	(ScoreboardColumnId.SCORE      , EJustilign.Start),
-	(ScoreboardColumnId.SCORE_DELTA, EJustilign.End),
-	(ScoreboardColumnId.NAME       , EJustilign.Start),
-	(ScoreboardColumnId.SPY        , EJustilign.Start),
-	(ScoreboardColumnId.POWER      , EJustilign.End),
-	(ScoreboardColumnId.TECH       , EJustilign.Start),
-	(ScoreboardColumnId.TRADE      , EJustilign.Start),
-	(ScoreboardColumnId.AGREEMENTS , EJustilign.Start),
-	(ScoreboardColumnId.RELIGION   , EJustilign.Start),
-	(ScoreboardColumnId.ATTITUDE   , EJustilign.Start),
-	(ScoreboardColumnId.WORST_ENEMY, EJustilign.Start),
-	(ScoreboardColumnId.MOBILISING , EJustilign.Start),
-	(ScoreboardColumnId.CITIES     , EJustilign.End),
-)
+
 
 class CvMainInterface:
 	"Main Interface Screen"
@@ -210,6 +195,23 @@ class CvMainInterface:
 		"""
 		if CyGame().isPitbossHost():
 			return
+			
+		self.kScoreboardDesc = (
+			(ScoreboardColumnId.WAR_PEACE  , EJustilign.Start),
+			(ScoreboardColumnId.SCORE      , EJustilign.Start),
+			(ScoreboardColumnId.SCORE_DELTA, EJustilign.End),
+			(ScoreboardColumnId.NAME       , EJustilign.Start),
+			(ScoreboardColumnId.SPY        , EJustilign.Start),
+			(ScoreboardColumnId.POWER      , EJustilign.End),
+			(ScoreboardColumnId.TECH       , EJustilign.Start),
+			(ScoreboardColumnId.TRADE      , EJustilign.Start),
+			(ScoreboardColumnId.AGREEMENTS , EJustilign.Start),
+			(ScoreboardColumnId.RELIGION   , EJustilign.Start),
+			(ScoreboardColumnId.ATTITUDE   , EJustilign.Start),
+			(ScoreboardColumnId.WORST_ENEMY, EJustilign.Start),
+			(ScoreboardColumnId.MOBILISING , EJustilign.Start),
+			(ScoreboardColumnId.CITIES     , EJustilign.End),
+		)
 		
 		# This is the main interface screen, create it as such
 		screen = CyGInterfaceScreen("MainInterface", CvScreenEnums.MAIN_INTERFACE)
@@ -408,9 +410,9 @@ class CvMainInterface:
 		screen.setPanelBackgroundColour("Scoreboard", HeckTuiColour.Black)
 
 		table = TableLayoutConfig()
-		table.cols = [TableLayoutConfigRowColDesc(0, 0)] * len(kScoreboardDesc)
+		table.cols = [TableLayoutConfigRowColDesc(0, 0)] * len(self.kScoreboardDesc)
 		table.rows = [TableLayoutConfigRowColDesc(0, 0)]
-		table.cells = [TableLayoutConfigCell(ivec2(i, 0), ivec2(1, 1), RectJustilign(align, EJustilign.Start)) for i, (colId, align) in enumerate(kScoreboardDesc)]
+		table.cells = [TableLayoutConfigCell(ivec2(i, 0), ivec2(1, 1), RectJustilign(align, EJustilign.Start)) for i, (colId, align) in enumerate(self.kScoreboardDesc)]
 		screen.setTableLayout("Scoreboard", table)
 		
 		
@@ -1877,7 +1879,7 @@ class CvMainInterface:
 		
 			# Now actually create the controls.
 			rowPrefix = prefix + str(ePlayer)
-			for colId, _ in kScoreboardDesc:
+			for colId, _ in self.kScoreboardDesc:
 				name = rowPrefix + '_' + str(colId)
 				text = pieces[colId]
 				screen.newActionButton("Scoreboard", name, WidgetTypes.WIDGET_CONTACT_CIV, ePlayer, -1, HeckTuiBorderStyle.NONE)

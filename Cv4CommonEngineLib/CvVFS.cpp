@@ -252,7 +252,8 @@ struct CvVFS::Internals
 		fs::path vanillaCiv4RootDir,
 		fs::path userConfigDir,
 		const std::optional<fs::path>& optModRelPath,
-		const std::optional<fs::path>& optEngineAssetsOverrideDir
+		const std::optional<fs::path>& optEngineAssetsOverrideDir,
+		bool enableCustomAssets
 	)
 	{
 		// Make all paths absolute so that file enumeration always returns absolute physical paths.
@@ -271,9 +272,12 @@ struct CvVFS::Internals
 			vanillaCiv4RootDir / "Warlords" / cvengine::kPublicMapsDirName /**/,
 			btsRoot / "Assets"                                             /**/,
 			btsRoot / cvengine::kPublicMapsDirName                         /**/,
-			userConfigDir / cvengine::kCustomAssetsDirName                 /**/,
-			userConfigDir / cvengine::kPublicMapsDirName                   /**/,
 		});
+
+		if (enableCustomAssets)
+			mMountings.push_back(userConfigDir / cvengine::kCustomAssetsDirName);
+
+		mMountings.push_back(userConfigDir / cvengine::kPublicMapsDirName);
 
 		if (optModRelPath)
 		{
@@ -326,6 +330,12 @@ struct CvVFS::Internals
 		buildPythonModuleLookup("", false);
 		buildPythonModuleLookup("Python", true); // Let's hope there are no conflicts with maps.
 #endif
+		//for (const auto& [name, entry] : mPythonModuleLookup)
+		//{
+		//	const auto dest = LR"(Python2Scripts)" / entry.vfsPath;
+		//	std::filesystem::create_directories(dest.parent_path());
+		//	std::filesystem::copy_file(entry.physPath, dest, std::filesystem::copy_options::update_existing);
+		//}
 	}
 
 	// We'll now store these as wstrings. If anybody needs ASCII/codepage strings, they'll have to convert where used.
@@ -603,9 +613,10 @@ CvVFS::CvVFS(
 	const std::filesystem::path& vanillaCiv4RootDir,
 	const std::filesystem::path& userConfigDir,
 	const std::optional<std::filesystem::path>& optModRelPath,
-	const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir
+	const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir,
+	bool enableCustomAssets
 )
-	: mInternals(std::make_unique<Internals>(vanillaCiv4RootDir, userConfigDir, optModRelPath, optEngineAssetsOverrideDir))
+	: mInternals(std::make_unique<Internals>(vanillaCiv4RootDir, userConfigDir, optModRelPath, optEngineAssetsOverrideDir, enableCustomAssets))
 {
 }
 

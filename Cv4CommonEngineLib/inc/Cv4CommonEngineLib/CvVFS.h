@@ -17,7 +17,8 @@ namespace cvengine
 			const std::filesystem::path& vanillaCiv4RootDir,
 			const std::filesystem::path& userConfigDir,
 			const std::optional<std::filesystem::path>& optModRelPath,
-			const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir
+			const std::optional<std::filesystem::path>& optEngineAssetsOverrideDir,
+			bool enableCustomAssets
 		);
 		~CvVFS() noexcept;
 

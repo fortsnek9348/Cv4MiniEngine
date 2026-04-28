@@ -93,6 +93,10 @@ namespace cvengine
 		CvDLLFlagEntityIFaceBase* flagEntityIFace{};
 		const cvbot::IPlayerBotPlugin* optPlayerBotPlugin{};
 		ICommonEngineCallbackHandler* callbackHandler{};
+		// Set this to suppress python screens in a headless engine.
+		bool isPitbossHost{};
+		// Set this to false to stop BUG from loading in a headless engine.
+		bool enableCustomAssets = true;
 	};
 
 	struct [[nodiscard]] CommonEngineInitResult

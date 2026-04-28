@@ -18,7 +18,7 @@ using namespace mybot;
 
 namespace
 {
-	constexpr int kOrderEnumerationDepth = 4;
+	constexpr int kOrderEnumerationDepth = 3;
 	constexpr int kEvaluationAdditionalTurnsAtNormalSpeed = 25; // Will be scaled.
 
 	constexpr auto kTechIndices = heck::range<ETech>(ETech::Num);

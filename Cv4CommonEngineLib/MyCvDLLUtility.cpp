@@ -167,7 +167,8 @@ int MyCvDLLUtility::getAssignedNetworkID(int iPlayerID)
 
 bool MyCvDLLUtility::isConnected([[maybe_unused]] int iNetID)
 {
-	std::abort();
+	// Everybody is always connected.
+	return true;
 }
 
 bool MyCvDLLUtility::isGameActive()
@@ -256,7 +257,7 @@ bool MyCvDLLUtility::isModularXMLLoading() const
 
 bool MyCvDLLUtility::IsPitbossHost() const
 {
-	return false;
+	return gCommonEngineConfig.isPitbossHost;
 }
 
 CvString MyCvDLLUtility::GetPitbossSmtpHost() const

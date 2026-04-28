@@ -95,7 +95,7 @@ bool MyCvDLLXml::LoadXml(FXml* xml, const TCHAR* pszXmlFile)
 
 	// TODO: What's the encoding of the given path? Really, the caller's file enumeration will need to return wstring/fs::path paths.
 	const pugi::xml_parse_result result = xml->doc.load_file(wpath.c_str());
-	std::wclog << L"Status = " << std::to_underlying(result.status) << L", encoding = " << std::to_underlying(result.encoding) << std::endl;
+	//std::wclog << L"Status = " << std::to_underlying(result.status) << L", encoding = " << std::to_underlying(result.encoding) << std::endl;
 
 	// If you want to check whether any XML files contain potential Windows-1252.
 	//checkFileHasUtf8ExtensionBytes(physPath);

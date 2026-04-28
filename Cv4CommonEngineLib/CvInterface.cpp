@@ -26,14 +26,16 @@ void CvInterface::uninit()
 
 bool CvInterface::removeFromSelectionList(CvUnit* pUnit)
 {
-	CvSelectionGroup& selectionList = *getSelectionList();
-	for (auto* node = selectionList.headUnitNode(); node; node = selectionList.nextUnitNode(node))
+	if (CvSelectionGroup* const selectionList = getSelectionList())
 	{
-		if (getUnit(node->m_data) == pUnit)
+		for (auto* node = selectionList->headUnitNode(); node; node = selectionList->nextUnitNode(node))
 		{
-			selectionList.deleteUnitNode(node);
-			setInterfaceMode(INTERFACEMODE_SELECTION);
-			return true;
+			if (getUnit(node->m_data) == pUnit)
+			{
+				selectionList->deleteUnitNode(node);
+				setInterfaceMode(INTERFACEMODE_SELECTION);
+				return true;
+			}
 		}
 	}
 
@@ -74,7 +76,8 @@ bool CvInterface::mirrorsSelectionGroup() const
 
 void CvInterface::clearSelectionList()
 {
-	getSelectionList()->clearUnits();
+	if (auto* const list = getSelectionList())
+		list->clearUnits();
 }
 
 bool CvInterface::tryRemoveUnitFromSelectionGroup(CvUnit* pUnit)
@@ -95,6 +98,9 @@ bool CvInterface::tryRemoveUnitFromSelectionGroup(CvUnit* pUnit)
 
 void CvInterface::insertIntoSelectionList(CvUnit* pUnit, bool bClear, bool bToggle, bool bGroup, bool bSound, bool bMinimalChange)
 {
+	if (!getSelectionList())
+		return;
+
 	// Bunch of stuff goes on in here...
 
 	if (!pUnit || (pUnit->getGroup() && pUnit->getGroup()->isBusy()))
@@ -153,11 +159,11 @@ int CvInterface::getNumSelectedUnits() const
 
 CvUnit* CvInterface::getSelectionUnit(int iIndex) const
 {
-	const CvSelectionGroup& list = *getSelectionList();
-	if (static_cast<size_t>(iIndex) < static_cast<size_t>(list.getNumUnits()))
-		return list.getUnitAt(iIndex);
-	else
-		return nullptr;
+	if (const CvSelectionGroup* const list = getSelectionList())
+		if (static_cast<size_t>(iIndex) < static_cast<size_t>(list->getNumUnits()))
+			return list->getUnitAt(iIndex);
+
+	return nullptr;
 }
 
 bool CvInterface::isUnitSelected(const CvUnit& unit) const

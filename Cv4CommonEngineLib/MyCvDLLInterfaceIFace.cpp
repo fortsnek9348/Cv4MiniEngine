@@ -369,9 +369,9 @@ void MyCvDLLInterfaceIFace::addPopup(CvPopupInfo* pInfo, PlayerTypes ePlayer, bo
 	}
 }
 
-void MyCvDLLInterfaceIFace::getDisplayedButtonPopups(CvPopupQueue&)
+void MyCvDLLInterfaceIFace::getDisplayedButtonPopups(CvPopupQueue& out)
 {
-	std::clog << __func__ << " not implemented. Used to serialise player popups.\n";
+	gCommonEngineConfig.interface->getDisplayedButtonPopups(out);
 }
 
 int MyCvDLLInterfaceIFace::getCycleSelectionCounter()

@@ -783,6 +783,11 @@ void CvPlayer::setPlayerBotToRunNextTurn()
 	if (m_playerBot)
 		m_playerBotFinalTurn = gGlobals.getGameINLINE().getGameTurn() + 1;
 }
+void CvPlayer::setPlayerBotFinalTurn(int turn)
+{
+	if (m_playerBot)
+		m_playerBotFinalTurn = turn;
+}
 #endif
 
 

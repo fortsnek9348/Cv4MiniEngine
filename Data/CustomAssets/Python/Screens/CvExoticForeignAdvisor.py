@@ -42,7 +42,7 @@ NUM_FOREIGN_SCREENS = 5
 kDefaultScreen = FOREIGN_BONUS_SCREEN
 kScreenName = "ForeignAdvisor"
 
-kCellVCenterAlign = RectJustilign(EJustilign.Stretch, EJustilign.Center)
+kCellVCenterAlign = None
 
 # UI Note: I originally had proportional table columns (which expand to the width of the container), but combining wrapped text with other proportional columns
 # does not work well because of the table layout algorithm. Initially, thw window is the width of the screen and the proportional columns are sized.
@@ -72,6 +72,10 @@ class CvExoticForeignAdvisor:
 		return CyGInterfaceScreen(kScreenName, CvScreenEnums.FOREIGN_ADVISOR)
 
 	def interfaceScreen(self, iScreen):
+		# Init this here in case headless engine is running.
+		global kCellVCenterAlign
+		kCellVCenterAlign = RectJustilign(EJustilign.Stretch, EJustilign.Center)
+	
 		if iScreen < 0:
 			iScreen = self.iScreen
 		if iScreen < 0 or iScreen >= NUM_FOREIGN_SCREENS:

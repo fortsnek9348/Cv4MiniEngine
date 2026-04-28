@@ -65,6 +65,8 @@ public:
 	DllExportForInterface void createPlayerBot(const cvbot::IPlayerBotPlugin& plugin);
 #if ENABLE_PLAYER_BOT
 	void setPlayerBotToRunNextTurn();
+
+	DllExportForInterface void setPlayerBotFinalTurn(int turn);
 #endif
 
 protected:

@@ -307,7 +307,7 @@ void CvTuiInterface::flushTalkingHeadMessages()
 
 void CvTuiInterface::getDisplayedButtonPopups([[maybe_unused]] CvPopupQueue& infos) const
 {
-	std::clog << __FUNCTION__ " not implemented. This is used for serialising the popoup queue.\n";
+	std::clog << __func__ << " not implemented. Used to serialise player popups.\n";
 }
 
 int CvTuiInterface::getCycleSelectionCounter() const
