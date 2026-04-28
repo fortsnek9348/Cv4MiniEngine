@@ -850,7 +850,19 @@ struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 	}
 };
 
-int main()// try
+[[noreturn]] static void invalidArgs()
+{
+	static constexpr const char* kHelp = R"(Usage: Cv4HeadlessMiniEngine [options]
+Options:
+	-bot <path to DLL/so>
+		Use the specified bot.
+)";
+
+	std::cerr << kHelp << std::endl;
+	std::exit(EXIT_FAILURE);
+}
+
+int main(int argc, const char* argv[])
 {
 	// Don't you just hate it when you can't see error messages because the error output is in fail state?
 	std::cout.exceptions(~std::ios::goodbit);
@@ -875,11 +887,20 @@ int main()// try
 	const std::filesystem::path iniFilename = L"Cv4MiniEngine.ini";
 	const std::filesystem::path profileFilename = L"Cv4MiniEngine Profile.txt";
 
-#ifdef NDEBUG
-	const std::filesystem::path playerBotPluginPath = L"FortsneksTestBot_Release_x64.dll";
-#else
-	const std::filesystem::path playerBotPluginPath = L"FortsneksTestBot_Debug_x64.dll";
-#endif
+	std::filesystem::path playerBotPluginPath;
+
+	for (int i = 1; i < argc; ++i)
+	{
+		const std::string_view arg = argv[i];
+		if (arg == "-bot")
+		{
+			if (i + 1 >= argc)
+				invalidArgs();
+			playerBotPluginPath = std::filesystem::path(argv[++i]);
+		}
+		else
+			invalidArgs();
+	}
 
 	const cvbot::IPlayerBotPlugin* botPlugin = nullptr;
 
@@ -1084,8 +1105,3 @@ int main()// try
 
 	return 0;
 }
-//catch (const std::exception& ex)
-//{
-//	std::cerr << ex.what() << '\n';
-//	return 1;
-//}
