@@ -139,8 +139,6 @@ namespace
 	{
 		const City* city{};
 
-		static constexpr int kScoreScale = 100;
-
 		static int evaluateTaskKindScore(const TaskEvalContext& ctx)
 		{
 			return CityDefenceTask::evaluateTaskKindScore(ctx);
