@@ -6,6 +6,7 @@
 #include <Cv4CommonEngineLib/CvPythonExtensionsSetup.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
 #include <Cv4CommonEngineLib/DLLMessageQueue.h>
+#include <Cv4CommonEngineLib/IniReader.h>
 
 #include <CvGameCoreDLL/CvDLLEntityIFaceBase.h>
 #include <CvGameCoreDLL/CvDLLFlagEntityIFaceBase.h>
@@ -875,9 +876,7 @@ int main(int argc, const char* argv[])
 	// Oh, just had to add this:
 	std::ios::sync_with_stdio(false);
 
-	const std::filesystem::path vanillaRoot = heck::findEnvironmentVariable(L"CV4HEADLESSENGINE_VANILLA_ROOT").value();
-	const std::filesystem::path engineAssetsOverrideDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L".");
-	const std::filesystem::path modRelPath{};
+	
 
 	const std::filesystem::path userDataDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Data);
 	const std::filesystem::path userConfigDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Config);
@@ -886,6 +885,20 @@ int main(int argc, const char* argv[])
 	const std::filesystem::path savesDirName = L"Saves (Cv4HeadlessEngine)";
 	const std::filesystem::path iniFilename = L"Cv4MiniEngine.ini";
 	const std::filesystem::path profileFilename = L"Cv4MiniEngine Profile.txt";
+
+	const std::filesystem::path iniPath = userConfigDirPath / iniFilename;
+	cvengine::IniData::createIfNew(iniPath);
+	const cvengine::IniData ini = cvengine::loadINI(iniPath);
+
+	constexpr cvengine::IniDocKey kCivilizationIVIniSection_CV4ENGINE{ "CV4MINIENGINE" };
+	constexpr cvengine::IniDocKey kCivilizationIVIniProp_VanillaCiv4RootDir{ "VanillaCiv4RootDir", "Path to root directory of your Civilization 4 installation." };
+	const std::filesystem::path vanillaCiv4RootDir = ini.get(kCivilizationIVIniSection_CV4ENGINE, kCivilizationIVIniProp_VanillaCiv4RootDir, L"");
+
+	if (vanillaCiv4RootDir.empty())
+		throw std::runtime_error("CV4ENGINE VanillaCiv4RootDir not specified in INI.");
+
+	const std::filesystem::path engineAssetsOverrideDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L".");
+	const std::filesystem::path modRelPath{};
 
 	std::filesystem::path playerBotPluginPath;
 
@@ -928,7 +941,7 @@ int main(int argc, const char* argv[])
 	HeadlessApp app;
 
 	[[maybe_unused]] const cvengine::CommonEngineInitResult initResult = cvengine::initialiseCommonEngine(std::wcout, cvengine::CommonEngineConfig{
-		.civ4InstallationRoot = vanillaRoot,
+		.civ4InstallationRoot = vanillaCiv4RootDir,
 		.optModRelPath = !modRelPath.empty() ? std::optional(modRelPath) : std::nullopt,
 		.optEngineAssetsOverrideDir = engineAssetsOverrideDir,
 		.userDataDirPath = userDataDirPath,
