@@ -804,11 +804,10 @@ public:
 
 struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 {
-	virtual void registerPythonExtensions(const pybind11::module_&) override
+	// Inherited via ICommonEngineCallbackHandler
+	void registerPythonExtensions(const pybind11::module_&) override
 	{
 	}
-
-	// Inherited via ICommonEngineCallbackHandler
 	bool isShiftDown() const override
 	{
 		return false;
@@ -850,7 +849,7 @@ struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 
 [[noreturn]] static void invalidArgs()
 {
-	static constexpr const char* kHelp = R"(Usage: Cv4HeadlessMiniEngine [options]
+	static constexpr const char* kHelp = R"(Usage: Cv4HeadlessMiniEngine [options] [path to save game]
 Options:
 	-bot <path to DLL/so>
 		Use the specified bot.
@@ -898,6 +897,7 @@ int main(int argc, const char* argv[])
 	const std::filesystem::path modRelPath{};
 
 	std::filesystem::path playerBotPluginPath;
+	std::filesystem::path saveGameLoadPath;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -908,6 +908,8 @@ int main(int argc, const char* argv[])
 				invalidArgs();
 			playerBotPluginPath = std::filesystem::path(argv[++i]);
 		}
+		else if (saveGameLoadPath.empty())
+			saveGameLoadPath = arg;
 		else
 			invalidArgs();
 	}
@@ -972,9 +974,15 @@ int main(int argc, const char* argv[])
 
 	const auto progressCallback = [](std::wstring_view s) { std::wcout << s << '\n'; };
 
+	if (saveGameLoadPath.empty())
 	{
 		cvengine::app::NewGameStartupState state(std::move(gameSetup), false);
-		//cvengine::app::LoadGameState state(LR"(C:\Users\Axolotl\Documents\My Games\Beyond the Sword\Saves (Cv4HeadlessEngine)\single\Autosave turn 420 AD-2000 - Copy.CivBeyondSwordSave)");
+		state.onEnter(progressCallback);
+		state.onLeave();
+	}
+	else
+	{
+		cvengine::app::LoadGameState state(saveGameLoadPath);
 		state.onEnter(progressCallback);
 		state.onLeave();
 	}
@@ -1020,6 +1028,9 @@ int main(int argc, const char* argv[])
 		progression |= turn != lastUpdateTurn;
 		progression |= DLLMessageQueue::getInstance().execute();
 
+		// Doing the update first will get the bot to handle popups.
+		game.update();
+
 		if (activePlayer.isTurnActive())
 		{
 			if ([[maybe_unused]] const CvDiploParameters* const diplo = activePlayer.popFrontDiplomacy())
@@ -1029,11 +1040,10 @@ int main(int argc, const char* argv[])
 			{
 				if (popupInfo->getText() == L"showDawnOfMan")
 					continue;
+				std::wclog << popupInfo->getText() << L'\n';
 				throw std::runtime_error("Active player has a queued popup.");
 			}
 		}
-
-		game.update();
 
 		lastUpdateTurn = turn;
 		++updateNum;

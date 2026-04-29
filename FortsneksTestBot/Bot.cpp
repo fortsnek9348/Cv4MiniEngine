@@ -1,25 +1,26 @@
-#include "Pathing.h"
-#include "SettlingAdvisor.h"
-#include "MilitaryAdvisor.h"
-#include "ResearchAdvisor.h"
-#include "DomesticAnalysis.h"
-#include "MapUnitLookup.h"
 #include "CityBuildingProductionAdvisor.h"
 #include "CityProduction.h"
+#include "DomesticAnalysis.h"
+#include "MapUnitLookup.h"
+#include "MilitaryAdvisor.h"
+#include "Pathing.h"
+#include "ResearchAdvisor.h"
+#include "SettlingAdvisor.h"
 
+#include <PlayerBotGameBinding/EnumDefs.h>
+#include <PlayerBotGameBinding/EnumStrings.h>
+#include <PlayerBotGameBinding/GameStructs.h>
+#include <PlayerBotGameBinding/IGame.h>
+#include <PlayerBotGameBinding/Infos.h>
 #include <PlayerBotGameBinding/IPlayerBot.h>
 #include <PlayerBotGameBinding/IPlayerBotPlugin.h>
-#include <PlayerBotGameBinding/IGame.h>
-#include <PlayerBotGameBinding/GameStructs.h>
-#include <PlayerBotGameBinding/EnumDefs.h>
-#include <PlayerBotGameBinding/Infos.h>
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
-#include <ostream>
 #include <random>
 #include <ranges>
 #include <sstream>
@@ -43,10 +44,41 @@ static auto filterProj(auto value, auto proj)
 	return std::views::filter([proj = std::forward<decltype(proj)>(proj), value = std::forward<decltype(value)>(value)](auto&& x) { return std::invoke(proj, x) == value; });
 }
 
+std::ostream& operator<<(std::ostream& os, ProductionChoice choice)
+{
+	struct Visitor
+	{
+		std::ostream& os;
+		void operator()(std::monostate) const
+		{
+			os << "-";
+		}
+		void operator()(EBuildingClass klass) const
+		{
+			os << cvbot::kBuildingClassNames[klass];
+		}
+		void operator()(EUnitClass klass) const
+		{
+			os << cvbot::kUnitClassNames[klass];
+		}
+		void operator()(EProject i) const
+		{
+			os << cvbot::kProjectNames[i];
+		}
+		void operator()(EProcess i) const
+		{
+			os << cvbot::kProcessNames[i];
+		}
+	};
+	std::visit(Visitor{ os }, choice);
+	return os;
+}
+
 class MyBot : public IBot
 {
 public:
 	std::ostream& log;
+	std::ofstream civLogCSV;
 	const GameSetup setup;
 	const GlobalInfoData infos;
 
@@ -65,6 +97,7 @@ public:
 	
 	explicit MyBot(const cvbot::IBotInit& init)
 		: log(init.getLoggingStream())
+		, civLogCSV("BotCivLog.csv")
 		, setup(init.getGameSetup())
 		, infos(init.buildGlobalInfoData())
 	{
@@ -72,8 +105,6 @@ public:
 
 	virtual void run(IGame& game) override
 	{
-		
-
 		const GlobalInfo globalInfo = game.getGlobalInfo();
 
 		const std::vector<Unit> allVisibleUnits = game.getVisibleUnits(iaabb2::sized(ivec2(), setup.mapGeometry.dim));
@@ -106,13 +137,19 @@ public:
 		std::vector<City> myCities = std::views::all(allRevealedCities) | filterProj(setup.activePlayerI, &City::owner) | std::ranges::to<std::vector>();
 
 		if (myCities.empty())
+		{
 			if (const auto it = std::ranges::find(myUnits, EUnitClass::Settler, &Unit::klass); it != myUnits.end())
 			{
 				// Settle in-place.
 				game.startMission(std::array{ it->id }, EMission::Found, -1, -1);
 				if (auto optCity = game.getRevealedCityAt(it->coord))
 					myCities.push_back(std::move(*optCity));
+				else
+					return;
 			}
+			else
+				return;
+		}
 
 		std::ranges::stable_partition(myCities, &City::isCapital);
 
@@ -238,15 +275,18 @@ public:
 		std::clog << "settlerProductionDemand = " << settlerProductionDemand << '\n';
 		std::clog << "workerProductionDemand = " << workerProductionDemand << '\n';
 
-		unitProductionDemands.push_back(UnitProductionDemand{
-			.klass = EUnitClass::Worker,
-			.target = myCities.front().coord,
-			.turns = 10,
-			.count = static_cast<int>(workerProductionDemand),
-			.urgency = EUnitProductionUrgency::NonCombat,
-			});
+		if (workerProductionDemand > 0)
+		{
+			unitProductionDemands.push_back(UnitProductionDemand{
+				.klass = EUnitClass::Worker,
+				.target = myCities.front().coord,
+				.turns = 10,
+				.count = static_cast<int>(workerProductionDemand),
+				.urgency = EUnitProductionUrgency::NonCombat,
+				});
+		}
 
-		assignCityProduction(
+		const std::vector<ProductionChoice> cityProductionChoices = assignCityProduction(
 			game,
 			infos,
 			setup.mapGeometry,
@@ -331,9 +371,20 @@ public:
 
 		hasAnalyses = true;
 
+		{
+			// current tech, city productions...
+			civLogCSV << cvbot::kTechNames[techChoice] << ',';
+			for (const ProductionChoice& choice : cityProductionChoices)
+				civLogCSV << choice << ',';
+			civLogCSV << '\n';
+		}
+
 		std::clog << std::flush;
 		std::wclog << std::flush;
+
+		//throw BotFailure("Test bot failure.");
 	}
+
 
 	virtual std::string buildPlotDebugString(const IGame&, ivec2 coord) const override
 	{

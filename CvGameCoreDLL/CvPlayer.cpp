@@ -21938,10 +21938,22 @@ void CvPlayer::runPlayerBot()
 	const int turn = gGlobals.getGameINLINE().getGameTurn();
 	if (m_playerBot && m_playerBotTurnLastRan < turn && turn <= m_playerBotFinalTurn)
 	{
-		handleUIForPlayerBot();
-		m_playerBot->run(cvbot::Game::getInstance());
-		if (!m_listDiplomacy.empty() || !m_listPopups.empty())
-			throw cvbot::BotFailure("Unexpected diplo/popups after running bot.");
+		try
+		{
+			handleUIForPlayerBot();
+			m_playerBot->run(cvbot::Game::getInstance());
+
+			if (!m_listDiplomacy.empty() || !m_listPopups.empty())
+				throw cvbot::BotFailure("Unexpected diplo/popups after running bot.");
+		}
+		catch (const cvbot::BotFailure& ex)
+		{
+			m_playerBotFinalTurn = -1;
+			auto popupInfo = std::make_unique<CvPopupInfo>(ButtonPopupTypes::BUTTONPOPUP_TEXT);
+			popupInfo->setText((L"Bot failure\n" + heck::convertUtf8ToWide(ex.what())).c_str());
+			addPopup(popupInfo.release(), true);
+		}
+
 		m_playerBotTurnLastRan = turn;
 		if (turn < m_playerBotFinalTurn)
 		{

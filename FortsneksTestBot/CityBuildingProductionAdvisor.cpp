@@ -14,6 +14,7 @@ using namespace mybot;
 
 namespace
 {
+	constexpr bool kEnableNonVictoryLimitedBuildings = false;
 	//constexpr int kValueForecastTurns = 100; // To be scaled
 
 	int getBuildingBaseValue(
@@ -508,6 +509,9 @@ namespace
 		const std::vector<BuildChoiceEvaluation>& bestBuildChoicesPreWorldSolve
 	)
 	{
+		if (myCities.empty())
+			return bestBuildChoicesPreWorldSolve;
+
 		std::vector<ProductionChoice> orderedWorldWonders;
 
 		const bool isVictoryAtHand = civState.projectCounts[EProject::ApolloProgram] > 0 || worldWonderProductionsCityChoices.contains(EProject::ApolloProgram);
@@ -591,6 +595,13 @@ std::vector<CityBuildingProductionRecomendation> mybot::computeCityBuildingProdu
 		std::erase_if(choices, [](const CityBuildChoice& choice) {
 			return !(std::holds_alternative<EBuildingClass>(choice) || std::holds_alternative<EProject>(choice) || std::holds_alternative<EProcess>(choice));
 			});
+		// Filter out wonders.
+		if constexpr (!kEnableNonVictoryLimitedBuildings)
+		{
+			std::erase_if(choices, [&](const CityBuildChoice& choice) {
+				return !isVictoryProduction(infos, choice) && getProductionDecisionMethod(infos, civState, choice).kind != ProductionDecisionMethod::Regular;
+				});
+		}
 		buildChoices.push_back(std::move(choices));
 	}
 

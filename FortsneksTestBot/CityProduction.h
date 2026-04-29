@@ -2,13 +2,15 @@
 
 #include "Common.h"
 
+#include <vector>
+
 namespace mybot
 {
 	struct CityBuildingProductionRecomendation;
 	struct UnitProductionDemand;
 
 	// Assign city production from building and unit demands.
-	void assignCityProduction(
+	std::vector<ProductionChoice> assignCityProduction(
 		IGame& game,
 		const GlobalInfoData& infos,
 		MapGeometry geom,

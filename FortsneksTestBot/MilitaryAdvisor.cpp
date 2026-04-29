@@ -614,41 +614,6 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 	for (const auto& assignment : result.assignments)
 		std::visit(TaskExecutor{ game, *assignment.second.unit }, *assignment.second.task);
 
-	const std::vector<EUnitClass> availableUnitClasses = game.getCityProductionChoices(myCities.front().coord)
-		| std::views::filter([](const ProductionChoice& choice) { return std::holds_alternative<EUnitClass>(choice); })
-		| std::views::transform([](const ProductionChoice& choice) { return std::get<EUnitClass>(choice); })
-		| std::ranges::to<std::vector>();
-
-	const auto getUnitStrength = [&](EUnitClass klass, bool onCityDefence) {
-		const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
-		return unitInfo.baseCombatStrength * (100 + onCityDefence * unitInfo.cityDefenceModifier) / 100;
-		};
-
-	const UnitPreference unitPreference{
-		.cheapMilitaryPolice = std::ranges::min(availableUnitClasses, std::less(), [&](EUnitClass klass) {
-			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
-			return unitInfo.isMilitaryHappiness ? unitInfo.productionCost : INT_MAX;
-		}),
-		.cityDefender = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
-			//const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
-			return getUnitStrength(klass, true);
-		}),
-		.attacker = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
-			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
-			return unitInfo.canAttack ? getUnitStrength(klass, false) : -1;
-		}),
-		.scout = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
-			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
-			// CvUnit::canAutomate condition
-			if ((unitInfo.baseCombatStrength <= 0 && unitInfo.domain != EDomain::Sea) || unitInfo.domain == EDomain::Air || unitInfo.domain == EDomain::Immobile)
-				return std::pair(-1, -1);
-			else
-				return std::pair(+unitInfo.moveSteps, unitInfo.baseCombatStrength);
-		}),
-	};
-
-	
-
 	const auto isMilitaryUnit = [&](const Unit& unit) {
 		const UnitInfo& info = infos.units[infos.unitClasses[unit.klass].activeType];
 		return info.isMilitaryHappiness;
@@ -656,26 +621,64 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 
 	const int numMilitaryUnits = static_cast<int>(std::ranges::count_if(myUnits, isMilitaryUnit));
 
-	const int bestAvailableEffectiveStrength = getUnitStrength(unitPreference.cityDefender, true);
+	if (!myCities.empty())
+	{
+		const std::vector<EUnitClass> availableUnitClasses = game.getCityProductionChoices(myCities.front().coord)
+			| std::views::filter([](const ProductionChoice& choice) { return std::holds_alternative<EUnitClass>(choice); })
+			| std::views::transform([](const ProductionChoice& choice) { return std::get<EUnitClass>(choice); })
+			| std::ranges::to<std::vector>();
 
-	const auto isObsoleteMilitaryUnit = [&](const Unit& unit) {
-		//const UnitInfo& info = infos.units[infos.unitClasses[unit.klass].activeType];
-		return isMilitaryUnit(unit) && getUnitStrength(unitPreference.cityDefender, true) * 2 < bestAvailableEffectiveStrength;
+		const auto getUnitStrength = [&](EUnitClass klass, bool onCityDefence) {
+			const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+			return unitInfo.baseCombatStrength * (100 + onCityDefence * unitInfo.cityDefenceModifier) / 100;
+			};
+
+		const UnitPreference unitPreference{
+			.cheapMilitaryPolice = std::ranges::min(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+				const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+				return unitInfo.isMilitaryHappiness ? unitInfo.productionCost : INT_MAX;
+			}),
+			.cityDefender = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+				//const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+				return getUnitStrength(klass, true);
+			}),
+			.attacker = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+				const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+				return unitInfo.canAttack ? getUnitStrength(klass, false) : -1;
+			}),
+			.scout = std::ranges::max(availableUnitClasses, std::less(), [&](EUnitClass klass) {
+				const auto& unitInfo = infos.units[infos.unitClasses[klass].activeType];
+				// CvUnit::canAutomate condition
+				if ((unitInfo.baseCombatStrength <= 0 && unitInfo.domain != EDomain::Sea) || unitInfo.domain == EDomain::Air || unitInfo.domain == EDomain::Immobile)
+					return std::pair(-1, -1);
+				else
+					return std::pair(+unitInfo.moveSteps, unitInfo.baseCombatStrength);
+			}),
 		};
 
-	std::vector<const Unit*> spareMilitaryUnits = result.spareUnits;
-	std::ranges::sort(spareMilitaryUnits, std::greater(), [&](const Unit* unit) {
-		return getUnitStrength(unit->klass, true);
-		});
+		const int bestAvailableEffectiveStrength = getUnitStrength(unitPreference.cityDefender, true);
 
-	// Scrap units that are too weak to be useful.
-	while (spareMilitaryUnits.size() > myCities.size() && isObsoleteMilitaryUnit(*spareMilitaryUnits.back()))
-	{
-		const Unit& unit = *spareMilitaryUnits.back();
-		std::clog << "DELETING UNIT: " << cvbot::kUnitTypeNames[infos.unitClasses[unit.klass].activeType] << ", effective strength = " << getUnitStrength(unit.klass, true) << " vs best possible strength " << bestAvailableEffectiveStrength << '\n';
-		game.tryDelete(spareMilitaryUnits.back()->id);
+		const auto isObsoleteMilitaryUnit = [&](const Unit& unit) {
+			//const UnitInfo& info = infos.units[infos.unitClasses[unit.klass].activeType];
+			return isMilitaryUnit(unit) && getUnitStrength(unitPreference.cityDefender, true) * 2 < bestAvailableEffectiveStrength;
+			};
+
+		std::vector<const Unit*> spareMilitaryUnits = result.spareUnits;
+		std::ranges::sort(spareMilitaryUnits, std::greater(), [&](const Unit* unit) {
+			return getUnitStrength(unit->klass, true);
+			});
+
+		// Scrap units that are too weak to be useful.
+		while (spareMilitaryUnits.size() > myCities.size() && isObsoleteMilitaryUnit(*spareMilitaryUnits.back()))
+		{
+			const Unit& unit = *spareMilitaryUnits.back();
+			std::clog << "DELETING UNIT: " << cvbot::kUnitTypeNames[infos.unitClasses[unit.klass].activeType] << ", effective strength = " << getUnitStrength(unit.klass, true) << " vs best possible strength " << bestAvailableEffectiveStrength << '\n';
+			game.tryDelete(spareMilitaryUnits.back()->id);
+		}
+
+		for (const Task* const task : result.unassignedTasks)
+			analysis.unitProductionDemands.push_back(std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task));
 	}
-
 
 	const int showOfForcePowerRatio = computePowerRatioPercentForShowOfForce(civState.activePlayerI, players);
 	analysis.rivalPowerRatioPercent = showOfForcePowerRatio;
@@ -686,9 +689,6 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 	std::clog << "showOfForcePowerRatio = " << showOfForcePowerRatio << '\n';
 	std::clog << "numMilitaryUnits = " << numMilitaryUnits << '\n';
 	std::clog << "numShowOfForceWanted = " << numShowOfForceWanted << '\n';
-
-	for (const Task* const task : result.unassignedTasks)
-		analysis.unitProductionDemands.push_back(std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task));
 
 	//for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
 	//{

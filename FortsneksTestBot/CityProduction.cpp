@@ -81,7 +81,7 @@ namespace
 	}
 }
 
-void mybot::assignCityProduction(
+std::vector<ProductionChoice> mybot::assignCityProduction(
 	IGame& game,
 	const GlobalInfoData& infos,
 	MapGeometry geom,
@@ -180,22 +180,26 @@ void mybot::assignCityProduction(
 	const std::vector<int> taskIndices = computeOptimalAssignment(solverInput.view());
 
 	// Assign.
+	std::vector<ProductionChoice> out(myCities.size());
 	for (const size_t workerI : range(myCities.size()))
 	{
-		const i16vec2 cityCoord = myCities[workerI].coord;
 		const size_t taskI = taskIndices[workerI];
+		ProductionChoice choice;
 		if (taskI >= totalTasks) // -1
-			game.tryChangeProduction(cityCoord, std::monostate());
+			choice = std::monostate();
 		else if (taskI < buildingRecommendations.size())
 		{
 			if (taskI == workerI) // A city should only build its own buildings... Other building tasks have a value of zero, so shouldn't be selected.
-				game.tryChangeProduction(cityCoord, buildingRecommendations[workerI].choice);
+				choice = buildingRecommendations[workerI].choice;
 			else
-				game.tryChangeProduction(cityCoord, std::monostate());
+				choice = std::monostate();
 		}
 		else
-			game.tryChangeProduction(cityCoord, limitedDemands[taskI - buildingRecommendations.size()].klass);
+			choice = limitedDemands[taskI - buildingRecommendations.size()].klass;
+		out[workerI] = choice;
+		game.tryChangeProduction(myCities[workerI].coord, choice);
 	}
+	return out;
 
 	//// Generate lists of production choices.
 	//std::vector<std::vector<CityBuildChoice>> productionChoices;
