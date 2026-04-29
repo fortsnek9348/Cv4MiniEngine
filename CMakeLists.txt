@@ -246,13 +246,13 @@ if (ENABLE_BUILD_ENGINE)
 	endif()
 	# ============================================================================= Cv4HeadlessEngine
 	file(GLOB_RECURSE SRCS "Cv4HeadlessEngine/*.cpp")
-	add_executable(Cv4HeadlessEngine)
+	add_executable(Cv4HeadlessMiniEngine)
 	target_sources(
-		Cv4HeadlessEngine
+		Cv4HeadlessMiniEngine
 		PRIVATE
 			${SRCS}
 	)
-	target_link_libraries(Cv4HeadlessEngine PRIVATE Cv4CommonEngineLib)
+	target_link_libraries(Cv4HeadlessMiniEngine PRIVATE Cv4CommonEngineLib)
 
 	# ============================================================================= Cv4MiniEngine
 	file(GLOB_RECURSE SRCS "CmdCiv4/*.cpp")
@@ -382,10 +382,10 @@ if (ENABLE_BUILD_ENGINE)
 
 	# What is this. "RPATH"? Why can't you just search for libs in the current directory?
 	set_target_properties(Cv4MiniEngine PROPERTIES INSTALL_RPATH .)
-	set_target_properties(Cv4HeadlessEngine PROPERTIES INSTALL_RPATH .)
+	set_target_properties(Cv4HeadlessMiniEngine PROPERTIES INSTALL_RPATH .)
 	set_target_properties(HeckTUIInputTest PROPERTIES INSTALL_RPATH .)
 
-	install(TARGETS Cv4HeadlessEngine Cv4MiniEngine HeckTUIInputTest DESTINATION .)
+	install(TARGETS Cv4HeadlessMiniEngine Cv4MiniEngine HeckTUIInputTest DESTINATION .)
 	
 	# SFML too as we're building from source.
 	install(IMPORTED_RUNTIME_ARTIFACTS SFML::Audio SFML::System DESTINATION .)
