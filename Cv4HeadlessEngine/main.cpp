@@ -3,7 +3,6 @@
 #include <Cv4CommonEngineLib/CvEngine.h>
 #include <Cv4CommonEngineLib/CvInterface.h>
 #include <Cv4CommonEngineLib/CvPopup.h>
-#include <Cv4CommonEngineLib/CvPythonExtensionsSetup.h>
 #include <Cv4CommonEngineLib/CvTranslator.h>
 #include <Cv4CommonEngineLib/DLLMessageQueue.h>
 #include <Cv4CommonEngineLib/IniReader.h>
@@ -22,16 +21,10 @@
 #include <CommonStuff/DynamicLib.h>
 #include <CommonStuff/System.h>
 
-#include <pybind11/embed.h>
+#include <pybind11/pybind11.h>
 
 #include <chrono>
 #include <iostream>
-
-// This has to be done here and not in the common lib so that the linker doesn't throw away the object file.
-PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
-{
-	cvengine::setupCvPythonExtensionsModule(m);
-}
 
 // Remove symbol characters from message so that iostream doesn't go into fail state.
 static std::wstring sanitiseMessageString(std::wstring str)
@@ -811,6 +804,10 @@ public:
 
 struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 {
+	virtual void registerPythonExtensions(const pybind11::module_&) override
+	{
+	}
+
 	// Inherited via ICommonEngineCallbackHandler
 	bool isShiftDown() const override
 	{

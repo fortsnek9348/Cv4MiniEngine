@@ -6,6 +6,7 @@
 #include "inc/Cv4CommonEngineLib/CvUserProfile.h"
 #include "inc/Cv4CommonEngineLib/CvVFS.h"
 #include "inc/Cv4CommonEngineLib/MyCvDLLPython.h"
+#include "PythonAPI/CvPythonExtensionsSetup.h"
 #include "MyCvDLLXml.h"
 #include "MyCvDLLUtility.h"
 #include "Common.h"
@@ -21,6 +22,8 @@
 #include <CvGameCoreDLL/CvEventReporter.h>
 #include <CvGameCoreDLL/CvArtFileMgr.h>
 
+#include <pybind11/embed.h>
+
 #include <chrono>
 #include <iostream>
 
@@ -29,6 +32,14 @@ cvengine::CommonEngineConfig cvengine::gCommonEngineConfig;
 std::unique_ptr<cvengine::CvVFS> cvengine::gVFS;
 
 constexpr int kASyncSeed = 9347;
+
+// Put this here as this object file is guarenteed to be used by an engine.
+PYBIND11_EMBEDDED_MODULE(CvPythonExtensions, m)
+{
+	cvengine::setupCvPythonExtensionsModule(m);
+	cvengine::gCommonEngineConfig.callbackHandler->registerPythonExtensions(m);
+}
+
 
 static void loadPostMenuGlobals()
 {

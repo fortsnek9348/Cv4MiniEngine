@@ -34,7 +34,7 @@
     <ClInclude Include="inc\Cv4CommonEngineLib\AudioXmlDefs.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\CvEngine.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\CvInterface.h" />
-    <ClInclude Include="inc\Cv4CommonEngineLib\CvPythonExtensionsSetup.h" />
+    <ClInclude Include="PythonAPI\CvPythonExtensionsSetup.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\DLLMessageQueue.h" />
     <ClInclude Include="FMPIManager.h" />
     <ClInclude Include="inc\Cv4CommonEngineLib\CvUserProfile.h" />

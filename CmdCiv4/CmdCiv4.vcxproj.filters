@@ -156,9 +156,6 @@
     <ClCompile Include="DLLInterface\MyCvDLLPlotBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PythonAPI\CvPythonExtensions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OutputRedirection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

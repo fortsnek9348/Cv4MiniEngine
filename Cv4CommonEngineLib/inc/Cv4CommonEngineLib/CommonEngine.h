@@ -39,6 +39,7 @@ namespace cvengine
 	class ICommonEngineCallbackHandler
 	{
 	public:
+		virtual void registerPythonExtensions(const pybind11::module_& m) = 0;
 		virtual bool isShiftDown() const = 0;
 		virtual bool isAltDown() const = 0;
 		virtual bool isCtrlDown() const = 0;

@@ -10,6 +10,8 @@
 #include "DLLInterface/MyCvDLLFeature.h"
 #include "DLLInterface/MyCvDLLFlagEntity.h"
 #include "DLLInterface/MyCvDLLPlotBuilder.h"
+#include "PythonAPI/CyTuiDialog.h"
+#include "PythonAPI/CyGInterfaceScreen.h"
 
 #include <Cv4CommonEngineLib/CivIni.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
@@ -221,6 +223,12 @@ int CvApp::run()
 	}
 
 	return 0;
+}
+
+void CvApp::registerPythonExtensions(const pybind11::module_& m)
+{
+	cvengine::CyGInterfaceScreen::registerWithPython(m);
+	cvengine::CyTuiDialog::registerWithPython(m);
 }
 
 bool CvApp::isShiftDown() const

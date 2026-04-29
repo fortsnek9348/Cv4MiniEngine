@@ -136,6 +136,8 @@ namespace cvengine
 		// Main loop. Returns exit code.
 		int run();
 
+		virtual void registerPythonExtensions(const pybind11::module_& m) override;
+
 		virtual bool isShiftDown() const override;
 		virtual bool isAltDown() const override;
 		virtual bool isCtrlDown() const override;

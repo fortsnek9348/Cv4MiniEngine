@@ -129,7 +129,7 @@
     <ClInclude Include="CompressionBinaryStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Cv4CommonEngineLib\CvPythonExtensionsSetup.h">
+    <ClInclude Include="PythonAPI\CvPythonExtensionsSetup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PythonPopup.h">
