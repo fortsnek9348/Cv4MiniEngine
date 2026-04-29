@@ -1040,7 +1040,7 @@ int main(int argc, const char* argv[])
 			{
 				if (popupInfo->getText() == L"showDawnOfMan")
 					continue;
-				std::wclog << popupInfo->getText() << L'\n';
+				std::wclog << popupInfo->getText() << L'\n'; // This could be a bot failure exception.
 				throw std::runtime_error("Active player has a queued popup.");
 			}
 		}

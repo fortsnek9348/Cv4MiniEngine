@@ -34,20 +34,17 @@ namespace
 		switch (choice)
 		{
 		case EBuildingClass::Granary:
-			return 300;
+			return 200;
 		case EBuildingClass::Lighthouse:
 			// TODO: Should adjust based on number of water plots.
-			return 200;
+			return 190;
 
 		case EBuildingClass::Obelisk:
 			return std::ranges::contains(leader.traits, ELeaderTrait::Charismatic) * 200 + isCultureUseful * 200;
 
 		case EBuildingClass::Barracks:
-			// Low value. Other decision code will build this if the city has unit demand.
-			return 50;
 		case EBuildingClass::Stable:
-			// Low value. Other decision code will build this if the city has unit demand.
-			return 40;
+			return 0;
 
 		case EBuildingClass::Library:
 		case EBuildingClass::University:
@@ -57,13 +54,15 @@ namespace
 			return 100;
 
 		case EBuildingClass::Forge:
-			return averageProductionRate * 50;
+			//return averageProductionRate * 50;
+			return 150;
 		case EBuildingClass::Levee:
 			// TODO: Build forge first or not?
-			return 300;
+			return 120;
 		case EBuildingClass::Factory:
-			return averageProductionRate * 40 + city.isPowered * 50;
+			//return averageProductionRate * 40 + city.isPowered * 50;
 			//return 60 + city.isPowered * 20;
+			return 100;
 		case EBuildingClass::IronWorks:
 			return averageProductionRate * 30;
 
@@ -72,14 +71,19 @@ namespace
 			return hasBorderingCivs * 400;
 
 		case EBuildingClass::Colosseum:
-			return cityData.happiness <= 0 ? 300 : 0;
+			//return cityData.happiness <= 0 ? 300 : 0;
+			return 0;
 
+		//case EBuildingClass::Market:
+		//	return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.happiness < 0) * 50;
+		//case EBuildingClass::Grocer:
+		//	return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.healthiness < 0) * 50;
+		//case EBuildingClass::Bank:
+		//	return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider / 2;
 		case EBuildingClass::Market:
-			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.happiness < 0) * 50;
 		case EBuildingClass::Grocer:
-			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider + (cityData.healthiness < 0) * 50;
 		case EBuildingClass::Bank:
-			return city.optInspectableCityInfo->baseCommerceRateTimes100WithZeroSlider / 2;
+			return 0;
 
 		case EBuildingClass::GreatPalace: // Forbidden
 			// TODO: Should determine the best city to build this in.
@@ -99,17 +103,19 @@ namespace
 			return 0;
 
 
-
+			// These only get built if city is unhealthy.
 		case EBuildingClass::Hospital:
 		case EBuildingClass::RecyclingCenter:
 		case EBuildingClass::Aqueduct:
 		case EBuildingClass::PublicTransportation:
-			return cityData.healthiness < 0 ? 200 : 0;
+			return (cityData.healthiness < 0) * 200;
+
+			// These have some other slight use.
 		case EBuildingClass::Supermarket:
-			return (cityData.healthiness < 0 ? 200 : 0) + 100;
+			return (cityData.healthiness < 0) * 200 + 100;
 
 		case EBuildingClass::Harbor:
-			return cityData.healthiness < 0 ? 200 : 100;
+			return (cityData.healthiness < 0) * 100 + 100;
 
 		case EBuildingClass::CustomHouse:
 			// TODO: Only useful if not in mercantilism.
@@ -135,7 +141,7 @@ namespace
 			return 100;
 
 		case EBuildingClass::Courthouse:
-			return cityData.maintainenceCents;
+			return std::min<int>(cityData.maintainenceCents, 500);
 
 		case EBuildingClass::Jail:
 			return cityData.percentAngerContributions[City::InspectableCityInfo::WarWeariness] * 100;
@@ -145,7 +151,7 @@ namespace
 
 		case EBuildingClass::IntelligenceAgency:
 		case EBuildingClass::NationalSecurity:
-			return 50;
+			return 0;
 
 		case EBuildingClass::JewishTemple:
 		case EBuildingClass::ChristianTemple:
@@ -323,26 +329,35 @@ namespace
 
 	int computeProcessScore(
 		EProcess choice,
-		unsigned int averageProductionRate
+		[[maybe_unused]] unsigned int averageProductionRate
 	)
 	{
-		ECommerce commerce{};
+		//ECommerce commerce{};
+		//switch (choice)
+		//{
+		//default:
+		//case EProcess::Wealth: commerce = ECommerce::Gold; break;
+		//case EProcess::Research: commerce = ECommerce::Research; break;
+		//case EProcess::Culture: commerce = ECommerce::Culture; break;
+		//}
+		//
+		//const int commerceOutput = averageProductionRate;
+		//
+		//return commerce == ECommerce::Culture ? 0 : 5 * commerceOutput + (commerce == ECommerce::Gold) * 10;
+
 		switch (choice)
 		{
+		case EProcess::Wealth: return 50;
+		case EProcess::Research: return 20;
+		case EProcess::Culture:
 		default:
-		case EProcess::Wealth: commerce = ECommerce::Gold; break;
-		case EProcess::Research: commerce = ECommerce::Research; break;
-		case EProcess::Culture: commerce = ECommerce::Culture; break;
+			return 10;
 		}
-
-		const int commerceOutput = averageProductionRate;
-
-		return commerce == ECommerce::Culture ? 0 : 5 * commerceOutput + (commerce == ECommerce::Gold) * 10;
 	}
 
 	static int stabliseProduction(int baseValue, int progress, int cost)
 	{
-		return baseValue + baseValue * progress / cost;
+		return baseValue + baseValue * progress / cost / 1000;
 	}
 
 	struct ProductionEvaluator
@@ -428,6 +443,7 @@ namespace
 			}
 
 			assignedWorkers[taskI] = bestWorkerI;
+			workerTimes[bestWorkerI] = bestFinishT;
 		}
 
 		return assignedWorkers;

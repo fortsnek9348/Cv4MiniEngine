@@ -404,7 +404,7 @@ namespace cvbot
 
 		// Red Fist
 		// Enhanced from BUG mod in that we report unknown.
-		std::optional<bool> optIsWarPreping{};
+		std::optional<bool> optIsWarPrepping{};
 
 		std::optional<EReligion> optStateReligion{};
 

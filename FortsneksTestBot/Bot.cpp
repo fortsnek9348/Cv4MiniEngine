@@ -79,6 +79,7 @@ class MyBot : public IBot
 public:
 	std::ostream& log;
 	std::ofstream civLogCSV;
+	std::vector<i16vec2> loggingCityCoords;
 	const GameSetup setup;
 	const GlobalInfoData infos;
 
@@ -374,8 +375,29 @@ public:
 		{
 			// current tech, city productions...
 			civLogCSV << cvbot::kTechNames[techChoice] << ',';
-			for (const ProductionChoice& choice : cityProductionChoices)
-				civLogCSV << choice << ',';
+
+			for (const City& city : myCities)
+				if (!std::ranges::contains(loggingCityCoords, city.coord))
+					loggingCityCoords.push_back(city.coord);
+
+			for (const i16vec2 coord : loggingCityCoords)
+			{
+				if (const auto optCity = game.getRevealedCityAt(coord))
+				{
+					if (optCity->owner == civState.activePlayerI)
+					{
+						const auto& cityInfo = *optCity->optInspectableCityInfo;
+						const ProductionChoice choice = cityInfo.productionChoice;
+						const int remaining = std::max(1, cityInfo.prodBinMax - cityInfo.prodBinLevel);
+						const int turnsLeft = cdiv(remaining, static_cast<unsigned int>(std::max(1, cityInfo.prodBinRate)));
+						civLogCSV << choice;
+						if (!std::holds_alternative<std::monostate>(choice) && !std::holds_alternative<EProcess>(choice))
+							civLogCSV << " (" << turnsLeft << ')';
+					}
+				}
+				civLogCSV << ',';
+			}
+
 			civLogCSV << '\n';
 		}
 

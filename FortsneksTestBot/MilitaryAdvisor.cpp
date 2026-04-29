@@ -470,6 +470,14 @@ namespace
 				continue;
 			}
 
+			if (players[i]->optIsWarPrepping == false)
+				continue;
+
+			if (std::ranges::any_of(players[i]->relations, [](const Relation& rel) { return rel.war; }))
+				continue;
+
+			std::wclog << L"Show of force considering " << players[i]->name << L'\n';
+
 			if (players[i]->optVisibleDemographics)
 			{
 				sumPower += power;
@@ -479,7 +487,7 @@ namespace
 		}
 
 		if (numPowerKnown <= 0)
-			return 100;
+			return 150;
 		else
 			return heck::rdiv(myPower * 100, static_cast<unsigned int>(std::max(1, maxPower)));
 			//return heck::rdiv(myPower * numPowerKnown * 100, static_cast<unsigned int>(std::max(1, sumPower)));
@@ -621,6 +629,9 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 
 	const int numMilitaryUnits = static_cast<int>(std::ranges::count_if(myUnits, isMilitaryUnit));
 
+	const int showOfForcePowerRatio = computePowerRatioPercentForShowOfForce(civState.activePlayerI, players);
+	analysis.rivalPowerRatioPercent = showOfForcePowerRatio;
+
 	if (!myCities.empty())
 	{
 		const std::vector<EUnitClass> availableUnitClasses = game.getCityProductionChoices(myCities.front().coord)
@@ -678,28 +689,28 @@ MilitaryAnalysis mybot::doMilitaryAnalysis(
 
 		for (const Task* const task : result.unassignedTasks)
 			analysis.unitProductionDemands.push_back(std::visit([&](const auto& typedTask) { return typedTask.makeDemand(unitPreference); }, *task));
+
+		// power ratio = numMilitaryUnits / numRivalUnits
+
+		constexpr int kTargetPowerRatio = 90;
+		const int targetNumMilitaryUnits = numMilitaryUnits * kTargetPowerRatio / showOfForcePowerRatio;
+		const int numShowOfForceWanted = std::max(targetNumMilitaryUnits - numMilitaryUnits, 0);
+
+		std::clog << "showOfForcePowerRatio = " << showOfForcePowerRatio << '\n';
+		std::clog << "numMilitaryUnits = " << numMilitaryUnits << '\n';
+		std::clog << "numShowOfForceWanted = " << numShowOfForceWanted << '\n';
+
+		for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
+		{
+			const UnitProductionDemand demand{
+				.klass = unitPreference.attacker,
+				.target = myCities.front().coord,
+				.turns = 0,
+				.urgency = EUnitProductionUrgency::ShowOfForce,
+			};
+			analysis.unitProductionDemands.push_back(demand);
+		}
 	}
-
-	const int showOfForcePowerRatio = computePowerRatioPercentForShowOfForce(civState.activePlayerI, players);
-	analysis.rivalPowerRatioPercent = showOfForcePowerRatio;
-
-	const int targetNumMilitaryUnits = numMilitaryUnits * 100 / showOfForcePowerRatio;
-	const int numShowOfForceWanted = std::max(targetNumMilitaryUnits - numMilitaryUnits, 0);
-
-	std::clog << "showOfForcePowerRatio = " << showOfForcePowerRatio << '\n';
-	std::clog << "numMilitaryUnits = " << numMilitaryUnits << '\n';
-	std::clog << "numShowOfForceWanted = " << numShowOfForceWanted << '\n';
-
-	//for ([[maybe_unused]] const int i : range(numShowOfForceWanted))
-	//{
-	//	const UnitProductionDemand demand{
-	//		.klass = unitPreference.attacker,
-	//		.target = myCities.front().coord,
-	//		.turns = 0,
-	//		.urgency = EUnitProductionUrgency::ShowOfForce,
-	//	};
-	//	analysis.unitProductionDemands.push_back(demand);
-	//}
 
 	return analysis;
 }

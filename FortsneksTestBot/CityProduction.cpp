@@ -18,10 +18,10 @@ namespace
 
 	static constexpr auto kUrgencyTimeFlexibility = std::to_array({
 			1000, // None
-			100, // MilitaryPolice,
+			200, // MilitaryPolice,
 			100, // NonCombat,
 			50, // Escort,
-			8, // ShowOfForce
+			20, // ShowOfForce
 			10, // MilitaryBuildUp,
 			4, // UndefendedCity,
 			2, // TerritoryDefence,
@@ -29,34 +29,30 @@ namespace
 		});
 	static_assert(kUrgencyTimeFlexibility.size() == (size_t)EUnitProductionUrgency::Num);
 
-	// Remember: Bulding final assignment value is around 100.
-
-	constexpr auto kUrgencyPerTurnValue = std::to_array({
+	// These values compare to building values.
+	constexpr auto kUrgencyNominalValue = std::to_array({
 		1, // None
 		50, // MilitaryPolice,
-		80, // NonCombat,
-		100, // Escort,
-		250, // ShowOfForce
-		300, // MilitaryBuildUp,
-		500, // UndefendedCity,
-		1000, // TerritoryDefence,
+		700, // NonCombat,
+		800, // Escort,
+		500, // ShowOfForce
+		600, // MilitaryBuildUp,
+		1000, // UndefendedCity,
+		2000, // TerritoryDefence,
 		10'000, // Survival,
 		});
-	static_assert(kUrgencyPerTurnValue.size() == (size_t)EUnitProductionUrgency::Num);
+	static_assert(kUrgencyNominalValue.size() == (size_t)EUnitProductionUrgency::Num);
 
-	int computeArrivalTimeScoreModifier(unsigned int averageProductionRate, int gameSpeedScale, int progress, int cost, int moveSteps, int deadlineTurns, EUnitProductionUrgency urgency)
+	int computeArrivalTimeScoreModifier(int baseValue, unsigned int averageProductionRate, int gameSpeedScale, int progress, int cost, int moveSteps, int deadlineTurns, EUnitProductionUrgency urgency)
 	{
 		const int productionTurns = cdiv(cost - progress, averageProductionRate);
 		const int arrivalTime = productionTurns + moveSteps;
-		//const int arrivalTimeScore = (deadlineTurns - arrivalTime) * kUrgencyTimeSensitivity[std::to_underlying(urgency)];
 
 		// (a + k) / (b + k)
 		const int flexibility = kUrgencyTimeFlexibility[std::to_underlying(urgency)];
-		// Above the threshold, the score will always be close to kArrivalTimeScoreScale.
-		//constexpr int kArrivalTimeScoreThreshold = 10000;
-		constexpr int kArrivalTimeScoreScale = 100;
+		//constexpr int kArrivalTimeScoreScale = 100;
 		// arrivalTimeScore is kArrivalTimeScoreScale if unit arrives on time. Less flexibility will cause a bigger deviation if the unit does not.
-		return (deadlineTurns + flexibility * gameSpeedScale / 100) * kArrivalTimeScoreScale / std::max(1, arrivalTime + flexibility * gameSpeedScale / 100);
+		return (deadlineTurns + flexibility * gameSpeedScale / 100) * baseValue / std::max(1, arrivalTime + flexibility * gameSpeedScale / 100);
 	}
 
 	int computeUnitScore(
@@ -72,12 +68,12 @@ namespace
 		EUnitProductionUrgency urgency
 	)
 	{
-		const int urgencyScore = kUrgencyPerTurnValue[std::to_underlying(urgency)];
+		const int baseScore = kUrgencyNominalValue[std::to_underlying(urgency)];
 		const UnitInfo& info = infos.units[choice];
 		const int cost = info.productionCost;
 		const int distance = info.domain == EDomain::Immobile ? 0 : computeDistance(geom, cityCoord, target, EDistanceMetric::Step);
-		const int arrivalTimeScoreModifier = computeArrivalTimeScoreModifier(averageProductionRate, gameSpeedScale, prodProgress, cost, distance / std::max<int>(1, info.moveSteps), deadlineTurns, urgency);
-		return urgencyScore * arrivalTimeScoreModifier;
+		const int arrivalTimeScoreModifier = computeArrivalTimeScoreModifier(baseScore, averageProductionRate, gameSpeedScale, prodProgress, cost, distance / std::max<int>(1, info.moveSteps), deadlineTurns, urgency);
+		return arrivalTimeScoreModifier;
 	}
 }
 

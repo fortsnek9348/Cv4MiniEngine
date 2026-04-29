@@ -520,7 +520,7 @@ static Player convert(CvPlayerAI& otherPlayer, bool allKnowing)
 	out.score = otherPlayer.calculateScore(); // calls python
 	out.civ = static_cast<cvbot::ECivlisation>(otherPlayer.getCivilizationType());
 	out.leader = static_cast<cvbot::ELeaderhead>(otherPlayer.getLeaderType());
-	out.optIsWarPreping = isWHEOOH(otherPlayerI, gGlobals.getGame().getActivePlayer());
+	out.optIsWarPrepping = isWHEOOH(otherPlayerI, gGlobals.getGame().getActivePlayer());
 	// As in BUG, if we can see the player's city list, show the exact number, otherwise, count up revealed cities.
 	if (canSeeAllCities(otherPlayer))
 		out.optNumCities = out.numRevealedCities = otherPlayer.getNumCities();

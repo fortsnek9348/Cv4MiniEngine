@@ -345,7 +345,8 @@ void MyCvDLLInterfaceIFace::addPopup(CvPopupInfo* pInfo, PlayerTypes ePlayer, bo
 	// We own this pointer now.
 	std::unique_ptr<CvPopupInfo> pInfoOwner(pInfo);
 
-	std::wclog << L"addPopup for player " << std::to_underlying(ePlayer) << L": " << pInfo->getText() << std::endl;
+	// When exceptions are enabled on the stream, we'll need to sanitise the text. So, let's just not do this for now.
+	//std::wclog << L"addPopup for player " << std::to_underlying(ePlayer) << L": " << pInfo->getText() << std::endl;
 
 	if (ePlayer == NO_PLAYER)
 		ePlayer = gGlobals.getGame().getActivePlayer();
