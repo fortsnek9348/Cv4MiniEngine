@@ -1,3 +1,5 @@
+#include "GameRunScope.h"
+
 #include <Cv4CommonEngineLib/CommonEngine.h>
 #include <Cv4CommonEngineLib/CvAppStates.h>
 #include <Cv4CommonEngineLib/CvEngine.h>
@@ -13,18 +15,20 @@
 #include <CvGameCoreDLL/CvDLLSymbolIFaceBase.h>
 #include <CvGameCoreDLL/CvGameAI.h>
 #include <CvGameCoreDLL/CvGlobals.h>
-#include <CvGameCoreDLL/CvInfos.h>
 #include <CvGameCoreDLL/CvMap.h>
 #include <CvGameCoreDLL/CvPlayerAI.h>
 #include <CvGameCoreDLL/CvPopupInfo.h>
+#include <CvGameCoreDLL/CvTeamAI.h>
 
 #include <CommonStuff/DynamicLib.h>
 #include <CommonStuff/System.h>
+#include <CommonStuff/range.h>
 
 #include <pybind11/pybind11.h>
 
 #include <chrono>
 #include <iostream>
+#include <iomanip>
 
 // Remove symbol characters from message so that iostream doesn't go into fail state.
 static std::wstring sanitiseMessageString(std::wstring str)
@@ -968,14 +972,14 @@ int main(int argc, const char* argv[])
 	// Patch scripts.
 	(void)pybind11::module::import("Cv4MiniEngineEntryPoint").attr("init")();
 
-	cvengine::app::SimplifiedInitCore gameSetup = cvengine::app::getGameSetupFromIni();
-	gameSetup.gameName = L"Headless1";
-	gameSetup.playerName = L"HeadlessPlayer";
-
 	const auto progressCallback = [](std::wstring_view s) { std::wcout << s << '\n'; };
 
 	if (saveGameLoadPath.empty())
 	{
+		cvengine::app::SimplifiedInitCore gameSetup = cvengine::app::getGameSetupFromIni();
+		gameSetup.gameName = L"Headless1";
+		gameSetup.playerName = L"HeadlessPlayer";
+
 		cvengine::app::NewGameStartupState state(std::move(gameSetup), false);
 		state.onEnter(progressCallback);
 		state.onLeave();
@@ -992,13 +996,6 @@ int main(int argc, const char* argv[])
 		state.onEnter(progressCallback);
 	}
 
-	for (int i = 0; i < gGlobals.getMAX_CIV_PLAYERS(); ++i)
-	{
-		const CvPlayer& player = GET_PLAYER(static_cast<PlayerTypes>(i));
-		if (player.isEverAlive())
-			std::wcout << L"Player " << i << L' ' << gGlobals.getLeaderHeadInfo(player.getLeaderType()).getDescription() << L" / " << player.getCivilizationDescription() << std::endl;
-	}
-
 	constexpr int kNumAIAutoplayTurns = 100'000;
 	constexpr int kMaxUpdatesStalled = 10'000;
 
@@ -1009,12 +1006,12 @@ int main(int argc, const char* argv[])
 	CvPlayer& activePlayer = GET_PLAYER(game.getActivePlayer());
 	activePlayer.setPlayerBotFinalTurn(kNumAIAutoplayTurns);
 
+
 	int lastUpdateTurn = 0;
 	int lastProgressingUpdateNum = -1;
 	int updateNum = 0;
 
-	using Clock = std::chrono::steady_clock;
-	const auto t0 = Clock::now();
+	GameRunScope runScope;
 
 	while (game.getGameState() == GAMESTATE_ON)
 	{
@@ -1030,6 +1027,8 @@ int main(int argc, const char* argv[])
 
 		// Doing the update first will get the bot to handle popups.
 		game.update();
+
+		runScope.update();
 
 		if (activePlayer.isTurnActive())
 		{
@@ -1054,46 +1053,8 @@ int main(int argc, const char* argv[])
 			throw std::runtime_error("Game update loop has stalled.");
 	}
 
-	const auto t1 = Clock::now();
+	runScope.dumpSummary();
 
-	lastUpdateTurn = game.getGameTurn();
-
-	std::vector<const CvPlayer*> players;
-	for (int i = 0; i < gGlobals.getMAX_CIV_PLAYERS(); ++i)
-		if (CvPlayer* const player = &GET_PLAYER(static_cast<PlayerTypes>(i)); player->isEverAlive())
-			players.push_back(player);
-
-	std::ranges::stable_sort(players, std::greater(), [&game](const CvPlayer* player) {
-		return game.getPlayerScore(player->getID());
-		});
-
-	for (const CvPlayer* const player : players)
-	{
-		std::wcout << L"Player " << player->getID();
-		std::wcout << L' ' << (game.getWinner() == player->getTeam() ? L"winner" : player->isAlive() ? L"alive" : L"dead");
-		std::wcout << L' ' << game.getPlayerScore(player->getID());
-		std::wcout << L' ' << gGlobals.getLeaderHeadInfo(player->getLeaderType()).getDescription() << L" / " << player->getCivilizationDescription();
-		std::wcout << L", " << player->getNumCities() << L" cities";
-		std::wcout << std::endl;
-	}
-
-	{
-		std::cout << "AI/bot autoplay ended.\n";
-		std::cout << "Turn = " << lastUpdateTurn << '\n';
-		std::cout << "Turnslice = " << game.getTurnSlice() << '\n';
-		const int turnSliceShift = (4 - game.getTurnSlice() % 4) % 4;
-		game.changeTurnSlice(turnSliceShift);
-		for (int k = 0; k < 4; ++k)
-		{
-			std::cout << "SYNC CHECKSUM " << k << " = " << game.calculateSyncChecksum() << '\n';
-			game.changeTurnSlice(1);
-		}
-		game.changeTurnSlice(-turnSliceShift-4);
-		std::cout << std::flush;
-	}
-
-	const auto duration = std::chrono::duration<double>(t1 - t0);
-	std::cout << lastUpdateTurn << " turns in " << duration << " (" << (duration / lastUpdateTurn) << " per turn)." << std::endl;
 
 	cvengine::shutdownCommonEngine();
 

@@ -228,7 +228,7 @@ public:
 	bool isForcePeace(TeamTypes eIndex) const;																// Exposed to Python
 	void setForcePeace(TeamTypes eIndex, bool bNewValue);
 
-	bool isVassal(TeamTypes eIndex) const;																// Exposed to Python
+	DllExportForInterface bool isVassal(TeamTypes eIndex) const;																// Exposed to Python
 	void setVassal(TeamTypes eIndex, bool bNewValue, bool bCapitulated);
 
 	void assignVassal(TeamTypes eVassal, bool bSurrender) const;																// Exposed to Python

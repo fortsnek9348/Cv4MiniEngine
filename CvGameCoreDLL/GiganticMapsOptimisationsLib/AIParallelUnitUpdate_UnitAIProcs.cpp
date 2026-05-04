@@ -247,7 +247,7 @@ void DryRunUnitState::AI_barbAttackMove(GroupUpdateRecord& record, IPathFinder& 
 			return;
 		}
 	}
-
+	
 	if (AI_load(record, group, pathFinder, UNITAI_ASSAULT_SEA, MISSIONAI_LOAD_ASSAULT, NO_UNITAI, -1, -1, -1, -1, MOVE_SAFE_TERRITORY, 1))
 	{
 		return;

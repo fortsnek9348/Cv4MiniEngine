@@ -314,7 +314,7 @@ public:
 	PlayerTypes getRankPlayer(int iRank) const;															// Exposed to Python
 	void setRankPlayer(int iRank, PlayerTypes ePlayer);
 
-	int getPlayerRank(PlayerTypes ePlayer) const;														// Exposed to Python 
+	DllExportForInterface int getPlayerRank(PlayerTypes ePlayer) const;														// Exposed to Python 
 	void setPlayerRank(PlayerTypes ePlayer, int iRank);
 
 	DllExport int getPlayerScore(PlayerTypes ePlayer) const;													// Exposed to Python
@@ -323,7 +323,7 @@ public:
 	TeamTypes getRankTeam(int iRank) const;																	// Exposed to Python
 	void setRankTeam(int iRank, TeamTypes eTeam);
 
-	int getTeamRank(TeamTypes eTeam)const;																	// Exposed to Python
+	DllExportForInterface int getTeamRank(TeamTypes eTeam)const;																	// Exposed to Python
 	void setTeamRank(TeamTypes eTeam, int iRank);
 
 	DllExport int getTeamScore(TeamTypes eTeam) const;																// Exposed to Python

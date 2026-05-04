@@ -1721,7 +1721,7 @@ class CvMainInterface:
 					if team.isVassal(iOwnerTeam):
 						masters[teamI] = iOwnerTeam
 						break
-			playerInfoList.append((teamRanks[masters[teamI]], 1 if team.isAVassal() else 0, teamRanks[ePlayer], playerRanks[ePlayer], ePlayer))
+			playerInfoList.append((teamRanks[masters[teamI]], 1 if team.isAVassal() else 0, teamRanks[teamI], playerRanks[ePlayer], ePlayer))
 		
 		playerInfoList.sort()
 		

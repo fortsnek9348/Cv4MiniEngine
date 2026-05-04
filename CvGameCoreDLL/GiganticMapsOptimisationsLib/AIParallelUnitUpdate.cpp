@@ -285,6 +285,8 @@ namespace
 
 		explicit DryRunRecordingPathFinder(IVectorisedPathfinder& pathfinder, VectorisedPathfinderMap& map) : pathfinderMap(map), pathfinder(pathfinder)
 		{
+			// BUG FIX: Reset pathfinder before use.
+			(void)pathfinder.reset({});
 		}
 
 		void flush()
@@ -767,6 +769,7 @@ namespace
 		// And while we're at it, start on the conflict graph by populating with the writes.
 		// Use work stealing as unit update performance can vary wildly.
 		heck::parallelWorkStealingForEachN(groupIds.size(), [&player, &pathfinderMap, &groupUpdateTasks, &conflictsContainer, groupIds, threadLocalData, updateProcessSeed](size_t threadI, size_t taskI) {
+			//static std::mutex mutex; const std::lock_guard lock(mutex);
 			const CvSelectionGroupAI* const liveGroup = static_cast<const CvSelectionGroupAI*>(player.getSelectionGroup(groupIds[taskI]));
 
 			GroupUpdateTask& task = groupUpdateTasks[taskI];
@@ -780,7 +783,6 @@ namespace
 
 			DryRunRecordingPathFinder pathFinder(*threadLocalData[threadI].astar, pathfinderMap);
 
-			
 			task.dryRunResult = dryrun_CvSelectionGroupAI_AI_update(*liveGroup, pathFinder, updateProcessSeed);
 			
 
