@@ -852,18 +852,6 @@ struct HeadlessApp : cvengine::ICommonEngineCallbackHandler
 	}
 };
 
-[[noreturn]] static void invalidArgs()
-{
-	static constexpr const char* kHelp = R"(Usage: Cv4HeadlessMiniEngine [options] [path to save game]
-Options:
-	-bot <path to DLL/so>
-		Use the specified bot.
-)";
-
-	std::cerr << kHelp << std::endl;
-	std::exit(EXIT_FAILURE);
-}
-
 int main(int argc, char* argv[])
 {
 	// Don't you just hate it when you can't see error messages because the error output is in fail state?
@@ -882,8 +870,8 @@ int main(int argc, char* argv[])
 	const std::filesystem::path userDataDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Data);
 	const std::filesystem::path userConfigDirPath = heck::getUserGamesSpecialDirectory("Beyond the Sword", heck::EUserGamesSpecialDirectory::Config);
 	const std::filesystem::path cacheDirPath = heck::getUserGamesSpecialDirectory("Cv4MiniEngine", heck::EUserGamesSpecialDirectory::Cache);
-	const std::filesystem::path replaysDirName = L"Replays (Cv4HeadlessEngine)";
-	const std::filesystem::path savesDirName = L"Saves (Cv4HeadlessEngine)";
+	const std::filesystem::path replaysDirName = L"Replays (Cv4HeadlessMiniEngine)";
+	const std::filesystem::path savesDirName = L"Saves (Cv4HeadlessMiniEngine)";
 	const std::filesystem::path iniFilename = L"Cv4MiniEngine.ini";
 	const std::filesystem::path profileFilename = L"Cv4MiniEngine Profile.txt";
 
