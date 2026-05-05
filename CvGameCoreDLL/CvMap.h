@@ -271,7 +271,7 @@ public:
 	DllExport virtual void read(FDataStreamBase* pStream);
 	DllExport virtual void write(FDataStreamBase* pStream);
 
-	// fortsnekL const custom map options
+	// fortsnek: const custom map options
 	void rebuild(int iGridW, int iGridH, int iTopLatitude, int iBottomLatitude, bool bWrapX, bool bWrapY, WorldSizeTypes eWorldSize, ClimateTypes eClimate, SeaLevelTypes eSeaLevel, int iNumCustomMapOptions, const CustomMapOptionTypes * eCustomMapOptions);		// Exposed to Python
 
 protected:

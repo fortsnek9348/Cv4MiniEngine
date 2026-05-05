@@ -58,6 +58,7 @@ namespace
 #if !CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
 			text << L"    Native file dialogs: https://github.com/btzy/nativefiledialog-extended\n";
 #endif
+			text << L"    CLI11: https://github.com/CLIUtils/CLI11\n";
 
 			client->addChild(std::make_shared<tui::Label>(text.str()));
 		}
