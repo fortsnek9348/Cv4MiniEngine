@@ -23,6 +23,7 @@ public:
 	virtual bool callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<int>* pIntList) override;
 	virtual bool callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, int* pIntList, int* iListSize) override;
 	virtual bool callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<float>* pFloatList) override;
+	bool callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<std::wstring>* result);
 	virtual bool callPythonFunction(const char* szModName, const char* szFxnName, int iArg, long* result) override;
 	virtual bool pythonUsingDefaultImpl() override;
 

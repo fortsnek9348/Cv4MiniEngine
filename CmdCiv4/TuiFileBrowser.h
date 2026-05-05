@@ -7,7 +7,7 @@ namespace cvengine
 	struct TuiFileBrowserConfig
 	{
 		std::filesystem::path defPath;
-		std::wstring fileExt{};
+		std::vector<std::wstring> fileExts{}; // First is used as the default
 		bool toSave = false;
 		bool wantDirectory = false;
 		bool useText = true;

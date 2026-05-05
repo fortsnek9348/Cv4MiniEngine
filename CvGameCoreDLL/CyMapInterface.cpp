@@ -7,6 +7,7 @@
 #include "CyPlot.h"
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 //
 // published python interface for CyMap

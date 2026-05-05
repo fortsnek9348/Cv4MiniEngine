@@ -103,6 +103,18 @@ namespace cvengine
 		cvengine::app::LoadGameState mImpl;
 	};
 
+	class LoadScenarioCvAppState : public ICvAppState
+	{
+	public:
+		explicit LoadScenarioCvAppState(const std::filesystem::path& path);
+		virtual void onEnter(CvApp&) override;
+		virtual void onUpdate(CvApp&) override;
+		virtual void onLeave(CvApp&) override;
+
+	private:
+		cvengine::app::StartScenarioGameState mImpl;
+	};
+
 	class CvApp : public ICommonEngineCallbackHandler
 	{
 	public:
@@ -148,6 +160,7 @@ namespace cvengine
 		// display load screen, do the loading, push InGame, reset UI
 		// Deferred to next update.
 		virtual void deferLoadGame(const std::filesystem::path&) override;
+		void deferLoadScenario(const std::filesystem::path&);
 
 		virtual bool isAutorun() const override;
 

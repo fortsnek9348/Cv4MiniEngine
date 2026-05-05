@@ -15,7 +15,7 @@ using namespace cvengine;
 
 // For testing
 //#ifndef CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
-//#define CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
+//#define CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER 1
 //#endif
 
 #if !CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
@@ -30,9 +30,8 @@ using namespace cvengine;
 #include <Windows.h>
 #endif
 
-static const std::filesystem::path kGameName = "Beyond the Sword";
-
 static constexpr const wchar_t* kSaveFileExtension = L"CivBeyondSwordSave";
+static constexpr const wchar_t* kWorldBuilderExtensions = L"CivBeyondSwordWBSave,CivWarlordsWBSave,Civ4WorldBuilderSave";
 
 #ifndef CV4MINIENGINE_USE_CONSOLE_FILE_BROWSER
 static bool initNFD()
@@ -59,6 +58,7 @@ static std::string convertToNFDString(std::wstring_view s)
 #endif
 
 static const auto kNfdSaveFileExtension = convertToNFDString(kSaveFileExtension);
+static const auto kNfdWorldBuilderExtensions = convertToNFDString(kWorldBuilderExtensions);
 
 std::optional<std::filesystem::path> cvengine::promptSaveFilePath(const std::filesystem::path& defPath)
 {
@@ -93,12 +93,18 @@ std::optional<std::filesystem::path> cvengine::promptSaveFilePath(const std::fil
 	}
 }
 
-std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir)
+std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir, EFileType fileType)
 {
 	(void)initNFD();
 
 	nfdnchar_t* outPath{};
-	nfdnfilteritem_t filters[] = { { HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kNfdSaveFileExtension.c_str() } };
+
+	static const nfdnfilteritem_t kFileTypeFilters[]{
+		{ HECK_NFD_STRING_LITERAL("Civ4 BTS saves"), kNfdSaveFileExtension.c_str() },
+		{ HECK_NFD_STRING_LITERAL("Civ4 World Builder saves"), kNfdWorldBuilderExtensions.c_str() },
+	};
+
+	const nfdnfilteritem_t filters[] = { kFileTypeFilters[std::to_underlying(fileType)] };
 	const nfdopendialognargs_t args{
 		.filterList = filters,
 		.filterCount = std::size(filters),
@@ -157,16 +163,16 @@ std::optional<std::filesystem::path> cvengine::promptSaveFilePath(const std::fil
 {
 	return cvengine::tryPromptTuiFileBrowserPath({
 			.defPath = defPath,
-			.fileExt = kSaveFileExtension,
+			.fileExts{ kSaveFileExtension },
 			.toSave = true,
 		});
 }
 
-std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir)
+std::optional<std::filesystem::path> cvengine::promptLoadFilePath(const std::filesystem::path& defDir, EFileType fileType)
 {
 	return cvengine::tryPromptTuiFileBrowserPath({
 			.defPath = defDir,
-			.fileExt = kSaveFileExtension,
+			.fileExts = std::wstring_view(fileType == EFileType::Saves ? kSaveFileExtension : kWorldBuilderExtensions) | std::views::split(L',') | std::ranges::to<std::vector<std::wstring>>(),
 		});
 }
 

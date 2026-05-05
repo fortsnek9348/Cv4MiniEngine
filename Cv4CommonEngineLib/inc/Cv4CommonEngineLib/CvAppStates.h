@@ -66,6 +66,25 @@ namespace cvengine::app
 		bool mSaveToIni = false;
 	};
 
+	class StartScenarioGameState : public IState
+	{
+	public:
+		struct Config
+		{
+			// If NO_PLAYER, pick first.
+			PlayerTypes activePlayerI = NO_PLAYER;
+
+			// Other settings are taken from INI.
+		};
+
+		explicit StartScenarioGameState(const std::filesystem::path& path, const Config& config);
+		virtual void onEnter(const ProgressCallback& progressCallback) override;
+		virtual void onLeave() override;
+	private:
+		std::filesystem::path mPath;
+		Config mConfig;
+	};
+
 	class LoadGameState : public IState
 	{
 	public:

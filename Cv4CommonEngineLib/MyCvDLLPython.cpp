@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "CommonEngineGlobal.h"
 
+#include <CvGameCoreDLL/CvDLLUtilityIFaceBase.h>
 #include <CvGameCoreDLL/CvEventReporter.h>
 #include <CvGameCoreDLL/CvGlobals.h>
 #include <CvGameCoreDLL/CvInitCore.h>
@@ -228,8 +229,14 @@ bool MyCvDLLPython::isInitialized()
 
 const char* MyCvDLLPython::getMapScriptModule()
 {
+	const std::wstring name = gGlobals.getInitCore().getMapScriptName();
 	static std::string temp;
-	temp = heck::convertWideToUtf8(gGlobals.getInitCore().getMapScriptName());
+	temp = heck::convertWideToUtf8(name);
+
+	// Firaxis HACK: For scenarios, this returns null, and then we must ignore future calls.
+	if (gGlobals.getDLLIFaceNonInl()->isDescFileName(temp.c_str()))
+		return nullptr;
+
 	return temp.c_str();
 }
 
@@ -251,31 +258,38 @@ bool MyCvDLLPython::moduleExists([[maybe_unused]] const char* moduleName, [[mayb
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg)
 {
+	if (!moduleName)
+		return true;
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg).has_value();
 }
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, long* result)
 {
+	assert(moduleName);
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, result);
 }
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, CvString* result)
 {
+	assert(moduleName);
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, static_cast<std::string*>(result));
 }
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, CvWString* result)
 {
+	assert(moduleName);
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, static_cast<std::wstring*>(result));
 }
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<uint8_t>* result)
 {
+	assert(moduleName);
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, result);
 }
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<int>* result)
 {
+	assert(moduleName);
 	auto& mgr = getPythonManager();
 	return mgr.tryCall(moduleName, fxnName, fxnArg, result);
 }
@@ -287,11 +301,19 @@ bool MyCvDLLPython::callFunction([[maybe_unused]] const char* moduleName, [[mayb
 
 bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<float>* result)
 {
+	assert(moduleName);
+	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, result);
+}
+
+bool MyCvDLLPython::callFunction(const char* moduleName, const char* fxnName, PyObject* fxnArg, std::vector<std::wstring>* result)
+{
+	assert(moduleName);
 	return getPythonManager().tryCall(moduleName, fxnName, fxnArg, result);
 }
 
 bool MyCvDLLPython::callPythonFunction(const char* szModName, const char* szFxnName, int iArg, long* result)
 {
+	assert(szModName);
 	return callFunction(szModName, szFxnName, MakeFunctionArgs(std::array{ pybind11::int_(iArg).ptr() }.data(), 1), result);
 }
 

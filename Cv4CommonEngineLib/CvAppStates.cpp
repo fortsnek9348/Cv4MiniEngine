@@ -6,6 +6,7 @@
 #include "inc/Cv4CommonEngineLib/DLLMessageQueue.h"
 #include "inc/Cv4CommonEngineLib/CvInterface.h"
 #include "inc/Cv4CommonEngineLib/CvEngine.h"
+#include "inc/Cv4CommonEngineLib/CvVFS.h"
 #include "CommonEngineGlobal.h"
 #include "CvAppUtil.h"
 
@@ -40,7 +41,67 @@ static void updatePlayersAreHuman()
 		CvPlayerAI::getPlayerNonInl(playerI).updateHuman();
 }
 
+static void setupStandardSinglePlayerPlayers(CvInitCore& mainInitCore, const std::wstring& playerName, HandicapTypes handicap, std::span<const SimplifiedInitCore::Player> players)
+{
+	// Reset all player inits.
+	for (const auto i : range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
+	{
+		mainInitCore.setLeaderName(i, {});
+		mainInitCore.setCivDescription(i, {});
+		mainInitCore.setCivShortDesc(i, {});
+		mainInitCore.setCivAdjective(i, {});
+		mainInitCore.setCivPassword(i, {});
+		mainInitCore.setEmail(i, {});
+		mainInitCore.setSmtpHost(i, {});
+		mainInitCore.setFlagDecal(i, {});
+		mainInitCore.setWhiteFlag(i, {});
+		mainInitCore.setHandicap(i, static_cast<HandicapTypes>(gGlobals.getDefineINT("AI_HANDICAP")));
+		mainInitCore.setCiv(i, i < static_cast<int>(players.size()) ? players[i].civ : NO_CIVILIZATION);
+		mainInitCore.setTeam(i, i < static_cast<int>(players.size()) ? players[i].team : TeamTypes(i));
+		mainInitCore.setLeader(i, i < static_cast<int>(players.size()) ? players[i].leader : NO_LEADER);
+		mainInitCore.setColor(i, NO_PLAYERCOLOR);
+		mainInitCore.setArtStyle(i, NO_ARTSTYLE);
+		// SLOTCLAIM_UNASSIGNED / SS_OPEN.
+		// Then SLOTCLAIM_UNASSIGNED / SS_COMPUTER.
+		// Then SLOTCLAIM_UNASSIGNED / SS_TAKEN.
+		mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
+		mainInitCore.setSlotStatus(i, SS_TAKEN);
+		mainInitCore.setPlayableCiv(i, true);
+		mainInitCore.setMinorNationCiv(i, {});
+		mainInitCore.setReady(i, {});
+		mainInitCore.setPythonCheck(i, {});
+		mainInitCore.setXMLCheck(i, {});
 
+		if (size_t(i) <= 0)
+		{
+			mainInitCore.setSlotClaim(i, SLOTCLAIM_ASSIGNED);
+			mainInitCore.setSlotStatus(i, SS_TAKEN);
+		}
+		else if (size_t(i) < players.size())
+		{
+			mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
+			mainInitCore.setSlotStatus(i, SS_COMPUTER);
+			mainInitCore.setReady(i, true);
+		}
+		else
+		{
+			mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
+			mainInitCore.setSlotStatus(i, SS_CLOSED);
+			mainInitCore.setReady(i, false);
+		}
+	}
+
+	mainInitCore.setNetID(PlayerTypes(0), 0);
+	mainInitCore.setHandicap(PlayerTypes(0), handicap);
+	//mainInitCore.setTeam(PlayerTypes(0), TeamTypes(0));
+	mainInitCore.setActivePlayer(PlayerTypes(0));
+	//mainInitCore.setSlotStatus(PlayerTypes(0), SS_TAKEN);
+	mainInitCore.setPythonCheck(PlayerTypes(0), "");
+	mainInitCore.setXMLCheck(PlayerTypes(0), "placeholder xml hash"); // Possibly used only by the engine. And we don't check XML.
+	mainInitCore.setLeaderName(PlayerTypes(0), playerName);
+	mainInitCore.setCivPassword(PlayerTypes(0), L"");
+	//mainInitCore.setTeam(PlayerTypes(0), TeamTypes(0));
+}
 
 static void setupNewGame(const SimplifiedInitCore& config)
 {
@@ -103,69 +164,7 @@ static void setupNewGame(const SimplifiedInitCore& config)
 
 	mainInitCore.setMode(GAMEMODE_NORMAL);
 
-	// Reset all player inits.
-	for (const auto i : range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
-	{
-		mainInitCore.setLeaderName(i, {});
-		mainInitCore.setCivDescription(i, {});
-		mainInitCore.setCivShortDesc(i, {});
-		mainInitCore.setCivAdjective(i, {});
-		mainInitCore.setCivPassword(i, {});
-		mainInitCore.setEmail(i, {});
-		mainInitCore.setSmtpHost(i, {});
-		mainInitCore.setFlagDecal(i, {});
-		mainInitCore.setWhiteFlag(i, {});
-		mainInitCore.setHandicap(i, static_cast<HandicapTypes>(gGlobals.getDefineINT("AI_HANDICAP")));
-		mainInitCore.setCiv(i, i < static_cast<int>(config.players.size()) ? config.players[i].civ : NO_CIVILIZATION);
-		mainInitCore.setTeam(i, i < static_cast<int>(config.players.size()) ? config.players[i].team : TeamTypes(i));
-		mainInitCore.setLeader(i, i < static_cast<int>(config.players.size()) ? config.players[i].leader : NO_LEADER);
-		mainInitCore.setColor(i, NO_PLAYERCOLOR);
-		mainInitCore.setArtStyle(i, NO_ARTSTYLE);
-		// SLOTCLAIM_UNASSIGNED / SS_OPEN.
-		// Then SLOTCLAIM_UNASSIGNED / SS_COMPUTER.
-		// Then SLOTCLAIM_UNASSIGNED / SS_TAKEN.
-		mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
-		mainInitCore.setSlotStatus(i, SS_TAKEN);
-		mainInitCore.setPlayableCiv(i, true);
-		mainInitCore.setMinorNationCiv(i, {});
-		mainInitCore.setReady(i, {});
-		mainInitCore.setPythonCheck(i, {});
-		mainInitCore.setXMLCheck(i, {});
-	}
-
-
-
-	for (const auto i : range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
-	{
-		if (size_t(i) <= 0)
-		{
-			mainInitCore.setSlotClaim(i, SLOTCLAIM_ASSIGNED);
-			mainInitCore.setSlotStatus(i, SS_TAKEN);
-		}
-		else if (size_t(i) < config.players.size())
-		{
-			mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
-			mainInitCore.setSlotStatus(i, SS_COMPUTER);
-			mainInitCore.setReady(i, true);
-		}
-		else
-		{
-			mainInitCore.setSlotClaim(i, SLOTCLAIM_UNASSIGNED);
-			mainInitCore.setSlotStatus(i, SS_CLOSED);
-			mainInitCore.setReady(i, false);
-		}
-	}
-
-	mainInitCore.setNetID(PlayerTypes(0), 0);
-	mainInitCore.setHandicap(PlayerTypes(0), config.difficulty);
-	//mainInitCore.setTeam(PlayerTypes(0), TeamTypes(0));
-	mainInitCore.setActivePlayer(PlayerTypes(0));
-	//mainInitCore.setSlotStatus(PlayerTypes(0), SS_TAKEN);
-	mainInitCore.setPythonCheck(PlayerTypes(0), "");
-	mainInitCore.setXMLCheck(PlayerTypes(0), "placeholder xml hash"); // Possibly used only by the engine. And we don't check XML.
-	mainInitCore.setLeaderName(PlayerTypes(0), config.playerName);
-	mainInitCore.setCivPassword(PlayerTypes(0), L"");
-	//mainInitCore.setTeam(PlayerTypes(0), TeamTypes(0));
+	setupStandardSinglePlayerPlayers(mainInitCore, config.playerName, config.difficulty, config.players);
 
 	updatePlayersAreHuman();
 
@@ -226,7 +225,7 @@ static void yieldProgress(const ProgressCallback& callback, const std::wstring& 
 	callback(text);
 }
 
-static void startNewGame(const ProgressCallback& callback)
+static void startNewGame(const ProgressCallback& callback, bool isScenario)
 {
 	yieldProgress(callback, L"TXT_KEY_INIT_INITIALIZING");
 
@@ -464,22 +463,39 @@ static void startNewGame(const ProgressCallback& callback)
 
 	yieldProgress(callback, L"TXT_KEY_INIT_SETUP_MAP");
 
+	auto& game = gGlobals.getGame();
+
 	const auto mapGenT0 = std::chrono::steady_clock::now();
 
-	// Map init.
-	auto& map = gGlobals.getMap();
-	map.init();
+	if (isScenario)
+	{
+		MyCvDLLPython python;
+		long result = -1;
+		if (!python.callFunction(PYWorldBuilderModule, "applyMapDesc", nullptr, &result) || result != 0)
+			throw std::runtime_error(PYWorldBuilderModule ".applyMapDesc failed.");
 
-	auto& mapGen = CvMapGenerator::GetInstance();
-	mapGen.generateRandomMap();
-	mapGen.addGameElements();
+		game.initDiplomacy();
 
-	yieldProgress(callback, L"TXT_KEY_INIT_SETUP_PLAYERS");
+		if (!python.callFunction(PYWorldBuilderModule, "applyInitialItems", nullptr, &result) || result != 0)
+			throw std::runtime_error(PYWorldBuilderModule ".applyInitialItems failed.");
+	}
+	else
+	{
+		// Map init.
+		auto& map = gGlobals.getMap();
+		map.init();
 
-	// Game init.
-	auto& game = gGlobals.getGame();
-	game.initDiplomacy();
-	game.setInitialItems();
+		auto& mapGen = CvMapGenerator::GetInstance();
+		mapGen.generateRandomMap();
+		mapGen.addGameElements();
+
+		yieldProgress(callback, L"TXT_KEY_INIT_SETUP_PLAYERS");
+
+		// Game init.
+		game.initDiplomacy();
+		game.setInitialItems();
+	}
+
 	game.initScoreCalculation();
 	game.initEvents();
 	game.setFinalInitialized(true);
@@ -639,7 +655,7 @@ void NewGameStartupState::onEnter(const ProgressCallback& progressCallback)
 	setupNewGame(mSimplifiedInitCore);
 	if (mSaveToIni)
 		updateINI();
-	startNewGame(progressCallback);
+	startNewGame(progressCallback, false);
 
 	setPlayerOptions();
 
@@ -651,6 +667,207 @@ void NewGameStartupState::onEnter(const ProgressCallback& progressCallback)
 	//app.deferInGameUI();
 }
 void NewGameStartupState::onLeave()
+{
+}
+
+StartScenarioGameState::StartScenarioGameState(const std::filesystem::path& path, const Config& config) : mPath(path), mConfig(config)
+{
+}
+void StartScenarioGameState::onEnter(const ProgressCallback& progressCallback)
+{
+	MyCvDLLPython python{};
+
+	long retValue = -1;
+	if (!python.callFunction(PYWorldBuilderModule, "readDesc", pybind11::make_tuple(mPath.wstring()).ptr(), &retValue) || retValue != 0)
+		throw std::runtime_error(PYWorldBuilderModule ".readDesc failed.");
+
+	if (!python.callFunction(PYWorldBuilderModule, "isRandomMap", nullptr, &retValue))
+		throw std::runtime_error(PYWorldBuilderModule ".isRandomMap failed.");
+
+	if (retValue != 0)
+		throw std::runtime_error("The given scenario is not a scenario. It is for restarting with a mod.");
+
+	CvWString modPath;
+	if (!python.callFunction(PYWorldBuilderModule, "getModPath", nullptr, &modPath))
+		throw std::runtime_error(PYWorldBuilderModule ".getModPath failed.");
+
+	if (modPath != gVFS->getModRelPathString())
+		throw std::runtime_error("WB save needs mod '" + heck::convertWideToUtf8(modPath) + "'.");
+
+	std::vector<int> encodedGameDesc;
+	if (!python.callFunction(PYWorldBuilderModule, "getGameData", nullptr, &encodedGameDesc))
+		throw std::runtime_error(PYWorldBuilderModule ".getGameData failed.");
+
+	std::vector<int> encodedPlayersData;
+	if (!python.callFunction(PYWorldBuilderModule, "getPlayerData", nullptr, &encodedPlayersData))
+		throw std::runtime_error(PYWorldBuilderModule ".getPlayerData failed.");
+
+	std::vector<std::wstring> encodedPlayersDesc;
+	if (!python.callFunction(PYWorldBuilderModule, "getPlayerDesc", nullptr, &encodedPlayersDesc))
+		throw std::runtime_error(PYWorldBuilderModule ".getPlayerDesc failed.");
+	
+	// Right, what goes on here... which values are actually used and when?
+	// After the call to getGameData, the BTS engine calls setOption, setMPOption, setForceControl, and setVictories.
+	// CvWBDesc.py calls CvGame::setStartYear.
+	// Era, Calendar, MaxTurns, TargetScore, MaxCityElimination, and GameTurn are used, but do not show up in logs. They are set bypassing the DLL.
+	// But not sure what effect Era has.
+	// World size, climate, and sea level are also set in init core.
+
+	const SimplifiedInitCore iniSettings = getGameSetupFromIni();
+
+	CvInitCore& initCore = gGlobals.getInitCore();
+	int gameDescAddr = 0;
+	initCore.resetGame();
+	initCore.resetPlayers();
+	initCore.setGameName(iniSettings.gameName);
+	initCore.setMode(GameMode::GAMEMODE_NORMAL);
+	initCore.setPitbossTurnTime(0);
+	initCore.setSyncRandSeed(iniSettings.syncSeed);
+	initCore.setMapRandSeed(iniSettings.mapSeed);
+	initCore.setType(GameType::GAME_SP_SCENARIO);
+	initCore.setMapScriptName(mPath.wstring());
+	initCore.setWorldSize(static_cast<WorldSizeTypes>(encodedGameDesc[gameDescAddr++]));
+	if (initCore.getWorldSize() == NO_WORLDSIZE)
+		initCore.setWorldSize(iniSettings.worldSizeType); // Use default?
+	initCore.setClimate(static_cast<ClimateTypes>(encodedGameDesc[gameDescAddr++]));
+	initCore.setSeaLevel(static_cast<SeaLevelTypes>(encodedGameDesc[gameDescAddr++]));
+	initCore.setEra(static_cast<EraTypes>(encodedGameDesc[gameDescAddr++]));
+	initCore.setGameSpeed(static_cast<GameSpeedTypes>(encodedGameDesc[gameDescAddr++]));
+	initCore.setCalendar(static_cast<CalendarTypes>(encodedGameDesc[gameDescAddr++]));
+	for ([[maybe_unused]] const int i : heck::range(encodedGameDesc[gameDescAddr++]))
+		initCore.setOption(static_cast<GameOptionTypes>(encodedGameDesc[gameDescAddr++]), true);
+	for ([[maybe_unused]] const int i : heck::range(encodedGameDesc[gameDescAddr++]))
+		initCore.setMPOption(static_cast<MultiplayerOptionTypes>(encodedGameDesc[gameDescAddr++]), true);
+	for ([[maybe_unused]] const int i : heck::range(encodedGameDesc[gameDescAddr++]))
+		initCore.setForceControl(static_cast<ForceControlTypes>(encodedGameDesc[gameDescAddr++]), true);
+	if (const int numVictoriesSpecified = encodedGameDesc[gameDescAddr++])
+	{
+		for (const auto i : heck::range<VictoryTypes>(gGlobals.getNumVictoryInfos()))
+			initCore.setVictory(i, false);
+		for ([[maybe_unused]] const int i : heck::range(numVictoriesSpecified))
+			initCore.setVictory(static_cast<VictoryTypes>(encodedGameDesc[gameDescAddr++]), true);
+	}
+	// else, leave all enabled?
+	initCore.setGameTurn(encodedGameDesc[gameDescAddr++]);
+	initCore.setMaxTurns(encodedGameDesc[gameDescAddr++]);
+	initCore.setMaxCityElimination(encodedGameDesc[gameDescAddr++]);
+	initCore.setNumAdvancedStartPoints(encodedGameDesc[gameDescAddr++]);
+	initCore.setTargetScore(encodedGameDesc[gameDescAddr++]);
+
+	if (gameDescAddr != encodedGameDesc.size())
+		throw std::runtime_error(PYWorldBuilderModule ".getGameData returned data in an unexpected format.");
+
+	// Now set the players.
+	// Note that teams are setup by the script.
+	int playerIntsAddr = 0;
+	int playerStrsAddr = 0;
+	PlayerTypes activePlayerI = NO_PLAYER;
+	bool hasSpecifiedPlayers = false;
+
+	// This seems to be the condition.
+	const auto isSpecifiedPlayer = [&](PlayerTypes playerI) {
+		return initCore.getCiv(playerI) != NO_CIVILIZATION && initCore.getLeader(playerI) != NO_LEADER;
+		};
+
+	for (const auto playerI : heck::range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
+	{
+		const auto civType = static_cast<CivilizationTypes>(encodedPlayersData[playerIntsAddr++]);
+		initCore.setCiv(playerI, civType);
+		const bool isPlayable = encodedPlayersData[playerIntsAddr++] != 0;
+		const auto leaderType = static_cast<LeaderHeadTypes>(encodedPlayersData[playerIntsAddr++]);
+		initCore.setLeader(playerI, leaderType);
+		initCore.setHandicap(playerI, static_cast<HandicapTypes>(encodedPlayersData[playerIntsAddr++]));
+		initCore.setTeam(playerI, static_cast<TeamTypes>(encodedPlayersData[playerIntsAddr++]));
+		initCore.setColor(playerI, static_cast<PlayerColorTypes>(encodedPlayersData[playerIntsAddr++]));
+		initCore.setArtStyle(playerI, static_cast<ArtStyleTypes>(encodedPlayersData[playerIntsAddr++]));
+		initCore.setMinorNationCiv(playerI, encodedPlayersData[playerIntsAddr++] != 0);
+		initCore.setWhiteFlag(playerI, encodedPlayersData[playerIntsAddr++] != 0);
+		
+		initCore.setCivDescription(playerI, encodedPlayersDesc[playerStrsAddr++]);
+		initCore.setCivShortDesc(playerI, encodedPlayersDesc[playerStrsAddr++]);
+		initCore.setLeaderName(playerI, encodedPlayersDesc[playerStrsAddr++]);
+		initCore.setCivAdjective(playerI, encodedPlayersDesc[playerStrsAddr++]);
+		initCore.setFlagDecal(playerI, encodedPlayersDesc[playerStrsAddr++]);
+
+		
+		const bool isSpecified = isSpecifiedPlayer(playerI);
+		if (isSpecifiedPlayer(playerI) && isPlayable && mConfig.activePlayerI == playerI)
+			activePlayerI = mConfig.activePlayerI;
+
+		hasSpecifiedPlayers |= isSpecified;
+	}
+
+	if (playerIntsAddr != encodedPlayersData.size())
+		throw std::runtime_error(PYWorldBuilderModule ".getPlayerData returned data in an unexpected format.");
+
+	if (playerStrsAddr != encodedPlayersDesc.size())
+		throw std::runtime_error(PYWorldBuilderModule ".getPlayerDesc returned data in an unexpected format.");
+
+	if (hasSpecifiedPlayers)
+	{
+		if (activePlayerI == NO_PLAYER)
+		{
+			// Pick the first.
+			for (const auto playerI : heck::range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
+				if (isSpecifiedPlayer(playerI))
+				{
+					activePlayerI = playerI;
+					break;
+				}
+		}
+
+		assert(activePlayerI != NO_PLAYER);
+
+		// Setup slots for specified players.
+		for (const auto playerI : heck::range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()))
+		{
+			if (playerI == activePlayerI)
+			{
+				initCore.setHandicap(playerI, iniSettings.difficulty);
+				initCore.setSlotClaim(playerI, SLOTCLAIM_ASSIGNED);
+				initCore.setSlotStatus(playerI, SS_TAKEN);
+			}
+			else if (isSpecifiedPlayer(playerI))
+			{
+				initCore.setHandicap(playerI, static_cast<HandicapTypes>(gGlobals.getDefineINT("AI_HANDICAP")));
+				initCore.setSlotClaim(playerI, SLOTCLAIM_UNASSIGNED);
+				initCore.setSlotStatus(playerI, SS_COMPUTER);
+				initCore.setReady(playerI, true);
+			}
+			else
+			{
+				initCore.setSlotClaim(playerI, SLOTCLAIM_UNASSIGNED);
+				initCore.setSlotStatus(playerI, SS_CLOSED);
+				initCore.setReady(playerI, false);
+			}
+		}
+	}
+	else
+	{
+		// Init standard single player random players.
+		activePlayerI = static_cast<PlayerTypes>(0);
+
+		std::vector<SimplifiedInitCore::Player> players(gGlobals.getWorldInfo(initCore.getWorldSize()).getDefaultPlayers());
+		for (size_t i = 0; i < players.size(); ++i)
+			players[i] = { .team = static_cast<TeamTypes>(i), .leader = NO_LEADER, .civ = NO_CIVILIZATION };
+		setupStandardSinglePlayerPlayers(initCore, {}, iniSettings.difficulty, players);
+	}
+
+	initCore.setActivePlayer(activePlayerI);
+	initCore.setLeaderName(activePlayerI, iniSettings.playerName);
+	initCore.setGameSpeed(iniSettings.speedType);
+
+	initCore.closeInactiveSlots();
+
+	startNewGame(progressCallback, true);
+
+	setPlayerOptions();
+
+	// ""Graphics""
+	yieldProgress(progressCallback, L"TXT_KEY_INIT_GRAPHICS");
+	setupGraphical();
+}
+void StartScenarioGameState::onLeave()
 {
 }
 
@@ -704,7 +921,7 @@ void InGameState::onEnter(const ProgressCallback& progressCallback)
 	gCommonEngineConfig.interface->startMainInterface();
 
 	// This happens after preGameStart and interface init.
-	if (gGlobals.getInitCore().getType() == GameType::GAME_SP_NEW)
+	if (gGlobals.getInitCore().getType() == GameType::GAME_SP_NEW || gGlobals.getInitCore().getType() == GameType::GAME_SP_SCENARIO)
 		CvEventReporter::getInstance().gameStart();
 
 	if (CvCity* const capital = CvPlayerAI::getPlayerNonInl(gGlobals.getGame().getActivePlayer()).getCapitalCity())

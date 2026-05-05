@@ -3,6 +3,8 @@
 #include "CvEnums.h"
 
 #include <string>
+#include <vector>
+#include <optional>
 
 //
 // Python wrapper class for CvMap 
@@ -78,7 +80,7 @@ public:
 	void resetPathDistance();
 
 	int calculatePathDistance(CyPlot* pSource, CyPlot* pDest);
-	void rebuild(int iGridW, int iGridH, int iTopLatitude, int iBottomLatitude, bool bWrapX, bool bWrapY, WorldSizeTypes eWorldSize, ClimateTypes eClimate, SeaLevelTypes eSeaLevel, int iNumCustomMapOptions, CustomMapOptionTypes * aeCustomMapOptions);
+	void rebuild(int iGridW, int iGridH, int iTopLatitude, int iBottomLatitude, bool bWrapX, bool bWrapY, WorldSizeTypes eWorldSize, ClimateTypes eClimate, SeaLevelTypes eSeaLevel, int iNumCustomMapOptions, std::optional<std::vector<CustomMapOptionTypes>> aeCustomMapOptions);
 	void regenerateGameElements();
 	void updateFog();
 	void updateMinimapColor();

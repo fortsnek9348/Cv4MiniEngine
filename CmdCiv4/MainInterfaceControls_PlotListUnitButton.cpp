@@ -149,16 +149,16 @@ PlotListUnitButton::PlotListUnitButton(CvUnit* unit) : EmptyButton({}), mUnit(un
 	switch (activity)
 	{
 	case ACTIVITY_INTERCEPT:
-		activityGlyph = { L"i", "COLOR_YELLOW", "COLOR_WATER_TEXT1" };
+		activityGlyph = { L"i", "COLOR_YELLOW", "COLOR_WATER_TEXT" };
 		break;
 	case ACTIVITY_PATROL:
 		activityGlyph = { L"p", "COLOR_YELLOW", "COLOR_TECH_BLUE" };
 		break;
 	case ACTIVITY_PLUNDER:
-		activityGlyph = { L"P", "COLOR_RED", "COLOR_TECH_BLUE" }; break;
+		activityGlyph = { L"P", "COLOR_RED", "COLOR_TECH_BLUE" };
 		break;
 	case ACTIVITY_HEAL:
-		activityGlyph = { L"+", "COLOR_RED", "COLOR_WHITE" }; break;
+		activityGlyph = { L"+", "COLOR_RED", "COLOR_WHITE" };
 		break;
 	case ACTIVITY_SENTRY:
 		activityGlyph = { L"S", "COLOR_YELLOW", "COLOR_CITY_BROWN" };

@@ -5,14 +5,27 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 
+#include <charconv>
+
 //
 // Python interface for free enums
 //
+
+static int toInt(std::string_view s)
+{
+	const char* const end = std::to_address(s.end());
+	int value{};
+	const auto [parseEnd, ec] = std::from_chars(s.data(), end, value);
+	if (ec != std::errc() || parseEnd != end)
+		throw pybind11::value_error("Invalid string for integer literal conversion to enum.");
+	return value;
+}
 
 template<class T>
 static auto cyenum(const pybind11::module& m, const char* name)
 {
 	pybind11::enum_<T> e(m, name, pybind11::arithmetic()); // arithmetic is important! It affects attitude compare in trade diplo.
+	e.def(pybind11::init([](std::string_view s) -> T { return static_cast<T>(toInt(s)); })); // For reading WB files.
 	e.def(pybind11::self + int());
 	e.def(int() + pybind11::self);
 	pybind11::implicitly_convertible<int, T>();

@@ -984,6 +984,18 @@ int main(int argc, const char* argv[])
 		state.onEnter(progressCallback);
 		state.onLeave();
 	}
+	else if (gGlobals.getDLLIFaceNonInl()->isDescFileName(saveGameLoadPath.string().c_str()))
+	{
+		cvengine::app::StartScenarioGameState state(saveGameLoadPath, {
+			.activePlayerI = NO_PLAYER,
+			.handicap = NO_HANDICAP,
+			.speed = NO_GAMESPEED,
+			.gameName = L"Headless1",
+			.playerName = L"HeadlessPlayer",
+			});
+		state.onEnter(progressCallback);
+		state.onLeave();
+	}
 	else
 	{
 		cvengine::app::LoadGameState state(saveGameLoadPath);

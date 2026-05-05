@@ -2,6 +2,8 @@
 #include "CvTuiInterface.h"
 #include "CvTuiMainInterface.h"
 
+#include <Cv4CommonEngineLib/CvTranslator.h>
+
 #include <HeckTextUI/BasicControls.h>
 #include <HeckTextUI/Window.h>
 
@@ -21,7 +23,7 @@ namespace
 
 			CvApp::getInstance().getUI().pushWindow(mWnd);
 
-			update(L"TXT_KEY_INIT_INITIALIZING");
+			update(CvTranslator::getInstance().getText(L"TXT_KEY_INIT_INITIALIZING"));
 		}
 
 		void update(std::wstring_view text)
@@ -90,6 +92,23 @@ void LoadGameCvAppState::onUpdate(CvApp&)
 {
 }
 void LoadGameCvAppState::onLeave(CvApp&)
+{
+	mImpl.onLeave();
+}
+
+LoadScenarioCvAppState::LoadScenarioCvAppState(const std::filesystem::path& path) : mImpl(std::move(path), cvengine::app::StartScenarioGameState::Config{})
+{
+}
+void LoadScenarioCvAppState::onEnter(CvApp& app)
+{
+	LoadingScreen loadingScreen;
+	mImpl.onEnter([&](std::wstring_view text) { loadingScreen.update(text); });
+	app.deferInGameUI();
+}
+void LoadScenarioCvAppState::onUpdate(CvApp&)
+{
+}
+void LoadScenarioCvAppState::onLeave(CvApp&)
 {
 	mImpl.onLeave();
 }

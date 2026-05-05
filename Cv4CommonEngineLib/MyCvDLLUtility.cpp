@@ -551,7 +551,15 @@ bool MyCvDLLUtility::getTransferredMap()
 bool MyCvDLLUtility::isDescFileName([[maybe_unused]] const char* szFileName)
 {
 	// TODO: What's the meaning of this exactly? *.CivBeyondSwordWBSave?
-	return false;
+	//return false;
+	const std::string_view filename(szFileName);
+	
+	const auto endsWith = [&](std::string_view ext) {
+		constexpr auto toAsciiLower = static_cast<char(*)(char)>(heck::toAsciiLower);
+		return filename.size() >= ext.size() && std::ranges::equal(filename.substr(filename.size() - ext.size()), ext, std::equal_to(), toAsciiLower, toAsciiLower);
+		};
+
+	return endsWith(".CivWarlordsWBSave") || endsWith(".Civ4WorldBuilderSave") || endsWith(".CivBeyondSwordWBSave");
 }
 
 bool MyCvDLLUtility::isWBMapScript()

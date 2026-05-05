@@ -321,19 +321,24 @@ namespace
 			}
 		};
 
+		bool checkMatchingExtension(const std::filesystem::path& path) const
+		{
+			std::wstring ext = path.extension().wstring();
+			std::wstring_view extView = ext;
+			if (extView.size() && extView[0] == L'.')
+				extView = extView.substr(1);
+			return std::ranges::contains(config.fileExts, extView);
+		}
+
 		bool tryNavigateTo(const fs::path& dirPath)
 		{
 			std::vector<fs::directory_entry> localDirEntries;
 
 			try
 			{
-				std::wstring checkExt = config.fileExt;
-				if (!checkExt.empty() && checkExt[0] != L'.') // We need a dot in front of it.
-					checkExt.insert(checkExt.begin(), L'.');
-
 				localDirEntries.assign_range(fs::directory_iterator(dirPath, fs::directory_options::follow_directory_symlink | fs::directory_options::skip_permission_denied)
 					| std::views::filter([&, this](const fs::directory_entry& dirEntry) {
-						return config.fileExt.empty() || dirEntry.is_directory() || dirEntry.path().extension() == checkExt;
+						return dirEntry.is_directory() || checkMatchingExtension(dirEntry.path());
 						}));
 				std::ranges::stable_sort(localDirEntries, [](const fs::directory_entry& a, const fs::directory_entry& b) {
 					const bool isDirA = a.is_directory();
@@ -408,8 +413,8 @@ namespace
 						}
 
 						// If there's no extension, add the default.
-						if (!config.fileExt.empty() && !path.has_extension())
-							path.replace_extension(config.fileExt);
+						if (!config.fileExts.empty() && !config.fileExts[0].empty() && !path.has_extension())
+							path.replace_extension(config.fileExts[0]);
 					}
 
 					optSelectedPath = viewPath / path;

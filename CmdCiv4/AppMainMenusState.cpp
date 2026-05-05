@@ -2,6 +2,7 @@
 #include "AppGameSetupWindow.h"
 #include "VersionInfo.h"
 #include "CvApp.h"
+#include "FileDialogs.h"
 
 #include <Cv4CommonEngineLib/CvTranslator.h>
 #include <Cv4CommonEngineLib/CvVFS.h>
@@ -124,6 +125,11 @@ namespace
 			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_LOAD_GAME") + kPadding, [] {
 				gGlobals.getDLLIFaceNonInl()->LoadGame();
 				}));
+			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_SCENARIO") + kPadding, [&] {
+				if (const auto optPath = promptLoadFilePath(CvApp::getUserDataDir(), EFileType::WorldBuilder))
+					app.deferLoadScenario(*optPath);
+				}));
+			
 			menuPanel->addChild(std::make_shared<tui::Button>(kPadding + CvTranslator::getInstance().getText(L"TXT_KEY_MAIN_MENU_OPTIONS") + kPadding, [] {
 				gDLL->getPythonIFace()->callFunction("CvScreensInterface", "showOptionsScreen");
 				}));

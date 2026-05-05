@@ -258,6 +258,11 @@ void CvApp::deferLoadGame(const std::filesystem::path& path)
 	deferAppState(std::make_unique<LoadGameCvAppState>(path));
 }
 
+void CvApp::deferLoadScenario(const std::filesystem::path& path)
+{
+	deferAppState(std::make_unique<LoadScenarioCvAppState>(path));
+}
+
 bool CvApp::isAutorun() const
 {
 	return CvTuiInterface::getInstance().isAIAutorunActive();
