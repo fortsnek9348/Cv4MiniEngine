@@ -9,6 +9,7 @@
     <STB_DIR>D:\Lib\stb-master</STB_DIR>
     <S3TC_DXT_DIR>D:\Lib\s3tc-dxt-decompression-master</S3TC_DXT_DIR>
     <PUGIXML_DIR>D:\Lib\pugixml-1.15\Install</PUGIXML_DIR>
+    <CLI11_DIR>D:\Lib\CLI11</CLI11_DIR>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile />
@@ -37,6 +38,9 @@
     </BuildMacro>
     <BuildMacro Include="PUGIXML_DIR">
       <Value>$(PUGIXML_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="CLI11_DIR">
+      <Value>$(CLI11_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

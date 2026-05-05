@@ -1,18 +1,18 @@
 #pragma once
 
-#include <string>
+#include <filesystem>
 
 namespace cvengine
 {
 	struct [[nodiscard]] AppStartupConfig
 	{
-		std::wstring generatePlayerBotGameDefsDir{};
-		std::wstring modRelPath;
-		std::wstring save;
-		std::wstring botPath;
+		std::filesystem::path generatePlayerBotGameDefsDir{};
+		std::filesystem::path modRelPath;
+		std::filesystem::path save;
+		std::filesystem::path botPath;
 		bool isAutostart = false;
 		//bool isBotAutorun = false;
 	};
 
-	AppStartupConfig parseCommandLine(int argc, const char * const * argv);
+	AppStartupConfig parseCommandLine(int argc, char** argv);
 }

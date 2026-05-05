@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 	if (!appStartConfig.save.empty())
 	{
 		appStartConfig.modRelPath = cvengine::app::extractModRelPathFromSave(appStartConfig.save);
-		std::wclog << L"Overriding mod with " << std::quoted(appStartConfig.modRelPath) << L" from save file." << std::endl;
+		std::wclog << L"Overriding mod with " << appStartConfig.modRelPath << L" from save file." << std::endl;
 	}
 
 	CvApp& app = CvApp::getInstance();

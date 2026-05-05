@@ -66,7 +66,7 @@
       <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);$(CLI11_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -89,7 +89,7 @@
       <PreprocessorDefinitions>_HAS_CXX23;__AVX512VLBF16INTRIN_H;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SFML_DIR)\include;$(NFD_DIR)\src\include;$(PYBIND11_DIR)\include;$(PYTHON_DIR)\include;$(STB_DIR);$(S3TC_DXT_DIR);$(CLI11_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
       <TreatWarningAsError>true</TreatWarningAsError>

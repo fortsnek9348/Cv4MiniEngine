@@ -1,4 +1,5 @@
 #include "GameRunScope.h"
+#include "CommandLine.h"
 
 #include <Cv4CommonEngineLib/CommonEngine.h>
 #include <Cv4CommonEngineLib/CvAppStates.h>
@@ -863,7 +864,7 @@ Options:
 	std::exit(EXIT_FAILURE);
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, char* argv[])
 {
 	// Don't you just hate it when you can't see error messages because the error output is in fail state?
 	std::cout.exceptions(~std::ios::goodbit);
@@ -898,35 +899,18 @@ int main(int argc, const char* argv[])
 		throw std::runtime_error("CV4ENGINE VanillaCiv4RootDir not specified in INI.");
 
 	const std::filesystem::path engineAssetsOverrideDir = heck::findEnvironmentVariable(L"CV4MINIENGINE_DATADIR").value_or(L".");
-	const std::filesystem::path modRelPath{};
 
-	std::filesystem::path playerBotPluginPath;
-	std::filesystem::path saveGameLoadPath;
-
-	for (int i = 1; i < argc; ++i)
-	{
-		const std::string_view arg = argv[i];
-		if (arg == "-bot")
-		{
-			if (i + 1 >= argc)
-				invalidArgs();
-			playerBotPluginPath = std::filesystem::path(argv[++i]);
-		}
-		else if (saveGameLoadPath.empty())
-			saveGameLoadPath = arg;
-		else
-			invalidArgs();
-	}
+	const CommandLine cmdLine = parseCommandLine(argc, argv);
 
 	const cvbot::IPlayerBotPlugin* botPlugin = nullptr;
 
 	// Load player bot DLL.
-	if (!playerBotPluginPath.empty())
+	if (!cmdLine.botPath.empty())
 	{
 		if (!hasCvGameCoreDLLPlayerBotSupport())
 			throw std::runtime_error("Bot specified, but current CvGameCoreDLL not compiled with bot support.");
 	
-		heck::DynamicLibrary lib(playerBotPluginPath);
+		heck::DynamicLibrary lib(cmdLine.botPath);
 	
 		botPlugin = reinterpret_cast<const cvbot::IPlayerBotPlugin*(*)()>(lib.resolve("getPlayerBotPlugin"))();
 	}
@@ -945,7 +929,7 @@ int main(int argc, const char* argv[])
 
 	[[maybe_unused]] const cvengine::CommonEngineInitResult initResult = cvengine::initialiseCommonEngine(std::wcout, cvengine::CommonEngineConfig{
 		.civ4InstallationRoot = vanillaCiv4RootDir,
-		.optModRelPath = !modRelPath.empty() ? std::optional(modRelPath) : std::nullopt,
+		.optModRelPath = !cmdLine.modRelPath.empty() ? std::optional(cmdLine.modRelPath) : std::nullopt,
 		.optEngineAssetsOverrideDir = engineAssetsOverrideDir,
 		.userDataDirPath = userDataDirPath,
 		.userConfigDirPath = userConfigDirPath,
@@ -974,31 +958,23 @@ int main(int argc, const char* argv[])
 
 	const auto progressCallback = [](std::wstring_view s) { std::wcout << s << '\n'; };
 
-	if (saveGameLoadPath.empty())
+	if (cmdLine.saveFile.empty())
 	{
-		cvengine::app::SimplifiedInitCore gameSetup = cvengine::app::getGameSetupFromIni();
-		gameSetup.gameName = L"Headless1";
-		gameSetup.playerName = L"HeadlessPlayer";
-
-		cvengine::app::NewGameStartupState state(std::move(gameSetup), false);
+		cvengine::app::NewGameStartupState state(cvengine::app::getGameSetupFromIni(), false);
 		state.onEnter(progressCallback);
 		state.onLeave();
 	}
-	else if (gGlobals.getDLLIFaceNonInl()->isDescFileName(saveGameLoadPath.string().c_str()))
+	else if (gGlobals.getDLLIFaceNonInl()->isDescFileName(cmdLine.saveFile.string().c_str()))
 	{
-		cvengine::app::StartScenarioGameState state(saveGameLoadPath, {
-			.activePlayerI = NO_PLAYER,
-			.handicap = NO_HANDICAP,
-			.speed = NO_GAMESPEED,
-			.gameName = L"Headless1",
-			.playerName = L"HeadlessPlayer",
+		cvengine::app::StartScenarioGameState state(cmdLine.saveFile, {
+			.activePlayerI = static_cast<PlayerTypes>(cmdLine.scenarioPreferredPlayer),
 			});
 		state.onEnter(progressCallback);
 		state.onLeave();
 	}
 	else
 	{
-		cvengine::app::LoadGameState state(saveGameLoadPath);
+		cvengine::app::LoadGameState state(cmdLine.saveFile);
 		state.onEnter(progressCallback);
 		state.onLeave();
 	}
