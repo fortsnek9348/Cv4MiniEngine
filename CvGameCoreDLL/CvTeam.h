@@ -63,7 +63,7 @@ public:
 	bool hasMetHuman() const;																														// Exposed to Python
 	int getDefensivePactCount(TeamTypes eTeam = NO_TEAM) const;																									// Exposed to Python
 	int getVassalCount(TeamTypes eTeam = NO_TEAM) const;
-	bool isAVassal() const;																							// Exposed to Python
+	DllExportForInterface bool isAVassal() const;																							// Exposed to Python
 	bool canVassalRevolt(TeamTypes eMaster) const;
 
 	int getUnitClassMaking(UnitClassTypes eUnitClass) const;														// Exposed to Python

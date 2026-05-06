@@ -12,6 +12,7 @@ Cv4MiniEngine depends on:
 * If you have a GUI: nativefiledialog-extended
 * Header-only: stb (for DXT compression)
 * Header-only: https://github.com/pybind/pybind11/releases/tag/v2.9.2 (version must support Python 2.7)
+* Header-only: https://github.com/CLIUtils/CLI11
 
 Cv4MiniEngine also depends on the FAStar repository, as a submodule.
 

@@ -34,16 +34,11 @@ void MyCvDLLEngineIFace::SaveReplay(PlayerTypes ePlayer)
 }
 void MyCvDLLEngineIFace::SaveGame(CvString& szFilename, [[maybe_unused]] SaveGameTypes eType)
 {
-	//std::abort();
-
 	// This is only called by player bot I think, so assume UTF8.
 	const std::filesystem::path defPath = gCommonEngineConfig.userDataDirPath / gCommonEngineConfig.savesDirName / kSavesSingleDirName / heck::convertUtf8ToWide(szFilename);
 
-	if (const auto optPath = gCommonEngineConfig.callbackHandler->promptSaveGamePath(defPath))
-	{
-		FFile<StdRawBinaryStream> file{ StdRawBinaryStream(*optPath, std::ios::out | std::ios::binary) };
-		app::serialise(file);
-	}
+	FFile<StdRawBinaryStream> file{ StdRawBinaryStream(defPath, std::ios::out | std::ios::binary) };
+	app::serialise(file);
 }
 
 void MyCvDLLEngineIFace::DoTurn()

@@ -10,6 +10,7 @@
 #include <Cv4CommonEngineLib/DLLMessageQueue.h>
 #include <Cv4CommonEngineLib/IniReader.h>
 
+#include <CvGameCoreDLL/CvDLLEngineIFaceBase.h>
 #include <CvGameCoreDLL/CvDLLEntityIFaceBase.h>
 #include <CvGameCoreDLL/CvDLLFlagEntityIFaceBase.h>
 #include <CvGameCoreDLL/CvDLLPlotBuilderIFaceBase.h>
@@ -20,6 +21,7 @@
 #include <CvGameCoreDLL/CvPlayerAI.h>
 #include <CvGameCoreDLL/CvPopupInfo.h>
 #include <CvGameCoreDLL/CvTeamAI.h>
+#include <CvGameCoreDLL/CvInitCore.h>
 
 #include <CommonStuff/DynamicLib.h>
 #include <CommonStuff/System.h>
@@ -946,6 +948,8 @@ int main(int argc, char* argv[])
 
 	const auto progressCallback = [](std::wstring_view s) { std::wcout << s << '\n'; };
 
+	bool isLoadingSave = false;
+
 	if (cmdLine.saveFile.empty())
 	{
 		cvengine::app::NewGameStartupState state(cvengine::app::getGameSetupFromIni(), false);
@@ -962,6 +966,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
+		isLoadingSave = true;
 		cvengine::app::LoadGameState state(cmdLine.saveFile);
 		state.onEnter(progressCallback);
 		state.onLeave();
@@ -972,16 +977,25 @@ int main(int argc, char* argv[])
 		state.onEnter(progressCallback);
 	}
 
+	CvGame& game = gGlobals.getGame();
+
+	if (cmdLine.wantInitialSave && !isLoadingSave)
+	{
+		CvString path = heck::convertWideToUtf8(game.getName() + L" - initial.CivBeyondSwordSave");
+		gGlobals.getDLLIFaceNonInl()->getEngineIFace()->SaveGame(path);
+	}
+
 	constexpr int kNumAIAutoplayTurns = 100'000;
 	constexpr int kMaxUpdatesStalled = 10'000;
 
-	CvGame& game = gGlobals.getGame();
+	
 	if (!botPlugin)
 		game.setAIAutoPlay(kNumAIAutoplayTurns);
 
 	CvPlayer& activePlayer = GET_PLAYER(game.getActivePlayer());
 	activePlayer.setPlayerBotFinalTurn(kNumAIAutoplayTurns);
 
+	const int startTurn = game.getGameTurn();
 
 	int lastUpdateTurn = 0;
 	int lastProgressingUpdateNum = -1;
@@ -993,8 +1007,8 @@ int main(int argc, char* argv[])
 	{
 		const int turn = game.getGameTurn();
 
-		//if (turn > 100)
-		//	break;
+		if (turn - startTurn > cmdLine.maxTurns)
+			break;
 
 		bool progression = false;
 
@@ -1031,6 +1045,43 @@ int main(int argc, char* argv[])
 
 	runScope.dumpSummary();
 
+	if (cmdLine.wantEndSave)
+	{
+		if (!activePlayer.isAlive())
+		{
+			// game.reviveActivePlayer() doesn't work well.
+			// Instead, change the active player.
+			
+			const auto getSelectionKey = [&game, winner = game.getWinner()](PlayerTypes playerI) {
+				const CvPlayer& player = GET_PLAYER(playerI);
+				const TeamTypes teamI = GET_PLAYER(playerI).getTeam();
+				// alive > not alive
+				// winner > not winner
+				// not a vassal > vassal
+				// bigger score
+				return std::tuple(player.isAlive(), teamI == winner, !GET_TEAM(teamI).isAVassal(), game.getPlayerScore(playerI));
+				};
+			
+			const PlayerTypes newActivePlayerI = std::ranges::max(heck::range<PlayerTypes>(gGlobals.getMAX_CIV_PLAYERS()), std::less(), getSelectionKey);
+
+			if (GET_PLAYER(newActivePlayerI).isAlive())
+			{
+				std::cout << "Switching over active player from " << static_cast<int>(activePlayer.getID()) << " to " << static_cast<int>(newActivePlayerI) << std::endl;
+				
+				CvInitCore& initCore = gGlobals.getInitCore();
+				initCore.setSlotClaim(activePlayer.getID(), SLOTCLAIM_UNASSIGNED);
+				initCore.setSlotStatus(activePlayer.getID(), SS_CLOSED);
+				initCore.setActivePlayer(newActivePlayerI);
+				initCore.setSlotClaim(newActivePlayerI, SLOTCLAIM_ASSIGNED);
+				initCore.setSlotStatus(newActivePlayerI, SS_TAKEN);
+			}
+			else
+				std::cout << "WARNING: Active player is not alive and there's nobody to switch to." << std::endl;
+		}
+
+		CvString path = heck::convertWideToUtf8(game.getName() + L" - end.CivBeyondSwordSave");
+		gGlobals.getDLLIFaceNonInl()->getEngineIFace()->SaveGame(path);
+	}
 
 	cvengine::shutdownCommonEngine();
 
