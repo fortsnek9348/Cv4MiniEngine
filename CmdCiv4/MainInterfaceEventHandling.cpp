@@ -70,7 +70,8 @@ bool cvengine::handleMainInterfaceConsoleEvent(const ConsoleEvent& e)
 		{
 			if (key != FInputDevice::NONE)
 			{
-				if (key == FInputDevice::KB_A && modifiers.ctrl && modifiers.alt)
+				// Was Ctrl+Alt+A, but can't get that through ANSI input.
+				if (key == FInputDevice::KB_B && modifiers.ctrl && modifiers.alt)
 				{
 					// Cv4MiniEngine key
 					interfaceController.activateAIAutoPlay(10'000);

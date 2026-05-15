@@ -112,14 +112,7 @@ void cvengine::app::deserialise(FFile<StdRawBinaryStream>& file)
 	mainInitCore.resetGame(&loadedInitCore, true, false);
 	mainInitCore.resetPlayers(&loadedInitCore, true, false);
 
-	// I have no idea what the criteria is, but something sets the active player even when no player is isHuman in CvGame.
-	// When loading the save, player 0 is SS_COMPUTER.
-	// In the logs, it looks like the Firaxis engine is overwriting the first player. Maybe the first player is always the active player in single player?
-	//mainInitCore.setNetID(PlayerTypes(0), 0);
-	//mainInitCore.setSlotClaim(PlayerTypes(0), SLOTCLAIM_ASSIGNED);
-	//mainInitCore.setSlotStatus(PlayerTypes(0), SS_TAKEN);
-	
-	// Find the first human player.
+	// Find the first human player. Not sure if this is correct behaviour.
 	for (int i = 0; i < gGlobals.getMAX_CIV_PLAYERS(); ++i)
 		if (mainInitCore.getSlotStatus(static_cast<PlayerTypes>(i)) == SlotStatus::SS_TAKEN)
 		{
@@ -130,9 +123,6 @@ void cvengine::app::deserialise(FFile<StdRawBinaryStream>& file)
 	if (mainInitCore.getActivePlayer() == NO_PLAYER)
 		mainInitCore.setActivePlayer(static_cast<PlayerTypes>(0));
 	
-	// The Firaxis engine appears to force a player to be human. Loading an AIAutoPlay save does not continue the AIAutoPlay.
-	// This behaviour can be overriden in CvGame::read.
-
 	mainInitCore.setType(GameType::GAME_SP_LOAD);
 
 	file.Read(&u32); // unk

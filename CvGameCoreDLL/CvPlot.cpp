@@ -944,7 +944,12 @@ void CvPlot::nukeExplosion(int iRange, CvUnit* pNukeUnit)
 						}
 					}
 
-					iNukedPopulation = ((pLoopCity->getPopulation() * (GC.getDefineINT("NUKE_POPULATION_DEATH_BASE") + GC.getGameINLINE().getSorenRandNum(GC.getDefineINT("NUKE_POPULATION_DEATH_RAND_1"), "Population Nuked 1") + GC.getGameINLINE().getSorenRandNum(GC.getDefineINT("NUKE_POPULATION_DEATH_RAND_2"), "Population Nuked 2"))) / 100);
+					// Unsequenced RNG here. The order is:
+					// Rand sync = 2026750331 on 938 (Population Nuked 1)
+					// Rand sync = 11602840 on 938 (Population Nuked 2)
+					const int iNukedPopulation1 = GC.getGameINLINE().getSorenRandNum(GC.getDefineINT("NUKE_POPULATION_DEATH_RAND_1"), "Population Nuked 1");
+					const int iNukedPopulation2 = GC.getGameINLINE().getSorenRandNum(GC.getDefineINT("NUKE_POPULATION_DEATH_RAND_2"), "Population Nuked 2");
+					iNukedPopulation = ((pLoopCity->getPopulation() * (GC.getDefineINT("NUKE_POPULATION_DEATH_BASE") + iNukedPopulation1 + iNukedPopulation2)) / 100);
 
 					iNukedPopulation *= std::max(0, (pLoopCity->getNukeModifier() + 100));
 					iNukedPopulation /= 100;
